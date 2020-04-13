@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/dont-code-schema.json",
+  "creation": {
+    "type": "application",
+    "name": "ToDoApp",
+    "entities": [
+      {
+        "name": "ToDoItem",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "done",
+            "type": "boolean"
+          }
+        ]
+      }
+    ],
+    "screens": [
+      {
+        "layout": "flow",
+        "components": [
+          {
+            "type": "list",
+            "entity": {
+              "name": "ToDoItem"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
