@@ -24,6 +24,7 @@
     ],
     "screens": [
       {
+        "name": "List Todo",
         "layout": "flow",
         "components": [
           {
