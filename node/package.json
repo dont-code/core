@@ -23,9 +23,10 @@
     "update": "nx migrate latest",
     "workspace-schematic": "nx workspace-schematic",
     "dep-graph": "nx dep-graph",
-    "help": "nx help"
+    "help": "nx help",
+    "publish-core": "npm publish dist/libs/core --access public"
   },
-  "private": true,
+  "private": false,
   "dependencies": {
     "@nrwl/node": "^9.2.4"
   },

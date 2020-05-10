@@ -34,7 +34,9 @@
             "tsConfig": "libs/core/tsconfig.lib.json",
             "packageJson": "libs/core/package.json",
             "main": "libs/core/src/index.ts",
-            "assets": ["libs/core/*.md"]
+            "assets": [
+              { "glob": "**/*", "input": "libs/core/src/assets/", "output": "/assets/" },
+              { "glob": "*.md", "input": "libs/score/", "output": "/" }]
           }
         }
       }
