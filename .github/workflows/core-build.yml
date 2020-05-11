@@ -44,7 +44,7 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: distribution
-          path: dist/libs/core
+          path: node/dist/libs/core
       - name: Unit tests
         run: npm run nx run core:test
       - name: Publish
