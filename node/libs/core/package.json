@@ -1,8 +1,5 @@
 {
   "name": "@dontcode/core",
   "version": "0.0.2",
-  "private": false,
-  "files": [
-    "assets/schemas/dont-code-schema.json"
-  ]
+  "private": false
 }
