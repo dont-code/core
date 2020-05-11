@@ -44,6 +44,6 @@ jobs:
       - name: Unit tests
         run: npm run nx run core:test
       - name: Publish
-        run: npm publish-core
+        run: npm publish dist/libs/core --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
