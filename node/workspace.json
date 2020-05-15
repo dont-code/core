@@ -36,7 +36,7 @@
             "main": "libs/core/src/index.ts",
             "assets": [
               { "glob": "**/*", "input": "libs/core/src/assets/", "output": "/assets/" },
-              { "glob": "*.md", "input": "libs/score/", "output": "/" }]
+              { "glob": "*.md", "input": "libs/core/", "output": "/" }]
           }
         }
       }
