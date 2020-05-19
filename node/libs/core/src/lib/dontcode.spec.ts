@@ -18,7 +18,7 @@ describe('dontcode', () => {
 });
 
 class PluginTest implements DontCode.Plugin {
-  updatesToModel(): PluginConfig {
+  getConfiguration(): PluginConfig {
     return {
       "plugin": {
         "id": "ScreenPlugin",

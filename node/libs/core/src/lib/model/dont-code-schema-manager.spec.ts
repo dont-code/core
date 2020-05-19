@@ -1,17 +1,19 @@
 import { DontCode } from "@dontcode/core";
 import dtcde = DontCode.dtcde;
-import { DontCodeSchemaEnum, DontCodeSchemaObject } from "./dont-code-schema-item";
+import { DontCodeSchemaEnum, DontCodeSchemaObject, DontCodeSchemaRoot } from "./dont-code-schema-item";
 import PluginConfig = DontCode.PluginConfig;
 
 describe('Schema Manager', () => {
   it('should work', () => {
     const mgr = dtcde.getSchemaManager()
     expect(mgr).toBeDefined();
+    expect(mgr.getSchema()).toBeInstanceOf(DontCodeSchemaRoot);
+    expect(mgr.getSchema().getChild('creation')).toBeInstanceOf(DontCodeSchemaObject);
   });
   it('should updates model from plugin', () => {
     const mgr = dtcde.getSchemaManager();
     const plugin = new PluginTest();
-    mgr.registerChanges(plugin.updatesToModel());
+    mgr.registerChanges(plugin.getConfiguration());
     expect(mgr.locateItem('/definitions/screen')).toBeDefined();
     const screen:DontCodeSchemaObject = mgr.locateItem('/definitions/screen') as DontCodeSchemaObject;
     expect(screen.getChild('type')).toBeDefined();
@@ -22,7 +24,7 @@ describe('Schema Manager', () => {
 });
 
 class PluginTest implements DontCode.Plugin {
-  updatesToModel(): PluginConfig {
+  getConfiguration(): PluginConfig {
     return {
       "plugin": {
         "id": "ScreenPlugin",

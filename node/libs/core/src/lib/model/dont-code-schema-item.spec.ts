@@ -1,10 +1,7 @@
-import { DontCode } from "@dontcode/core";
-import dtcde = DontCode.dtcde;
 import {
-  DontCodeSchemaArray,
   DontCodeSchemaEnum,
-  DontCodeSchemaItem,
-  DontCodeSchemaObject, DontCodeSchemaRef,
+  DontCodeSchemaObject,
+  DontCodeSchemaRef,
   DontCodeSchemaValue
 } from "./dont-code-schema-item";
 
@@ -32,19 +29,17 @@ describe('Schema Item', () => {
       }
     );
     expect(item).toBeDefined();
-    expect(item.get('type')).toBeInstanceOf (DontCodeSchemaEnum);
-    const appType:DontCodeSchemaEnum=item.get('type');
+    expect(item.getChild('type')).toBeInstanceOf (DontCodeSchemaEnum);
+    const appType=item.getChild('type') as DontCodeSchemaEnum;
     expect(appType.isEnum()).toBeTruthy();
-    expect(appType.length).toEqual(1);
-    expect(item.get('name')).toBeInstanceOf (DontCodeSchemaValue);
-    const appName:DontCodeSchemaValue=item.get('name');
+    expect(appType.getValues().length).toEqual(1);
+    expect(item.getChild('name')).toBeInstanceOf (DontCodeSchemaValue);
+    const appName=item.getChild('name') as DontCodeSchemaValue;
     expect(appName.getType()).toEqual('string');
-    expect(item.get('entities')).toBeInstanceOf (DontCodeSchemaArray);
-    const appEntities:DontCodeSchemaArray=item.get('entities');
+    expect(item.getChild('entities')).toBeInstanceOf (DontCodeSchemaRef);
+    const appEntities=item.getChild('entities') as DontCodeSchemaRef;
     expect(appEntities.isArray()).toBeTruthy();
-    expect(appEntities.getItemsSchemaItem()).toBeInstanceOf(DontCodeSchemaRef);
-    const entitiesRef:DontCodeSchemaRef = appEntities.getItemsSchemaItem() as DontCodeSchemaRef;
-    expect(entitiesRef.getReference()).toBeDefined();
+    expect(appEntities.getReference()).toBeDefined();
 
   });
 });

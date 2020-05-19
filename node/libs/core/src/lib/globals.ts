@@ -11,7 +11,7 @@ export namespace DontCode {
   }
 
   export interface Plugin {
-    updatesToModel (): PluginConfig ;
+    getConfiguration (): PluginConfig ;
   }
 
   export interface PluginConfig {

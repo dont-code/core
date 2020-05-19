@@ -56,7 +56,7 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
   }
 
   public static generateItem ( json:any, parent?:DontCodeSchemaItem): AbstractSchemaItem {
-    const isArray = Array.isArray(json);
+    let isArray = Array.isArray(json);
 
     if( isArray) {
       console.error('arrays are not supported', json);
@@ -64,6 +64,7 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     }
 
     let ret: AbstractSchemaItem;
+    isArray = false;
 
     if (json['type']) {
       const type = json['type'];
@@ -73,6 +74,7 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
           break;
         case 'array':
           ret= this.generateItem(json['items'], parent);
+          isArray=true;
           break;
         default:
           ret= new DontCodeSchemaValue(json, parent);
@@ -221,7 +223,7 @@ export class DontCodeSchemaRoot extends DontCodeSchemaObject{
   }
 }
 
-export class DontCodeSchemaArray extends AbstractSchemaItem {
+/*export class DontCodeSchemaArray extends AbstractSchemaItem {
   protected items:DontCodeSchemaItem;
 
   constructor(json:any,parent?:DontCodeSchemaItem) {
@@ -243,7 +245,8 @@ export class DontCodeSchemaArray extends AbstractSchemaItem {
     else
       return;
   }
-}
+}*/
+
 export class DontCodeSchemaEnum extends AbstractSchemaItem {
   protected values = new Array<string>();
 
