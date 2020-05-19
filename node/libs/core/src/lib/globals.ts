@@ -11,7 +11,33 @@ export namespace DontCode {
   }
 
   export interface Plugin {
-    updatesToModel (): any ;
+    updatesToModel (): PluginConfig ;
+  }
+
+  export interface PluginConfig {
+    plugin: {
+      id,
+      "display-name"?,
+      "version"
+    },
+    "schema-updates"?: Array<
+      {
+        id,
+        description,
+        changes:Array <ChangeConfig>;
+      }>
+  }
+
+  export interface ChangeConfig {
+    location:{
+      parent,
+      id,
+      after
+    },
+    add,
+    props,
+    replace:boolean
+
   }
 
 }

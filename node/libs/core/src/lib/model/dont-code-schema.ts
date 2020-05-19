@@ -3,7 +3,10 @@ import { DontCodeModel } from './dont-code-model';
 export class DontCodeSchema {
   static ROOT= '/properties/'+DontCodeModel.ROOT;
 
-  static default={
+  /**
+   * This is a copy of dont-code-schema.json, please don't forget to update
+   */
+  static defaultv1={
     "$id": "http://dont-code.net/dont-code-schema/v1",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "description": "JSON Schema v1 for dont-code",

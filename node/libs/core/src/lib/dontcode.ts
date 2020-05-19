@@ -1,17 +1,19 @@
 import { DontCode } from "./globals";
 import { DontCodeSchemaManager } from "./model/dont-code-schema-manager";
+import { DontCodePluginManager } from "./model/dont-code-plugin-manager";
 
 export class DontCodeCore implements DontCode.Core {
 
     protected schemaManager:DontCodeSchemaManager;
+    protected pluginManager:DontCodePluginManager;
 
     constructor() {
       this.schemaManager = new DontCodeSchemaManager();
+      this.pluginManager = new DontCodePluginManager();
     }
 
     registerPlugin(plugin: DontCode.Plugin): void {
-        //throw new Error("Method not implemented.");
-      console.log("Plugin registered", plugin);
+      this.pluginManager.registerPlugin (plugin, this.schemaManager);
     }
 
     getSchemaUri(): string {
@@ -21,7 +23,7 @@ export class DontCodeCore implements DontCode.Core {
   /**
    * Returns the schema of dont-code augmented by plugins
    */
-  getSchemaManager (): DontCodeSchemaManager {
+    getSchemaManager (): DontCodeSchemaManager {
       return this.schemaManager;
     }
 
