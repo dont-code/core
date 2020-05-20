@@ -17,7 +17,7 @@ export class DontCodeCore implements DontCode.Core {
     }
 
     getSchemaUri(): string {
-      return "schemas/dont-code-schema.json";
+      return "schemas/v1/dont-code-schema.json";
     }
 
   /**

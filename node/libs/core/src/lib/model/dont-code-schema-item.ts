@@ -17,6 +17,7 @@ export interface DontCodeSchemaItem {
 
   getParent (): DontCodeSchemaItem;
   getChild (id?:string): DontCodeSchemaItem;
+  getChildren (): IterableIterator<[string, DontCodeSchemaItem]>;
 }
 
 export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
@@ -108,6 +109,10 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     return;
   }
 
+  getChildren (): IterableIterator<[string, DontCodeSchemaItem]> {
+    return new Map().entries();
+  }
+
   updateWith(update: any) {
   }
 
@@ -180,6 +185,10 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
       return this.children.get(id);
     else
       return;
+  }
+
+  getChildren(): IterableIterator<[string, DontCodeSchemaItem]> {
+    return this.children.entries();
   }
 }
 
