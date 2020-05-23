@@ -35,8 +35,8 @@ export namespace DontCode {
       after
     },
     add,
-    props,
-    replace:boolean
+    props?,
+    replace?:boolean
 
   }
 

@@ -10,16 +10,24 @@ describe('Schema Manager', () => {
     expect(mgr.getSchema()).toBeInstanceOf(DontCodeSchemaRoot);
     expect(mgr.getSchema().getChild('creation')).toBeInstanceOf(DontCodeSchemaObject);
   });
+
   it('should updates model from plugin', () => {
     const mgr = dtcde.getSchemaManager();
     const plugin = new PluginTest();
     mgr.registerChanges(plugin.getConfiguration());
     expect(mgr.locateItem('/definitions/screen')).toBeDefined();
-    const screen:DontCodeSchemaObject = mgr.locateItem('/definitions/screen') as DontCodeSchemaObject;
+    const screen = mgr.locateItem('/definitions/screen') as DontCodeSchemaObject;
     expect(screen.getChild('type')).toBeDefined();
-    const screenType:DontCodeSchemaEnum = screen.getChild('type') as DontCodeSchemaEnum;
+    const screenType = screen.getChild('type') as DontCodeSchemaEnum;
     expect(screenType.getValues()).toContain ('list');
     expect(screenType.getValues()).toContain ('freeform');
+    expect(screenType.getProperties('list')).toBeDefined();
+    const listProps =  screenType.getProperties('list');
+    expect(listProps.isEmpty()).toBeFalsy();
+    expect(listProps.isReplace()).toBeTruthy();
+    expect(listProps.getPosAfter()).toBeDefined();
+    expect(listProps.getChild('entity')).toBeDefined();
+
   });
 });
 

@@ -12,19 +12,29 @@ export interface DontCodeSchemaItem {
   isReference (): boolean;
   isRoot (): boolean;
 
+  /**
+   * Adds or update a child with the change given by the plugin
+   * @param change
+   */
   upsertWith(change: DontCode.ChangeConfig): boolean;
-  updateWith(update: any);
+
+  /**
+   * Updates the Schema Item with the given change config
+   * @param update
+   */
+  updateWith(update: DontCode.ChangeConfig);
 
   getParent (): DontCodeSchemaItem;
   getChild (id?:string): DontCodeSchemaItem;
   getChildren (): IterableIterator<[string, DontCodeSchemaItem]>;
+  getProperties (code:string): DontCodeSchemaProperty;
 }
 
 export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
   protected parent: DontCodeSchemaItem;
   protected array = false;
 
-  constructor(parent?:DontCodeSchemaItem) {
+  protected constructor(parent?:DontCodeSchemaItem) {
     this.parent=parent;
   }
 
@@ -113,9 +123,12 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     return new Map().entries();
   }
 
-  updateWith(update: any) {
+  updateWith(update: DontCode.ChangeConfig) {
   }
 
+  getProperties(code: string): DontCodeSchemaProperty {
+    return undefined;
+  }
 
 }
 
@@ -142,10 +155,6 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
     }
   }
 
-  isArray(): boolean {
-    return false;
-  }
-
   isEnum(): boolean {
     return false;
   }
@@ -167,16 +176,16 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
   }
 
   upsertWith(change: DontCode.ChangeConfig): boolean {
-    const exists = this.getChild(change.location.id);
+    let exists = this.getChild(change.location.id);
     if( !exists) {
-      this.children.set(change.location.id, AbstractSchemaItem.generateItem(change.add, this));
-    } else {
-      exists.updateWith(change.add);
+      exists = AbstractSchemaItem.generateItem(change.add, this);
+      this.children.set(change.location.id, exists);
     }
+    exists.updateWith(change);
     return true;
   }
 
-  updateWith(update: any) {
+  updateWith(update: DontCode.ChangeConfig) {
     super.updateWith(update);
   }
 
@@ -208,10 +217,6 @@ export class DontCodeSchemaRoot extends DontCodeSchemaObject{
     }
   }
 
-  isArray(): boolean {
-    return false;
-  }
-
   isEnum(): boolean {
     return false;
   }
@@ -232,32 +237,9 @@ export class DontCodeSchemaRoot extends DontCodeSchemaObject{
   }
 }
 
-/*export class DontCodeSchemaArray extends AbstractSchemaItem {
-  protected items:DontCodeSchemaItem;
-
-  constructor(json:any,parent?:DontCodeSchemaItem) {
-    super(parent);
-    this.items = AbstractSchemaItem.generateItem(json['items'], this);
-  }
-
-  isArray(): boolean {
-    return true;
-  }
-
-  getItemsSchemaItem (): DontCodeSchemaItem {
-    return this.items;
-  }
-
-  getChild(id?: string): DontCodeSchemaItem {
-    if(!id)
-      return this.items;
-    else
-      return;
-  }
-}*/
-
 export class DontCodeSchemaEnum extends AbstractSchemaItem {
   protected values = new Array<string>();
+  protected properties = new Map<string, DontCodeSchemaProperty>();
 
   constructor(json:any, parent?:DontCodeSchemaItem) {
     super(parent);
@@ -266,10 +248,6 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
 
   isEnum(): boolean {
     return true;
-  }
-
-  isArray(): boolean {
-    return false;
   }
 
   isObject(): boolean {
@@ -292,11 +270,21 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
     return this.values;
   }
 
-
-  updateWith(update: any) {
+  updateWith(update: DontCode.ChangeConfig) {
     super.updateWith(update);
-    const toAdd = update['enum'] as Array<string>;
-    this.values.push(...toAdd);
+    const toAdd = update.add['enum'] as Array<string>;
+    toAdd.forEach(value => {
+      this.values.push(value);
+      if( update.props) {
+        const props=new DontCodeSchemaProperty(update, this);
+        if( !props.isEmpty ())
+          this.properties.set(value, props );
+      }
+    });
+  }
+
+  getProperties(code: string): DontCodeSchemaProperty {
+    return this.properties.get(code);
   }
 }
 
@@ -320,6 +308,7 @@ export class DontCodeSchemaValue extends AbstractSchemaItem {
 
 export class DontCodeSchemaRef extends AbstractSchemaItem {
   protected ref:string;
+  protected resolvedRef=new Map<string, DontCodeSchemaItem>();
 
   constructor(json:any, parent?:DontCodeSchemaItem) {
     super(parent);
@@ -334,4 +323,40 @@ export class DontCodeSchemaRef extends AbstractSchemaItem {
     return this.ref;
   }
 
+  resolveReference (resolved:DontCodeSchemaItem) {
+    this.resolvedRef.set('',resolved);
+  }
+
+
+  getChildren(): IterableIterator<[string, DontCodeSchemaItem]> {
+    return this.resolvedRef.entries();
+  }
 }
+
+export class DontCodeSchemaProperty extends DontCodeSchemaObject{
+  protected replace:boolean;
+  protected posAfter:string;
+
+  constructor(json: DontCode.ChangeConfig, parent: DontCodeSchemaItem) {
+    super({
+      "type":"object",
+      "properties":json.props
+    }, parent);
+    this.replace = json.replace;
+    this.posAfter = json.location.after;
+  }
+
+  isEmpty(): boolean {
+    return this.children.size==0;
+  }
+
+  isReplace (): boolean {
+    return this.replace;
+  }
+
+  getPosAfter (): string {
+    return this.posAfter;
+  }
+}
+
+
