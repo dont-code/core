@@ -26,16 +26,22 @@ export interface DontCodeSchemaItem {
 
   getParent (): DontCodeSchemaItem;
   getChild (id?:string): DontCodeSchemaItem;
+//  getChildIndex (child:DontCodeSchemaItem): number;
   getChildren (): IterableIterator<[string, DontCodeSchemaItem]>;
   getProperties (code:string): DontCodeSchemaProperty;
+
+  getRelativeId (): string;
+  setRelativeId (relativeId:string);
 }
 
 export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
   protected parent: DontCodeSchemaItem;
   protected array = false;
+  protected relativeId:string;
 
-  protected constructor(parent?:DontCodeSchemaItem) {
+  protected constructor(parent:DontCodeSchemaItem, relativeId:string) {
     this.parent=parent;
+    this.relativeId = relativeId;
   }
 
   isArray(): boolean {
@@ -66,7 +72,7 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     return false;
   }
 
-  public static generateItem ( json:any, parent?:DontCodeSchemaItem): AbstractSchemaItem {
+  public static generateItem ( json:any, itemId:string, parent?:DontCodeSchemaItem): AbstractSchemaItem {
     let isArray = Array.isArray(json);
 
     if( isArray) {
@@ -81,19 +87,19 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
       const type = json['type'];
       switch (type) {
         case 'object':
-          ret= new DontCodeSchemaObject(json, parent);
+          ret= new DontCodeSchemaObject(json, itemId,parent);
           break;
         case 'array':
-          ret= this.generateItem(json['items'], parent);
+          ret= this.generateItem(json['items'], itemId, parent);
           isArray=true;
           break;
         default:
-          ret= new DontCodeSchemaValue(json, parent);
+          ret= new DontCodeSchemaValue(json, itemId, parent);
       }
     } else if (json['enum']) {
-      ret= new DontCodeSchemaEnum(json, parent);
+      ret= new DontCodeSchemaEnum(json, itemId, parent);
     } else if (json['$ref']) {
-      ret= new DontCodeSchemaRef(json, parent);
+      ret= new DontCodeSchemaRef(json, itemId, parent);
     }
     else
     {
@@ -105,6 +111,19 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
 
   public static isObject (item): boolean {
     return (typeof item === "object" && !Array.isArray(item) && item !== null);
+  }
+
+  public static goto (entity: DontCodeSchemaItem, to:string): DontCodeSchemaItem {
+    let ret = entity;
+    to.split('/').forEach(value => {
+      if( value!=='#' && (value!='')) {
+        ret=ret.getChild(value);
+      }
+      if( !ret) {
+        console.error('Cannot find '+value+' of '+to+' in the following item ', entity);
+      }
+    });
+    return ret;
   }
 
   upsertWith(change: DontCode.ChangeConfig): boolean {
@@ -130,13 +149,20 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     return undefined;
   }
 
+  getRelativeId (): string {
+    return this.relativeId;
+  }
+  setRelativeId (relativeId:string) {
+    this.relativeId = relativeId;
+  }
+
 }
 
 export class DontCodeSchemaObject extends AbstractSchemaItem {
   protected children = new Map<string, DontCodeSchemaItem>();
 
-  constructor(json:any,parent?:DontCodeSchemaItem) {
-    super(parent);
+  constructor(json:any, relativeId:string, parent?:DontCodeSchemaItem) {
+    super(parent, relativeId);
     if (json)
       this.readJson (json);
   }
@@ -145,12 +171,12 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
     const props =json['properties'];
     if( props) {
       for (var key in props) {
-        this.children.set(key, AbstractSchemaItem.generateItem(props[key], this));
+        this.children.set(key, AbstractSchemaItem.generateItem(props[key], key, this));
       }
     }
     const definitions =json['definitions'];
     if( definitions) {
-      const defsItem=AbstractSchemaItem.generateItem(definitions, this);
+      const defsItem=AbstractSchemaItem.generateItem(definitions, 'definitions', this);
       this.children.set('definitions', defsItem);
     }
   }
@@ -178,8 +204,19 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
   upsertWith(change: DontCode.ChangeConfig): boolean {
     let exists = this.getChild(change.location.id);
     if( !exists) {
-      exists = AbstractSchemaItem.generateItem(change.add, this);
-      this.children.set(change.location.id, exists);
+      exists = AbstractSchemaItem.generateItem(change.add, change.location.id, this);
+      if( change.location.after) {
+        let newMap = new Map<string, DontCodeSchemaItem> ();
+        this.children.forEach((value, key) => {
+          newMap.set(key, value);
+          if (key===change.location.after) {
+            newMap.set(change.location.id, exists);
+          }
+        });
+        this.children=newMap;
+      } else {
+        this.children.set(change.location.id, exists);
+      }
     }
     exists.updateWith(change);
     return true;
@@ -199,6 +236,17 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
   getChildren(): IterableIterator<[string, DontCodeSchemaItem]> {
     return this.children.entries();
   }
+
+  /*getChildIndex(child: DontCodeSchemaItem): number {
+    let ret=-1;
+    this.children.forEach((value, key) => {
+      ret++;
+      if( value===child)
+        return ret;
+    })
+    return -1;
+  }*/
+
 }
 
 export class DontCodeSchemaRoot extends DontCodeSchemaObject{
@@ -213,7 +261,7 @@ export class DontCodeSchemaRoot extends DontCodeSchemaObject{
     if( definitions) {
       this.children.set('definitions', new DontCodeSchemaObject( {
         properties: definitions
-      }, this));
+      }, 'definitions', this));
     }
   }
 
@@ -241,8 +289,8 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
   protected values = new Array<string>();
   protected properties = new Map<string, DontCodeSchemaProperty>();
 
-  constructor(json:any, parent?:DontCodeSchemaItem) {
-    super(parent);
+  constructor(json:any, relativeId:string, parent?:DontCodeSchemaItem) {
+    super(parent, relativeId);
     this.values.push(...json["enum"]);
   }
 
@@ -276,7 +324,7 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
     toAdd.forEach(value => {
       this.values.push(value);
       if( update.props) {
-        const props=new DontCodeSchemaProperty(update, this);
+        const props=new DontCodeSchemaProperty(update, this.relativeId+'='+value,this);
         if( !props.isEmpty ())
           this.properties.set(value, props );
       }
@@ -291,8 +339,8 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
 export class DontCodeSchemaValue extends AbstractSchemaItem {
   protected type:string;
 
-  constructor(json:any, parent?:DontCodeSchemaItem) {
-    super(parent);
+  constructor(json:any, relativeId:string, parent?:DontCodeSchemaItem) {
+    super(parent, relativeId);
     this.type=json["type"];
   }
 
@@ -310,8 +358,8 @@ export class DontCodeSchemaRef extends AbstractSchemaItem {
   protected ref:string;
   protected resolvedRef=new Map<string, DontCodeSchemaItem>();
 
-  constructor(json:any, parent?:DontCodeSchemaItem) {
-    super(parent);
+  constructor(json:any, relativeId:string, parent?:DontCodeSchemaItem) {
+    super(parent, relativeId);
     this.ref=json["$ref"];
   }
 
@@ -337,11 +385,11 @@ export class DontCodeSchemaProperty extends DontCodeSchemaObject{
   protected replace:boolean;
   protected posAfter:string;
 
-  constructor(json: DontCode.ChangeConfig, parent: DontCodeSchemaItem) {
+  constructor(json: DontCode.ChangeConfig, relativeId: string, parent: DontCodeSchemaItem) {
     super({
       "type":"object",
       "properties":json.props
-    }, parent);
+    }, relativeId, parent);
     this.replace = json.replace;
     this.posAfter = json.location.after;
   }
