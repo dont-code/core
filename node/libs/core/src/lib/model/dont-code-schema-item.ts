@@ -29,6 +29,7 @@ export interface DontCodeSchemaItem {
 //  getChildIndex (child:DontCodeSchemaItem): number;
   getChildren (): IterableIterator<[string, DontCodeSchemaItem]>;
   getProperties (code:string): DontCodeSchemaProperty;
+  hasProperties (code:string): boolean;
 
   getRelativeId (): string;
   setRelativeId (relativeId:string);
@@ -148,6 +149,11 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
   getProperties(code: string): DontCodeSchemaProperty {
     return undefined;
   }
+
+  hasProperties (code:string): boolean {
+    return false;
+  }
+
 
   getRelativeId (): string {
     return this.relativeId;
@@ -334,6 +340,11 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
   getProperties(code: string): DontCodeSchemaProperty {
     return this.properties.get(code);
   }
+
+  hasProperties (code:string): boolean {
+    return this.properties.has(code);
+  }
+
 }
 
 export class DontCodeSchemaValue extends AbstractSchemaItem {
