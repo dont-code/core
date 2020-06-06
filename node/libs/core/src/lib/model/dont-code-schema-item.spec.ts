@@ -26,7 +26,7 @@ describe('Schema Item', () => {
             }
           }
         }
-      }
+      }, 'root'
     );
     expect(item).toBeDefined();
     expect(item.getChild('type')).toBeInstanceOf (DontCodeSchemaEnum);

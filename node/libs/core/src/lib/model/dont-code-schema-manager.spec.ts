@@ -5,7 +5,7 @@ import PluginConfig = DontCode.PluginConfig;
 
 describe('Schema Manager', () => {
   it('should work', () => {
-    const mgr = dtcde.getSchemaManager()
+    const mgr = dtcde.getSchemaManager();
     expect(mgr).toBeDefined();
     expect(mgr.getSchema()).toBeInstanceOf(DontCodeSchemaRoot);
     expect(mgr.getSchema().getChild('creation')).toBeInstanceOf(DontCodeSchemaObject);
@@ -19,6 +19,7 @@ describe('Schema Manager', () => {
     const screen = mgr.locateItem('/definitions/screen') as DontCodeSchemaObject;
     expect(screen.getChild('type')).toBeDefined();
     const screenType = screen.getChild('type') as DontCodeSchemaEnum;
+    expect(screenType.getValues().length).toEqual(2);
     expect(screenType.getValues()).toContain ('list');
     expect(screenType.getValues()).toContain ('freeform');
     expect(screenType.getProperties('list')).toBeDefined();

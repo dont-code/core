@@ -24,4 +24,6 @@ export class DontCodeModel {
   static readonly APP_COMPONENTS = DontCodeModel.APP_SCREENS+'/'+DontCodeModel.APP_COMPONENTS_NODE;
   static readonly APP_COMPONENTS_TYPE_NODE = 'type';
   static readonly APP_COMPONENTS_TYPE = DontCodeModel.APP_COMPONENTS+'/'+DontCodeModel.APP_COMPONENTS_TYPE_NODE;
+  static readonly APP_COMPONENTS_ENTITY_NODE = 'entity';
+  static readonly APP_COMPONENTS_ENTITY = DontCodeModel.APP_COMPONENTS+'/'+DontCodeModel.APP_COMPONENTS_ENTITY_NODE;
 }

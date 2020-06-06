@@ -106,7 +106,7 @@ export class DontCodeSchema {
             ]
           },
           "entity": {
-            "$ref": "#/definitions/entity",
+            "type": "string",
             "format": "#/creation/entities"
           }
         },

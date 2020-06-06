@@ -224,6 +224,7 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
         this.children.set(change.location.id, exists);
       }
     }
+    // Make sure to load the sub-properties
     exists.updateWith(change);
     return true;
   }
@@ -328,7 +329,8 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
     super.updateWith(update);
     const toAdd = update.add['enum'] as Array<string>;
     toAdd.forEach(value => {
-      this.values.push(value);
+      if( this.values.indexOf(value)==-1)
+        this.values.push(value);
       if( update.props) {
         const props=new DontCodeSchemaProperty(update, this.relativeId+'='+value,this);
         if( !props.isEmpty ())
