@@ -1,4 +1,4 @@
-import { DontCodeSchemaItem, DontCodeSchemaObject, DontCodeSchemaRoot } from "./dont-code-schema-item";
+import { DontCodeSchemaItem, DontCodeSchemaRoot } from "./dont-code-schema-item";
 import { DontCodeSchema } from "./dont-code-schema";
 import { DontCode } from "../globals";
 

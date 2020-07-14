@@ -1,19 +1,22 @@
 import { DontCode } from "./globals";
 import { DontCodeSchemaManager } from "./model/dont-code-schema-manager";
-import { DontCodePluginManager } from "./model/dont-code-plugin-manager";
+import { DontCodePluginManager } from "./plugin/dont-code-plugin-manager";
+import { DontCodePreviewManager } from "./plugin/preview/dont-code-preview-manager";
 
 export class DontCodeCore implements DontCode.Core {
 
     protected schemaManager:DontCodeSchemaManager;
     protected pluginManager:DontCodePluginManager;
+    protected previewManager:DontCodePreviewManager;
 
     constructor() {
       this.schemaManager = new DontCodeSchemaManager();
       this.pluginManager = new DontCodePluginManager();
+      this.previewManager = new DontCodePreviewManager();
     }
 
     registerPlugin(plugin: DontCode.Plugin): void {
-      this.pluginManager.registerPlugin (plugin, this.schemaManager);
+      this.pluginManager.registerPlugin (plugin, this.schemaManager, this.previewManager);
     }
 
     getSchemaUri(): string {
@@ -25,6 +28,10 @@ export class DontCodeCore implements DontCode.Core {
    */
     getSchemaManager (): DontCodeSchemaManager {
       return this.schemaManager;
+    }
+
+    getPreviewManager (): DontCodePreviewManager {
+      return this.previewManager;
     }
 
 }

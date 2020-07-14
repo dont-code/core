@@ -15,12 +15,21 @@
       "items": {
         "$ref": "#/definitions/schema-update"
       }
+    },
+    "preview-handlers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/preview-handler"
+      }
     }
   },
   "definitions": {
     "plugin": {
       "type": "object",
-      "required": ["id","version"],
+      "required": [
+        "id",
+        "version"
+      ],
       "properties": {
         "id": {
           "type": "string"
@@ -46,10 +55,10 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/change"
-            }
           }
         }
-      },
+      }
+    },
     "change": {
       "type": "object",
       "properties": {
@@ -61,16 +70,18 @@
         },
         "props": {
           "$ref": "#/definitions/itemprops"
-
-        } ,
+        },
         "replace": {
-        "type": "boolean"
+          "type": "boolean"
         }
       }
     },
     "change-location": {
       "type": "object",
-      "required": ["parent","id"],
+      "required": [
+        "parent",
+        "id"
+      ],
       "properties": {
         "parent": {
           "type": "string"
@@ -98,6 +109,25 @@
       "properties": {
       },
       "additionalProperties": true
+    },
+    "preview-handler": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/definitions/change-location"
+        },
+        "class": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   }
 }
