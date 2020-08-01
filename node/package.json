@@ -28,7 +28,8 @@
   },
   "private": false,
   "dependencies": {
-    "@nrwl/node": "^9.2.4"
+    "@nrwl/node": "^9.2.4",
+    "rxjs": "~6.5.4"
   },
   "devDependencies": {
     "@nrwl/workspace": "9.2.4",

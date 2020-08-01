@@ -5,4 +5,6 @@ export * from './lib/model/dont-code-schema';
 export * from './lib/model/dont-code-schema-item';
 export * from './lib/model/dont-code-schema-manager';
 export * from './lib/plugin/dont-code-plugin-manager';
+export * from './lib/plugin/command-provider-interface';
+export * from './lib/plugin/preview-handler';
 export * from './lib/globals';
