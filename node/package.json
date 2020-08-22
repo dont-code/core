@@ -28,11 +28,11 @@
   },
   "private": false,
   "dependencies": {
-    "@nrwl/node": "^9.2.4",
-    "rxjs": "~6.5.4"
+    "@nrwl/node": "^9.2.4"
   },
   "devDependencies": {
     "@nrwl/workspace": "9.2.4",
+    "rxjs": "~6.5.4",
     "@types/node": "~8.9.4",
     "dotenv": "6.2.0",
     "ts-node": "~7.0.0",

@@ -49,7 +49,8 @@ export namespace DontCode {
   export interface PreviewHandlerConfig {
     location: {
       parent,
-      id
+      id,
+      values?
     },
     class: {
       source,
