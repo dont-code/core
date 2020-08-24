@@ -1,4 +1,4 @@
-import { DontCode } from "@dontcode/core";
+import { DontCode, DontCodeSchemaItem } from "@dontcode/core";
 import PreviewHandlerConfig = DontCode.PreviewHandlerConfig;
 
 export class DontCodePreviewManager {
@@ -22,16 +22,18 @@ export class DontCodePreviewManager {
     }
   }
 
-  retrieveHandlerConfig (position: string, value?: string): PreviewHandlerConfig {
+  retrieveHandlerConfig (position: string, jsonContent?: any): PreviewHandlerConfig {
     const found = this.handlersPerLocations.get(position);
     let ret:PreviewHandlerConfig = null;
 
     if (found) {
         found.forEach (configuration => {
-          if (value) {
+          if (jsonContent) {
             if (configuration.location.values) {
+              const jsonValue=jsonContent[configuration.location.id] as string;
+
               (configuration.location.values as Array<string>).forEach (targetValue => {
-                if( targetValue === value) {
+                if( targetValue === jsonValue) {
                   ret = configuration;
                   return;
                 }

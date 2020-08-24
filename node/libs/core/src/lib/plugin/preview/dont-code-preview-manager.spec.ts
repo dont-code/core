@@ -22,7 +22,10 @@ describe('Preview Manager', () => {
     const test = new DontCodeCore();
 
     test.registerPlugin(new ValuesPluginTest());
-    const valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values", "value1");
+    const valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+    {
+      key:"value1"
+    });
     expect (valuesConfig).toBeDefined();
     expect(valuesConfig.class.name).toBe("ValuesComponent");
 
@@ -35,11 +38,17 @@ describe('Preview Manager', () => {
 
     test.registerPlugin(new ValuesPluginTest());
     test.registerPlugin(new OtherValuesPluginTest());
-    let valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values", "value1");
+    let valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+    {
+      key:"value1"
+    });
     expect (valuesConfig).toBeDefined();
     expect(valuesConfig.class.name).toBe("ValuesComponent");
 
-    valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values", "othervalue2");
+    valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+    {
+      key:"othervalue2"
+    });
     expect (valuesConfig).toBeDefined();
     expect(valuesConfig.class.name).toBe("OtherValuesComponent");
 
@@ -56,7 +65,10 @@ describe('Preview Manager', () => {
     expect (valuesConfig).toBeDefined();
     expect(valuesConfig.class.name).toBe("NoValuesComponent");
 
-    valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values", "othervalue1");
+    valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+    {
+      key:"othervalue1"
+    });
     expect (valuesConfig).toBeDefined();
     expect(valuesConfig.class.name).toBe("OtherValuesComponent");
 
