@@ -17,6 +17,30 @@ export namespace DontCode {
   }
 
   /**
+   * The typescript equivalent of the dont-code-schema.json
+   */
+  export interface DontCodeSchema {
+    creation: {
+      type: string,
+      name: string,
+      entities?: Array<
+      {
+        name:string,
+        fields?: Array<{
+          name:string,
+          type:string
+        }>
+      }
+      >,
+      screens?: Array<
+      {
+        name:string
+      }
+      >
+    }
+  }
+
+  /**
    * The typescript equivalent of plugin-config-schema.json
    */
   export interface PluginConfig {
