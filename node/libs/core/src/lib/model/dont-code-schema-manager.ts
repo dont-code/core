@@ -1,8 +1,6 @@
 import { DontCodeSchemaItem, DontCodeSchemaRef, DontCodeSchemaRoot } from "./dont-code-schema-item";
 import { DontCodeModelPointer, DontCodeSchema } from "./dont-code-schema";
 import { DontCode } from "../globals";
-import * as console from "console";
-import { Error } from "tslint/lib/error";
 
 export class DontCodeSchemaManager {
   protected currentSchema:DontCodeSchemaRoot;
