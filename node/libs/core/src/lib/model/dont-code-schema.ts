@@ -114,5 +114,31 @@ export class DontCodeSchema {
       }
     }
   };
+}
+
+/**
+ * Store all information needed to point to a single element in a model.
+ */
+export class DontCodeModelPointer {
+  position:string;
+
+  schemaPosition:string;
+
+  containerPosition: string;
+
+  containerSchemaPosition: string;
+
+  key: string;
+
+  itemId: string;
+
+  constructor(position: string, schemaPosition: string, containerPosition: string, containerSchemaPosition: string, key: string, itemId:string) {
+    this.position = position;
+    this.schemaPosition = schemaPosition;
+    this.containerPosition = containerPosition;
+    this.containerSchemaPosition = containerSchemaPosition;
+    this.key = key;
+    this.itemId = itemId;
+  }
 
 }

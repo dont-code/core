@@ -30,6 +30,59 @@ describe('Schema Manager', () => {
     expect(listProps.getChild('entity')).toBeDefined();
 
   });
+
+  it('should calculate pointers correctly', () => {
+    const mgr = dtcde.getSchemaManager();
+    let pointer = mgr.generateSchemaPointer('creation/name');
+    expect(pointer).toEqual({
+      position:'creation/name',
+      schemaPosition:'creation/name',
+      containerPosition:'creation',
+      containerSchemaPosition:'creation',
+      key:'name',
+      itemId:null
+    });
+
+    pointer = mgr.generateSchemaPointer('creation/screens/aaaa/name');
+    expect(pointer).toEqual({
+      position:'creation/screens/aaaa/name',
+      schemaPosition:'creation/screens/name',
+      containerPosition:'creation/screens/aaaa',
+      containerSchemaPosition:'creation/screens',
+      key:'name',
+      itemId:null
+    });
+    pointer = mgr.generateSchemaPointer('creation/screens/aaaa');
+    expect(pointer).toEqual({
+      position:'creation/screens/aaaa',
+      schemaPosition:'creation/screens',
+      containerPosition:'creation/screens',
+      containerSchemaPosition:'creation',
+      key:null,
+      itemId:'aaaa'
+    });
+
+    pointer = mgr.generateSchemaPointer('creation/entities/aaaa/fields/aabb/type');
+    expect(pointer).toEqual({
+      position:'creation/entities/aaaa/fields/aabb/type',
+      schemaPosition:'creation/entities/fields/type',
+      containerPosition:'creation/entities/aaaa/fields/aabb',
+      containerSchemaPosition:'creation/entities/fields',
+      key:'type',
+      itemId:null
+    });
+
+    pointer = mgr.generateSchemaPointer('creation/entities/aaaa/fields/aabb');
+    expect(pointer).toEqual({
+      position:'creation/entities/aaaa/fields/aabb',
+      schemaPosition:'creation/entities/fields',
+      containerPosition:'creation/entities/aaaa/fields',
+      containerSchemaPosition:'creation/entities',
+      key:null,
+      itemId:'aabb'
+    });
+
+  });
 });
 
 class PluginTest implements DontCode.Plugin {

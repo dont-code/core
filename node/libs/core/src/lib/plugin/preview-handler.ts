@@ -1,5 +1,6 @@
 import { CommandProviderInterface } from "./command-provider-interface";
+import { DontCodeModelPointer } from "../..";
 
 export interface PreviewHandler {
-  initCommandFlow (provider:CommandProviderInterface, position:string, schemaPosition:string);
+  initCommandFlow (provider:CommandProviderInterface, pointer:DontCodeModelPointer);
 }

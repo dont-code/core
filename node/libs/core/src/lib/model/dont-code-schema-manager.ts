@@ -1,6 +1,8 @@
-import { DontCodeSchemaItem, DontCodeSchemaRoot } from "./dont-code-schema-item";
-import { DontCodeSchema } from "./dont-code-schema";
+import { DontCodeSchemaItem, DontCodeSchemaRef, DontCodeSchemaRoot } from "./dont-code-schema-item";
+import { DontCodeModelPointer, DontCodeSchema } from "./dont-code-schema";
 import { DontCode } from "../globals";
+import * as console from "console";
+import { Error } from "tslint/lib/error";
 
 export class DontCodeSchemaManager {
   protected currentSchema:DontCodeSchemaRoot;
@@ -57,6 +59,58 @@ export class DontCodeSchemaManager {
     });
 
     return cur;
+  }
+
+  resolveReference (ref:DontCodeSchemaRef): DontCodeSchemaItem {
+    return this.locateItem(ref.getReference());
+  }
+
+  generateSchemaPointer (position: string) : DontCodeModelPointer {
+    const ret = new DontCodeModelPointer(position, null,null,null,null,null);
+
+    position = (position[0]==='/')?position.substring(1):position;
+    const posElems = position.split('/');
+
+    let parentItem = this.currentSchema as DontCodeSchemaItem;
+    let ignoreNext = false;
+    posElems.forEach(element => {
+      if (!ignoreNext) {
+        let nextItem = parentItem.getChild(element);
+        if (nextItem!==null) {
+          ret.itemId=null;
+          ret.containerSchemaPosition=ret.schemaPosition;
+          if( ret.schemaPosition!==null)
+            ret.schemaPosition=ret.schemaPosition+'/'+element;
+          else
+            ret.schemaPosition = element;
+
+          if (nextItem.isArray()) {
+            ignoreNext = true;
+          } else {
+            ignoreNext = false;
+          }
+
+          if( nextItem.isReference())
+            nextItem = this.resolveReference(nextItem as DontCodeSchemaRef);
+
+          parentItem = nextItem;
+
+        } else {
+          // Cannot find the next item in the schema: Error in the url
+          throw new Error('Cannot parse \''+position+'\' from the schema as '+element+' is not a child of '+parentItem.getRelativeId());
+        }
+      } else {
+        ret.itemId=element;
+        ignoreNext=false;
+      }
+    });
+
+    ret.containerSchemaPosition=ret.schemaPosition.substring(0, ret.schemaPosition.lastIndexOf('/'));
+    ret.containerPosition=ret.position.substring(0, ret.position.lastIndexOf('/'));
+    if (ret.itemId===null)
+      ret.key = posElems[posElems.length-1];
+
+    return ret;
   }
 
 }
