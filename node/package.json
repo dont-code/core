@@ -28,25 +28,25 @@
   },
   "private": false,
   "dependencies": {
-    "@nrwl/node": "^9.2.4"
+    "@nrwl/node": "10.2.1"
   },
   "devDependencies": {
-    "@nrwl/workspace": "9.2.4",
-    "rxjs": "~6.5.4",
+    "@nrwl/workspace": "10.2.1",
+    "rxjs": "6.5.5",
     "@types/node": "~8.9.4",
     "dotenv": "6.2.0",
     "ts-node": "~7.0.0",
     "tslint": "~6.0.0",
     "eslint": "6.8.0",
-    "typescript": "~3.8.3",
-    "prettier": "1.19.1",
-    "@nrwl/eslint-plugin-nx": "9.2.4",
+    "typescript": "3.9.7",
+    "prettier": "2.0.4",
+    "@nrwl/eslint-plugin-nx": "10.2.1",
     "@typescript-eslint/parser": "2.19.2",
     "@typescript-eslint/eslint-plugin": "2.19.2",
     "eslint-config-prettier": "6.0.0",
-    "@nrwl/jest": "9.2.4",
-    "jest": "25.2.3",
-    "@types/jest": "25.1.4",
-    "ts-jest": "25.2.1"
+    "@nrwl/jest": "10.2.1",
+    "jest": "26.2.2",
+    "@types/jest": "26.0.8",
+    "ts-jest": "26.1.4"
   }
 }

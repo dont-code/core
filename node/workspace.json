@@ -11,19 +11,17 @@
           "builder": "@nrwl/linter:lint",
           "options": {
             "linter": "eslint",
-            "config": "libs/core/.eslintrc",
             "tsConfig": [
               "libs/core/tsconfig.lib.json",
               "libs/core/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!libs/core/**"]
+            "exclude": ["**/node_modules/**", "!libs/core/**/*"]
           }
         },
         "test": {
           "builder": "@nrwl/jest:jest",
           "options": {
             "jestConfig": "libs/core/jest.config.js",
-            "tsConfig": "libs/core/tsconfig.spec.json",
             "passWithNoTests": true
           }
         },
@@ -35,8 +33,18 @@
             "packageJson": "libs/core/package.json",
             "main": "libs/core/src/index.ts",
             "assets": [
-              { "glob": "**/*", "input": "libs/core/src/assets/", "output": "/assets/" },
-              { "glob": "*.md", "input": "libs/core/", "output": "/" }]
+              {
+                "glob": "**/*",
+                "input": "libs/core/src/assets/",
+                "output": "/assets/"
+              },
+              {
+                "glob": "*.md",
+                "input": "libs/core/",
+                "output": "/"
+              }
+            ],
+            "srcRootForCompilationRoot": "libs\\core\\src"
           }
         }
       }
