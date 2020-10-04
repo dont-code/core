@@ -28,8 +28,8 @@ export class DontCodePreviewManager {
 
     if (found) {
         found.forEach (configuration => {
-          if (jsonContent) {
-            if (configuration.location.values) {
+          if (configuration.location.values) {
+            if (jsonContent) {
               const jsonValue=jsonContent[configuration.location.id] as string;
 
               (configuration.location.values as Array<string>).forEach (targetValue => {
@@ -40,9 +40,9 @@ export class DontCodePreviewManager {
               })
             }
           } else {
-            if (!configuration.location.values) {
+            // We have found a default handler, we keep it but keep on looking for a better one
+            if (ret === null) {
               ret = configuration;
-              return;
             }
           }
         })
