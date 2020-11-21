@@ -35,12 +35,12 @@ jobs:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Install
-        run: npm ci
-      - name: Install
-        run: git merge origin/Development
+        run: |
+          npm ci
+          git merge origin/Development
       - name: Build
+        run: npm version patch
         working-directory: node/libs/core
-        run: ../../npm version patch
       - name: Build
         run: npm run nx run core:build
       #      - uses: actions/upload-artifact@v1
