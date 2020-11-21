@@ -39,7 +39,7 @@ jobs:
       - name: Install
         run: git merge origin/Development
       - name: Build
-        working-directory: ./libs/core
+        working-directory: node/libs/core
         run: npm version patch
       - name: Build
         run: npm run nx run core:build
