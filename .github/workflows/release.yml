@@ -37,7 +37,7 @@ jobs:
       - name: Install
         run: npm ci
       - name: Install
-        run: git merge Development
+        run: git merge origin/Development
       - name: Build
         working-directory: ./libs/core
         run: npm version patch
