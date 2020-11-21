@@ -53,7 +53,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
-          git commit -m "New version"
+          git commit -a -m "New version"
           git push
       - name: Publish
         run: npm publish dist/libs/core --access public
