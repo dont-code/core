@@ -61,10 +61,10 @@ export namespace DontCode {
   export interface ChangeConfig {
     location:{
       parent,
-      id,
-      after
+      id?,
+      after?
     },
-    add,
+    add?,
     props?,
     replace?:boolean
 
@@ -73,7 +73,7 @@ export namespace DontCode {
   export interface PreviewHandlerConfig {
     location: {
       parent,
-      id,
+      id?,
       values?
     },
     class: {

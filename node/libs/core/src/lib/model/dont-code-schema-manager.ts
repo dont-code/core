@@ -29,11 +29,13 @@ export class DontCodeSchemaManager {
       updates.forEach(update => {
         const changes = update.changes;
         changes.forEach(change => {
-          const parent = this.locateItem (change.location.parent);
-          if( parent) {
-            parent.upsertWith(change);
-          } else {
-            throw ("Cannot find parent element: "+change.location.parent);
+          if( change.location.id) {
+            const parent = this.locateItem (change.location.parent);
+            if( parent) {
+              parent.upsertWith(change);
+            } else {
+              throw ("Cannot find parent element: "+change.location.parent);
+            }
           }
         });
       });

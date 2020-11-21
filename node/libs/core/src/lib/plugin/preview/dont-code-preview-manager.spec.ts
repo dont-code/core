@@ -18,6 +18,25 @@ describe('Preview Manager', () => {
     expect(simpleConfig.class.name).toBe("SimpleComponent");
   });
 
+  it('should manage basic plugin overriding configuration', () => {
+    const test = new DontCodeCore();
+
+    test.registerPlugin(new BasicPluginTest());
+    const entityConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values", {
+      key:"value1"
+    });
+    expect (entityConfig).toBeDefined();
+    expect(entityConfig.class.name).toBe("BasicComponent");
+
+    // Now it should select ValuePluginTest as it provides narrower criteria
+    test.registerPlugin(new ValuesPluginTest());
+    const valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values", {
+      key:"value1"
+    });
+    expect (valuesConfig).toBeDefined();
+    expect(valuesConfig.class.name).toBe("ValuesComponent");
+  });
+
   it('should manage plugin configurations with values', () => {
     const test = new DontCodeCore();
 
@@ -93,6 +112,30 @@ class SimplePluginTest implements DontCode.Plugin {
           "class": {
             "name": "SimpleComponent",
             "source": "simple"
+          }
+        }
+      ]
+
+    }
+  }
+}
+
+class BasicPluginTest implements DontCode.Plugin {
+  getConfiguration(): PluginConfig {
+    return {
+      "plugin": {
+        "id": "BasicPlugin",
+        "display-name": "Dont code Basic  test Plugin ",
+        "version": "1.0.0"
+      },
+      "preview-handlers": [
+        {
+          "location": {
+            "parent": "creation/values"
+          },
+          "class": {
+            "name": "BasicComponent",
+            "source": "basic"
           }
         }
       ]
