@@ -51,7 +51,7 @@ jobs:
         run: npm run nx run core:test
       - name: Push
         run: |
-          git commit -m "New version"
+          git commit --author="Github Release" -m "New version"
           git push
       - name: Publish
         run: npm publish dist/libs/core --access public
