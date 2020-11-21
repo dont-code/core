@@ -50,7 +50,9 @@ jobs:
       - name: Unit tests
         run: npm run nx run core:test
       - name: Push
-        run: git push
+        run: |
+          git commit -m "New version"
+          git push
       - name: Publish
         run: npm publish dist/libs/core --access public
         env:
