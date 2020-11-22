@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "ES2015",
+    "module": "UMD",
     "types": ["jest", "node"]
   },
   "include": [
