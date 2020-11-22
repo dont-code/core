@@ -1,10 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "UMD",
+    "module": "CommonJS",
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node"]
+    "types": ["node"],
+    "lib": ["dom", "es2018"]
   },
   "exclude": ["**/*.spec.ts"],
   "include": ["**/*.ts"]
