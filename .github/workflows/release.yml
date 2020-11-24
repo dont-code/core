@@ -48,8 +48,8 @@ jobs:
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@master
-          with:
-            path: node/libs/core/package.json
+        with:
+          path: node/libs/core/package.json
       - name: Unit tests
         run: npm run nx run core:test
       - name: Push
