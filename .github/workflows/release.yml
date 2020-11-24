@@ -45,15 +45,16 @@ jobs:
         working-directory: node/libs/core
       - name: Build
         run: npm run nx run core:build
-      #      - uses: actions/upload-artifact@v1
-      #        with:
-      #          name: distribution
-      #          path: node/dist/libs/core
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+          with:
+            path: node/libs/core/package.json
       - name: Unit tests
         run: npm run nx run core:test
       - name: Push
         run: |
-          git commit -a -m "New version" --allow-empty
+          git commit -a -m "New release ${{steps.package-version.outputs.current-version}}" --allow-empty
           git push
       - name: Publish
         run: npm publish dist/libs/core --access public
