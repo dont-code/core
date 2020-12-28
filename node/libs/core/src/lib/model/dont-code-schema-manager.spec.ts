@@ -83,6 +83,22 @@ describe('Schema Manager', () => {
     });
 
   });
+
+  it('should calculate the right key', () => {
+    const mgr = dtcde.getSchemaManager();
+    let pointer = mgr.generateSchemaPointer('creation/name');
+    expect(pointer.calculateKeyOrContainer()).toEqual('name');
+
+    pointer = mgr.generateSchemaPointer('creation/screens/aaaa');
+    expect(pointer.calculateKeyOrContainer()).toEqual('screens');
+
+    pointer = mgr.generateSchemaPointer('creation/entities/aaaa/fields/aabb/type');
+    expect(pointer.calculateKeyOrContainer()).toEqual('type');
+
+    pointer = mgr.generateSchemaPointer('creation/entities/aaaa/fields/aabb');
+    expect(pointer.calculateKeyOrContainer()).toEqual('fields');
+
+  });
 });
 
 class PluginTest implements DontCode.Plugin {
