@@ -141,4 +141,15 @@ export class DontCodeModelPointer {
     this.itemId = itemId;
   }
 
+  /**
+   * Find the name of the last element pointed by this pointer
+   * Usually it's the value of key (if it's a field) or the last container name (if it's an element in a container like entity/a/fields/a)
+   */
+  calculateKeyOrContainer (): string {
+    if (this.key) return this.key;
+    else {
+      return this.schemaPosition.substring(this.schemaPosition.lastIndexOf('/')+1);
+    }
+  }
+
 }
