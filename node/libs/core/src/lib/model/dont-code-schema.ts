@@ -152,4 +152,15 @@ export class DontCodeModelPointer {
     }
   }
 
+  /**
+   * Returns true if this pointer is pointing to a direct property of the given pointer
+   * @param pointer
+   * @return the property name or null
+   */
+  isPropertyOf (pointer:DontCodeModelPointer): string|null {
+    if (pointer.schemaPosition===this.containerSchemaPosition) {
+      return this.calculateKeyOrContainer();
+    }else return null;
+  }
+
 }
