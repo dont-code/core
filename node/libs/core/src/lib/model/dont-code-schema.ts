@@ -182,7 +182,10 @@ export class DontCodeModelPointer {
   getUnderPropertyOf (pointer:DontCodeModelPointer): string|null {
     if (this.schemaPosition.startsWith(pointer.schemaPosition)) {
       let keyPos=this.schemaPosition.indexOf('/', pointer.schemaPosition.length+1);
-      return this.schemaPosition.substring(pointer.schemaPosition.length+1, keyPos);
+      if( keyPos == -1)
+        return this.schemaPosition.substring(pointer.schemaPosition.length+1);
+      else
+        return this.schemaPosition.substring(pointer.schemaPosition.length+1, keyPos);
     }
     else return null;
   }
