@@ -27,11 +27,14 @@
     "publish-core": "npm publish dist/libs/core --access public"
   },
   "private": false,
-  "dependencies": {
-    "@nrwl/node": "10.4.4"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@nrwl/workspace": "10.4.4",
+    "@nrwl/web": "^10.4.4",
+    "@nrwl/node": "10.4.4",
+    "@nrwl/tao": "10.4.4",
+    "@nrwl/eslint-plugin-nx": "10.2.1",
+    "@nrwl/jest": "10.4.4",
     "rxjs": "6.6.3",
     "@types/node": "~12.12.6",
     "dotenv": "8.2.0",
@@ -40,12 +43,10 @@
     "eslint": "7.9.0",
     "typescript": "3.9.7",
     "prettier": "2.1.2",
-    "@nrwl/eslint-plugin-nx": "10.2.1",
     "@typescript-eslint/parser": "4.1.1",
     "@typescript-eslint/eslint-plugin": "4.1.1",
     "eslint-config-prettier": "6.11.0",
     "jest-preset-typescript": "^1.2.0",
-    "@nrwl/jest": "10.4.4",
     "jest": "26.2.2",
     "@types/jest": "26.0.8",
     "ts-jest": "26.4.0"
