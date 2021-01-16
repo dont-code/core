@@ -189,4 +189,20 @@ export class DontCodeModelPointer {
     }
     else return null;
   }
+
+  /**
+   * Returns a pointer pointing to a sub property of the current pointer
+   * @param subProp
+   */
+  subPropertyPointer (subProp:string): DontCodeModelPointer {
+    const newPointer = new DontCodeModelPointer(
+      this.position+'/'+subProp,
+      this.schemaPosition+'/'+subProp,
+      this.position,
+      this.schemaPosition,
+      subProp,
+      null
+    );
+    return newPointer;
+  }
 }

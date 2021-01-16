@@ -26,12 +26,14 @@
           }
         },
         "build": {
-          "builder": "@nrwl/node:package",
+          "builder": "@nrwl/web:package",
           "options": {
             "outputPath": "dist/libs/core",
             "tsConfig": "libs/core/tsconfig.lib.json",
-            "packageJson": "libs/core/package.json",
-            "main": "libs/core/src/index.ts",
+            "project": "libs/core/package.json",
+            "entryFile": "libs/core/src/index.ts",
+            "external": ["rxjs"],
+            "babelConfig": "@nrwl/web/babel",
             "assets": [
               {
                 "glob": "**/*",
