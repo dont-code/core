@@ -88,6 +88,15 @@ describe('Schema Manager', () => {
     let name = mgr.locateItem('creation/entities/name');
     expect(name).toBeDefined();
     expect(name.isArray()).toBeFalsy();
+
+    let fields = mgr.locateItem('creation/entities/fields');
+    expect(fields).toBeDefined();
+    expect(fields.isArray()).toBeTruthy();
+
+    let type = mgr.locateItem('creation/entities/fields/type');
+    expect(type).toBeDefined();
+    expect(type.isArray()).toBeFalsy();
+    expect(type.isEnum()).toBeTruthy();
   });
 
   it('should calculate the right key', () => {

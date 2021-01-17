@@ -191,6 +191,16 @@ export class DontCodeModelPointer {
   }
 
   /**
+   * Returns a pointer pointing to a sub Item of the current pointer.
+   * The current pointer must point to an array
+   * @param subItem
+   */
+  subItemOrPropertyPointer (subElement:string, isItem:boolean): DontCodeModelPointer {
+    if (isItem) return this.subPropertyPointer(subElement);
+    else return this.subItemPointer(subElement);
+  }
+
+    /**
    * Returns a pointer pointing to a sub property of the current pointer
    * @param subProp
    */
@@ -202,6 +212,24 @@ export class DontCodeModelPointer {
       this.schemaPosition,
       subProp,
       null
+    );
+    return newPointer;
+  }
+
+
+  /**
+   * Returns a pointer pointing to a sub Item of the current pointer.
+   * The current pointer must point to an array
+   * @param subItem
+   */
+  subItemPointer (subItem:string): DontCodeModelPointer {
+    const newPointer = new DontCodeModelPointer(
+      this.position+'/'+subItem,
+      this.schemaPosition+'/'+subItem,
+      this.position,
+      this.schemaPosition,
+      null,
+      subItem
     );
     return newPointer;
   }
