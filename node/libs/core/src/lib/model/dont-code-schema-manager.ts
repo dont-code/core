@@ -48,14 +48,17 @@ export class DontCodeSchemaManager {
    */
   locateItem (position:string): DontCodeSchemaItem {
     const split = position.split('/');
-    var cur:DontCodeSchemaItem = this.currentSchema;
+    let cur: DontCodeSchemaItem = this.currentSchema;
     split.forEach(value => {
       if( !cur) {
         console.error('Could not find subItem '+value+' of '+position);
         return cur;
       }
-      if( value && value.length>0 && value!=='#')
+      if( value && value.length>0 && value!=='#') {
+        if (cur.isReference())
+          cur=this.resolveReference(cur as DontCodeSchemaRef);
         cur = cur.getChild(value);
+      }
     });
 
     return cur;
