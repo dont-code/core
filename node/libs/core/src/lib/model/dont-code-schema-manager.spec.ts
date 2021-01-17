@@ -83,6 +83,12 @@ describe('Schema Manager', () => {
     });
 
   });
+  it('should locate items properly', () => {
+    const mgr = dtcde.getSchemaManager();
+    let name = mgr.locateItem('creation/entities/name');
+    expect(name).toBeDefined();
+    expect(name.isArray()).toBeFalsy();
+  });
 
   it('should calculate the right key', () => {
     const mgr = dtcde.getSchemaManager();

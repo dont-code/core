@@ -54,8 +54,11 @@ export class DontCodeSchemaManager {
         console.error('Could not find subItem '+value+' of '+position);
         return cur;
       }
-      if( value && value.length>0 && value!=='#')
+      if( value && value.length>0 && value!=='#') {
         cur = cur.getChild(value);
+        if (cur.isReference())
+          cur=this.resolveReference(cur as DontCodeSchemaRef);
+      }
     });
 
     return cur;
