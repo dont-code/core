@@ -8,4 +8,5 @@ export * from './lib/plugin/dont-code-plugin-manager';
 export * from './lib/plugin/command-provider-interface';
 export * from './lib/plugin/preview-handler';
 export * from './lib/plugin/plugin-module-interface';
+export * from './lib/test/dont-code-test-manager';
 export * from './lib/globals';
