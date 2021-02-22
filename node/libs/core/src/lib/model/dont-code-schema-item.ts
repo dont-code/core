@@ -1,4 +1,4 @@
-import { DontCode } from "../globals";
+import * as DontCode from "../globals";
 
 /**
  * Stores and manipulate the schema representing a dont-code application

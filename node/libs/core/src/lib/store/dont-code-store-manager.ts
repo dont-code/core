@@ -11,11 +11,11 @@ export class DontCodeStoreManager {
   }
 
 
-  get provider(): DontCodeStoreProvider {
+  getProvider(): DontCodeStoreProvider {
     return this._default;
   }
 
-  set provider(value: DontCodeStoreProvider) {
+  setProvider(value: DontCodeStoreProvider) {
     this._default = value;
   }
 
