@@ -1,6 +1,6 @@
 import { DontCodeSchemaItem, DontCodeSchemaRef, DontCodeSchemaRoot } from "./dont-code-schema-item";
 import { DontCodeModelPointer, DontCodeSchema } from "./dont-code-schema";
-import { DontCode } from "../globals";
+import {PluginConfig} from "../globals";
 
 export class DontCodeSchemaManager {
   protected currentSchema:DontCodeSchemaRoot;
@@ -22,7 +22,7 @@ export class DontCodeSchemaManager {
     return new DontCodeSchemaRoot(readSchema);
   }
 
-  registerChanges(config: DontCode.PluginConfig) {
+  registerChanges(config: PluginConfig) {
     const pluginFullName = config.plugin.id+'-v'+config.plugin.version;
     if (config['schema-updates']) {
       const updates = config['schema-updates'];

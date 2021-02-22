@@ -1,14 +1,11 @@
 import { DontCodeSchemaManager } from "../model/dont-code-schema-manager";
-import { DontCode } from "../globals";
+import * as DontCode from "../globals";
 import PluginConfig = DontCode.PluginConfig;
 import { DontCodePreviewManager } from "./preview/dont-code-preview-manager";
 
 export class DontCodePluginManager {
 
   protected plugins:Map<string,DontCode.Plugin>=new Map();
-
-  constructor() {
-  }
 
   registerPlugin(plugin: DontCode.Plugin, schemaManager: DontCodeSchemaManager, previewManager:DontCodePreviewManager ) {
     const config:PluginConfig = plugin.getConfiguration();

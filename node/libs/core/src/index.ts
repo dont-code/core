@@ -9,4 +9,6 @@ export * from './lib/plugin/command-provider-interface';
 export * from './lib/plugin/preview-handler';
 export * from './lib/plugin/plugin-module-interface';
 export * from './lib/test/dont-code-test-manager';
+export * from './lib/store/dont-code-store-manager';
+export * from './lib/store/dont-code-store-provider';
 export * from './lib/globals';
