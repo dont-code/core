@@ -7,9 +7,6 @@ export class DontCodePluginManager {
 
   protected plugins:Map<string,DontCode.Plugin>=new Map();
 
-  constructor() {
-  }
-
   registerPlugin(plugin: DontCode.Plugin, schemaManager: DontCodeSchemaManager, previewManager:DontCodePreviewManager ) {
     const config:PluginConfig = plugin.getConfiguration();
     const fullId = config.plugin.id+'-v'+config.plugin.version;

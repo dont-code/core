@@ -1,4 +1,4 @@
-import { DontCode } from "@dontcode/core";
+import * as DontCode from "@dontcode/core";
 import dtcde = DontCode.dtcde;
 import { DontCodeSchemaEnum, DontCodeSchemaObject, DontCodeSchemaRoot } from "./dont-code-schema-item";
 import PluginConfig = DontCode.PluginConfig;

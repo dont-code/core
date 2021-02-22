@@ -1,18 +1,21 @@
-import { DontCode } from "./globals";
-import { DontCodeSchemaManager } from "./model/dont-code-schema-manager";
-import { DontCodePluginManager } from "./plugin/dont-code-plugin-manager";
-import { DontCodePreviewManager } from "./plugin/preview/dont-code-preview-manager";
+import * as DontCode from "./globals";
+import {DontCodeSchemaManager} from "./model/dont-code-schema-manager";
+import {DontCodePluginManager} from "./plugin/dont-code-plugin-manager";
+import {DontCodePreviewManager} from "./plugin/preview/dont-code-preview-manager";
+import {DontCodeStoreManager} from "./store/dont-code-store-manager";
 
 export class DontCodeCore implements DontCode.Core {
 
     protected schemaManager:DontCodeSchemaManager;
     protected pluginManager:DontCodePluginManager;
     protected previewManager:DontCodePreviewManager;
+    protected storeManager:DontCodeStoreManager;
 
     constructor() {
       this.schemaManager = new DontCodeSchemaManager();
       this.pluginManager = new DontCodePluginManager();
       this.previewManager = new DontCodePreviewManager();
+      this.storeManager = new DontCodeStoreManager();
     }
 
     registerPlugin(plugin: DontCode.Plugin): void {
@@ -34,5 +37,8 @@ export class DontCodeCore implements DontCode.Core {
       return this.previewManager;
     }
 
+    getStoreManager (): DontCodeStoreManager {
+      return this.storeManager;
+    }
 }
 

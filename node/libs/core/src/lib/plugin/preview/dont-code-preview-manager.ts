@@ -1,5 +1,5 @@
-import { DontCode, DontCodeSchemaItem } from "@dontcode/core";
-import PreviewHandlerConfig = DontCode.PreviewHandlerConfig;
+import { DontCodeSchemaItem, PreviewHandlerConfig } from "@dontcode/core";
+import * as DontCode from "@dontcode/core";
 
 export class DontCodePreviewManager {
   protected handlersPerLocations: Map<string, PreviewHandlerConfig[] >

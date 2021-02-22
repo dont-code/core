@@ -1,16 +1,17 @@
 import { DontCodeCore } from "./dontcode";
 import { DontCodeSchemaManager } from "./model/dont-code-schema-manager";
 import { DontCodePreviewManager } from "./plugin/preview/dont-code-preview-manager";
-
-export namespace DontCode {
-  export var dtcde: DontCode.Core = new DontCodeCore();
+import { DontCodeStoreManager } from "./store/dont-code-store-manager";
 
   export interface Core {
     getSchemaUri (): string;
     registerPlugin (plugin:Plugin): void;
     getSchemaManager (): DontCodeSchemaManager;
     getPreviewManager (): DontCodePreviewManager;
+    getStoreManager (): DontCodeStoreManager;
   }
+
+  export const dtcde: Core = new DontCodeCore();
 
   export interface Plugin {
     getConfiguration (): PluginConfig ;
@@ -19,7 +20,7 @@ export namespace DontCode {
   /**
    * The typescript equivalent of the dont-code-schema.json
    */
-  export interface DontCodeSchema {
+  export interface DontCodeSchemaType {
     creation: {
       type: string,
       name: string,
@@ -81,6 +82,5 @@ export namespace DontCode {
       name
     }
   }
-}
 
 export {};
