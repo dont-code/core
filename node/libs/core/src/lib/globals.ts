@@ -2,11 +2,13 @@ import { DontCodeCore } from "./dontcode";
 import { DontCodeSchemaManager } from "./model/dont-code-schema-manager";
 import { DontCodePreviewManager } from "./plugin/preview/dont-code-preview-manager";
 import { DontCodeStoreManager } from "./store/dont-code-store-manager";
+import {DontCodeModelManager} from "./model/dont-code-model-manager";
 
   export interface Core {
     getSchemaUri (): string;
     registerPlugin (plugin:Plugin): void;
     getSchemaManager (): DontCodeSchemaManager;
+    getModelManager (): DontCodeModelManager;
     getPreviewManager (): DontCodePreviewManager;
     getStoreManager (): DontCodeStoreManager;
   }
