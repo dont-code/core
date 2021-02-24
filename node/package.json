@@ -27,28 +27,30 @@
     "publish-core": "npm publish dist/libs/core --access public"
   },
   "private": false,
-  "dependencies": {},
   "devDependencies": {
-    "@nrwl/workspace": "10.4.4",
-    "@nrwl/web": "^10.4.4",
-    "@nrwl/node": "10.4.4",
-    "@nrwl/tao": "10.4.4",
     "@nrwl/eslint-plugin-nx": "10.2.1",
     "@nrwl/jest": "10.4.4",
-    "rxjs": "6.6.3",
+    "@nrwl/node": "10.4.4",
+    "@nrwl/tao": "10.4.4",
+    "@nrwl/web": "^10.4.4",
+    "@nrwl/workspace": "10.4.4",
+    "@types/jest": "26.0.8",
     "@types/node": "~12.12.6",
+    "@typescript-eslint/eslint-plugin": "4.1.1",
+    "@typescript-eslint/parser": "4.1.1",
     "dotenv": "8.2.0",
+    "eslint": "7.9.0",
+    "eslint-config-prettier": "6.11.0",
+    "jest": "26.2.2",
+    "jest-preset-typescript": "^1.2.0",
+    "prettier": "2.1.2",
+    "rxjs": "6.6.3",
+    "ts-jest": "26.4.0",
     "ts-node": "~9.0.0",
     "tslint": "~6.1.3",
-    "eslint": "7.9.0",
-    "typescript": "3.9.7",
-    "prettier": "2.1.2",
-    "@typescript-eslint/parser": "4.1.1",
-    "@typescript-eslint/eslint-plugin": "4.1.1",
-    "eslint-config-prettier": "6.11.0",
-    "jest-preset-typescript": "^1.2.0",
-    "jest": "26.2.2",
-    "@types/jest": "26.0.8",
-    "ts-jest": "26.4.0"
+    "typescript": "3.9.7"
+  },
+  "optionalDependencies": {
+    "fsevents": "2.3.2"
   }
 }
