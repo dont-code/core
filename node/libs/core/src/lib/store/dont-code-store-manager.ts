@@ -19,7 +19,7 @@ export class DontCodeStoreManager {
     this._default = value;
   }
 
-  storeEntity (position:string, entity:any) : Promise<boolean> {
+  storeEntity (position:string, entity:any) : Promise<any> {
     return this._default.storeEntity(position, entity);
   }
 
