@@ -6,7 +6,7 @@ import {DontCodeStoreCriteria} from "./dont-code-store-manager";
  */
 export interface DontCodeStoreProvider {
 
-  storeEntity (position:string, entity:any) : Promise<boolean>;
+  storeEntity (position:string, entity:any) : Promise<any>;
 
   loadEntity (position:string, key: any) : Promise<any>;
 
