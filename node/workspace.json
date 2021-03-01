@@ -15,7 +15,10 @@
               "libs/core/tsconfig.lib.json",
               "libs/core/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!libs/core/**/*"]
+            "exclude": [
+              "**/node_modules/**",
+              "!libs/core/**/*"
+            ]
           }
         },
         "test": {
@@ -23,7 +26,10 @@
           "options": {
             "jestConfig": "libs/core/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": [
+            "coverage/libs/core"
+          ]
         },
         "build": {
           "builder": "@nrwl/web:package",
@@ -32,7 +38,9 @@
             "tsConfig": "libs/core/tsconfig.lib.json",
             "project": "libs/core/package.json",
             "entryFile": "libs/core/src/index.ts",
-            "external": ["rxjs"],
+            "external": [
+              "rxjs"
+            ],
             "babelConfig": "@nrwl/web/babel",
             "assets": [
               {
@@ -47,7 +55,10 @@
               }
             ],
             "srcRootForCompilationRoot": "libs\\core\\src"
-          }
+          },
+          "outputs": [
+            "{options.outputPath}"
+          ]
         }
       }
     }
