@@ -45,8 +45,9 @@ export class DontCodeSchemaManager {
   /**
    * Locate an item from it's position in the model
    * @param position
+   * @param resolveReference true to resolve the last reference instead of returning a @DontCodeSchemaRef
    */
-  locateItem (position:string): DontCodeSchemaItem {
+  locateItem (position:string, resolveReference?:boolean): DontCodeSchemaItem {
     const split = position.split('/');
     let cur: DontCodeSchemaItem = this.currentSchema;
     split.forEach(value => {
@@ -61,6 +62,9 @@ export class DontCodeSchemaManager {
       }
     });
 
+    if( (resolveReference) && (cur.isReference())) {
+      cur = this.resolveReference(cur as DontCodeSchemaRef);
+    }
     return cur;
   }
 
@@ -116,4 +120,17 @@ export class DontCodeSchemaManager {
     return ret;
   }
 
+  /**
+   * Returns the pointer to the subElement of the given pointer. It checked whether the given propOrItemName is a property or an item
+   * by looking at the schema
+   * @param parent
+   * @param propOrItemName
+   */
+  generateSubSchemaPointer (parent:DontCodeModelPointer, propOrItemName: string): DontCodeModelPointer {
+    if (this.locateItem(parent.schemaPosition, true).getChild(propOrItemName)) {
+      return parent.subPropertyPointer(propOrItemName);
+    } else {
+      return parent.subItemPointer(propOrItemName);
+    }
+  }
 }
