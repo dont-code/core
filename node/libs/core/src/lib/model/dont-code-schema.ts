@@ -225,9 +225,9 @@ export class DontCodeModelPointer {
   subItemPointer (subItem:string): DontCodeModelPointer {
     const newPointer = new DontCodeModelPointer(
       this.position+'/'+subItem,
-      this.schemaPosition+'/'+subItem,
-      this.position,
       this.schemaPosition,
+      this.position,
+      this.containerSchemaPosition,
       null,
       subItem
     );
