@@ -1,6 +1,26 @@
-# dontcode
-The dontcode components of dont-code app framework: See https://dont-code.github.io
+![image](https://dont-code.net/assets/logo-shadow-squared.png)
+## What is it for ?
 
-Dont-code application Framework makes developping a new application easy. Just by answering questions, dont-code app generates the application and shows you the result in realtime
+This library provides the core schemas and api that are used by all other components.
+It is part of the [dont-code](https://dont-code.net) no-code / low-code platform enabling you to quickly produce your very own application.
 
-Dont-code is composed of many components working together, this dontcode repository contains the common interfaces to make them understand each-other
+## What is it ?
+It's a typescript library with minimal dependencies (only rxjs) that is deployed to npm as  [@dontcode/core](https://www.npmjs.com/package/@dontcode/core).
+It runs on the browser.
+## How is it working ?
+
+## How to build it ?
+This project is a standard typescript project:
+
+1. Installing
+   `npm install`
+
+2. Running tests
+`npm run nx run core:test `
+
+3. Building 
+`npm run nx run core:build`
+
+## Thank you
+
+This project was generated using [Nx](https://nx.dev), visit the [Nx Documentation](https://nx.dev/angular) to learn more.
