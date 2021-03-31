@@ -16,19 +16,22 @@ export class DontCodeTestManager {
   public static createTestChange(containerSchema: string, containerItemId: string, schema: string, itemId: string, value: any, property?:string) {
     return DontCodeTestManager.createAnyChange(ChangeType.ADD, containerSchema, containerItemId, schema, itemId, value, property);
   }
+
   public static createAnyChange(type:ChangeType, containerSchema: string, containerItemId: string, schema: string, itemId: string, value: any, property?:string) {
     let calcContainerItemId=containerItemId?'/'+containerItemId:'';
     let calcItemId=itemId?'/'+itemId:'';
     let calcSchema=schema?'/'+schema:'';
     let calcProperty=property?'/'+property:'';
+    let calcPropertySchemaItem = (property)?calcSchema + calcItemId:'';
+    let calcPropertySchema = (property)?calcSchema:'';
 
     return new Change(type,
       containerSchema + calcContainerItemId + calcSchema + calcItemId + calcProperty,
       value, new DontCodeModelPointer(
         containerSchema + calcContainerItemId + calcSchema + calcItemId + calcProperty,
         containerSchema + calcSchema + calcProperty,
-        containerSchema + calcContainerItemId+ property?(calcSchema + calcItemId):'',
-        containerSchema + property?(calcSchema):'',
+        containerSchema + calcContainerItemId+ calcPropertySchemaItem,
+        containerSchema + calcPropertySchema,
         property?property:null,
         property?null:itemId
       ));
