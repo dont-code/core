@@ -12,4 +12,5 @@ export * from './lib/plugin/preview/dont-code-preview-manager';
 export * from './lib/test/dont-code-test-manager';
 export * from './lib/store/dont-code-store-manager';
 export * from './lib/store/dont-code-store-provider';
+export * from './lib/project/dont-code-project';
 export * from './lib/globals';
