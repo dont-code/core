@@ -1,4 +1,4 @@
-import {Change, DontCodeTestManager, dtcde} from "@dontcode/core";
+import {Change, ChangeType, DontCodeTestManager, dtcde} from "@dontcode/core";
 import {Subject} from "rxjs";
 
 describe('Model Manager', () => {
@@ -38,6 +38,7 @@ describe('Model Manager', () => {
         }
       }
     });
+    expect(service.findAtPosition('creation')).toHaveProperty('name', 'Test1');
     expect(service.findAtPosition('creation/entities/aaaa')).toHaveProperty('name', 'Entity1');
     expect(service.findAtPosition('creation/entities/aaaa/')).toHaveProperty('name', 'Entity1');
 
@@ -234,5 +235,16 @@ describe('Model Manager', () => {
     // from b,c,a to c,a,b
     source.next(DontCodeTestManager.createMoveChange("creation/entities/b", null, "creation", null, "entities", "b"));
     expect(Object.keys(service.getContent().creation.entities)).toStrictEqual(["c", "a", "b"]);
+  });
+
+  it('should reset content correctly from commands', () => {
+    const service = dtcde.getModelManager();
+    //service.resetContent({});
+    const source = new Subject<Change>();
+    service.receiveUpdatesFrom(source);
+    source.next(new Change(ChangeType.RESET, "creation",null));
+    expect(service.getContent()).toEqual({
+      creation: null
+    });
   });
 });
