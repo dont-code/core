@@ -92,6 +92,8 @@ export class DontCodeModelManager {
     let current = this.content;
 
     path.forEach(element => {
+      if( element==="")
+        return current;
       if (! current[element]) {
         if (create) {
           current[element]={};
