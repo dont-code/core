@@ -246,5 +246,15 @@ describe('Model Manager', () => {
     expect(service.getContent()).toEqual({
       creation: null
     });
+
+    const toReset={ type:'application', name:'Name'};
+    source.next(new Change(ChangeType.RESET, "creation", toReset ));
+    expect(service.getContent()).toEqual({
+      creation: toReset
+    });
+
+    const toRoot={ creation: {type:'application', name:'NameNew'}};
+    source.next(new Change(ChangeType.RESET, "/",toRoot ));
+    expect(service.getContent()).toEqual(toRoot);
   });
 });

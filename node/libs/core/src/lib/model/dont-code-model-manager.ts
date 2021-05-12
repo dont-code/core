@@ -34,7 +34,19 @@ export class DontCodeModelManager {
           case ChangeType.ADD:
           case ChangeType.UPDATE:
           case ChangeType.RESET:
-            parent[prop]=change.value;
+            if( prop==="") {
+                // We have to update (or reset) the existing parent itself, not a subproperty represented by prop
+              if( change.type===ChangeType.RESET) {
+                for (let subProp in parent) {
+                  delete parent[subProp];
+                }
+              }
+              for (let subProp in change.value) {
+                parent[subProp]=change.value[subProp];
+              }
+            } else {
+              parent[prop]=change.value;
+            }
             break;
           case ChangeType.DELETE:
             delete parent[prop];
