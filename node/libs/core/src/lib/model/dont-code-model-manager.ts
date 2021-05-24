@@ -1,6 +1,10 @@
 import {Change, ChangeType} from "../change/change";
 import {Subject} from "rxjs";
 
+/**
+ * Stores and constantly updates the json (as an instance of the DontCodeSchema) as it is being edited / modified through Change events
+ * It does not store the entity values but the description of entities, screens... as defined in the Editor
+ */
 export class DontCodeModelManager {
   protected content: any;
 
