@@ -43,6 +43,16 @@ describe('Schema Manager', () => {
       itemId:null
     });
 
+    pointer = mgr.generateSchemaPointer('/');
+    expect(pointer).toEqual({
+      position:'/',
+      schemaPosition:'/',
+      containerPosition:undefined,
+      containerSchemaPosition:undefined,
+      key:null,
+      itemId:null
+    });
+
     pointer = mgr.generateSchemaPointer('creation/screens/aaaa/name');
     expect(pointer).toEqual({
       position:'creation/screens/aaaa/name',
@@ -61,7 +71,6 @@ describe('Schema Manager', () => {
       key:null,
       itemId:'aaaa'
     });
-
     pointer = mgr.generateSchemaPointer('creation/entities/aaaa/fields/aabb/type');
     expect(pointer).toEqual({
       position:'creation/entities/aaaa/fields/aabb/type',
@@ -81,10 +90,15 @@ describe('Schema Manager', () => {
       key:null,
       itemId:'aabb'
     });
-
   });
+
   it('should locate items properly', () => {
     const mgr = dtcde.getSchemaManager();
+    let root = mgr.locateItem('/');
+    expect(root).toBeDefined();
+    expect(root.getParent()).toBeUndefined();
+    expect(root.isArray()).toBeFalsy();
+
     let name = mgr.locateItem('creation/entities/name');
     expect(name).toBeDefined();
     expect(name.isArray()).toBeFalsy();

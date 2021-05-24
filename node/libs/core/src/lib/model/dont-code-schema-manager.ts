@@ -72,18 +72,27 @@ export class DontCodeSchemaManager {
     return this.locateItem(ref.getReference());
   }
 
-  generateSchemaPointer (position: string) : DontCodeModelPointer {
-    const ret = new DontCodeModelPointer(position, null,null,null,null,null);
+  generateSchemaPointer (queriedPosition: string) : DontCodeModelPointer {
+    const ret = new DontCodeModelPointer(queriedPosition, null,null,null,null,null);
 
-    position = (position[0]==='/')?position.substring(1):position;
+    const position = (queriedPosition[0]==='/')?queriedPosition.substring(1):queriedPosition;
     const posElems = position.split('/');
+
+    if ((posElems.length===0) || (posElems[0].length===0))  {
+      // Managing the special case of asking for root
+      ret.position=queriedPosition;
+      ret.schemaPosition=queriedPosition;
+      ret.containerSchemaPosition=undefined;
+      ret.containerPosition=undefined;
+      return ret;
+    }
 
     let parentItem = this.currentSchema as DontCodeSchemaItem;
     let ignoreNext = false;
     posElems.forEach(element => {
       if (!ignoreNext) {
         let nextItem = parentItem.getChild(element);
-        if (nextItem!==null) {
+        if (nextItem) {
           ret.itemId=null;
           ret.containerSchemaPosition=ret.schemaPosition;
           if( ret.schemaPosition!==null)

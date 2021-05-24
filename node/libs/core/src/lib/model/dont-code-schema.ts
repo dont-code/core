@@ -206,8 +206,8 @@ export class DontCodeModelPointer {
    */
   subPropertyPointer (subProp:string): DontCodeModelPointer {
     const newPointer = new DontCodeModelPointer(
-      this.position+'/'+subProp,
-      this.schemaPosition+'/'+subProp,
+      (this.position==='/')?subProp:this.position+'/'+subProp,
+      (this.schemaPosition==='/')?subProp:this.schemaPosition+'/'+subProp,
       this.position,
       this.schemaPosition,
       subProp,
@@ -224,7 +224,7 @@ export class DontCodeModelPointer {
    */
   subItemPointer (subItem:string): DontCodeModelPointer {
     const newPointer = new DontCodeModelPointer(
-      this.position+'/'+subItem,
+      (this.position==='/')?subItem:this.position+'/'+subItem,
       this.schemaPosition,
       this.position,
       this.containerSchemaPosition,
