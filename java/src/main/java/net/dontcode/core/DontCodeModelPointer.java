@@ -16,6 +16,9 @@ public class DontCodeModelPointer {
 
     protected String itemId;
 
+    public DontCodeModelPointer() {
+    }
+
     public DontCodeModelPointer(String position, String schemaPosition, String containerPosition, String containerSchemaPosition) {
         this.position = position;
         this.schemaPosition = schemaPosition;

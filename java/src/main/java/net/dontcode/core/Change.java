@@ -15,6 +15,9 @@ public class Change {
         ADD ,UPDATE, DELETE, MOVE, RESET
     }
 
+    public Change() {
+    }
+
     public Change(ChangeType type, String position, Object value) {
         this.type = type;
         this.position = position;
