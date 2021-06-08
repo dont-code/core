@@ -12,7 +12,8 @@ public class Message {
 
     public static enum MessageType {
         INIT,
-        CHANGE
+        CHANGE,
+        ERROR
     }
 
     public Message(MessageType type, String sessionId) {
@@ -26,6 +27,12 @@ public class Message {
     }
 
     public Message() {
+    }
+
+    public Message(MessageType type, String sessionId, Change change) {
+        this.type = type;
+        this.sessionId = sessionId;
+        this.change = change;
     }
 
     public MessageType getType() {
