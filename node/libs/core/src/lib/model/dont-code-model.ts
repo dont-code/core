@@ -14,6 +14,10 @@ export class DontCodeModel {
   static readonly APP_FIELDS_NAME = DontCodeModel.APP_FIELDS+'/'+DontCodeModel.APP_FIELDS_NAME_NODE;
   static readonly APP_FIELDS_TYPE_NODE = 'type';
   static readonly APP_FIELDS_TYPE = DontCodeModel.APP_FIELDS+'/'+DontCodeModel.APP_FIELDS_TYPE_NODE;
+  static readonly APP_SHARING_NODE = 'sharing';
+  static readonly APP_SHARING= DontCodeModel.ROOT+'/'+DontCodeModel.APP_SHARING_NODE;
+  static readonly APP_SHARING_WITH_NODE = 'with';
+  static readonly APP_SHARING_WITH = DontCodeModel.APP_SHARING+'/'+DontCodeModel.APP_SHARING_WITH_NODE;
   static readonly APP_SCREENS_NODE = 'screens';
   static readonly APP_SCREENS = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SCREENS_NODE;
   static readonly APP_SCREENS_NAME_NODE = 'name';
