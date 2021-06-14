@@ -32,6 +32,9 @@ export class DontCodeSchema {
               "$ref": "#/definitions/entity"
             }
           },
+          "sharing": {
+            "$ref": "#/definitions/sharing"
+          },
           "screens": {
             "type": "array",
             "items": {
@@ -69,6 +72,17 @@ export class DontCodeSchema {
               "string",
               "number",
               "boolean"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "sharing": {
+        "type": "object",
+        "properties": {
+          "with": {
+            "enum": [
+              "no-one"
             ]
           }
         },
