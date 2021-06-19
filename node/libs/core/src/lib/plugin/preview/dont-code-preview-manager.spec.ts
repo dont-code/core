@@ -41,11 +41,15 @@ describe('Preview Manager', () => {
     const test = new DontCodeCore();
 
     test.registerPlugin(new ValuesPluginTest());
-    const valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+    let valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
     {
       key:"value1"
     });
-    expect (valuesConfig).toBeDefined();
+    expect (valuesConfig).toBeTruthy();
+    expect(valuesConfig.class.name).toBe("ValuesComponent");
+
+    valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values/key","value1");
+    expect (valuesConfig).toBeTruthy();
     expect(valuesConfig.class.name).toBe("ValuesComponent");
 
     const notFoundConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values");

@@ -1,5 +1,5 @@
-import { DontCodeSchemaItem, PreviewHandlerConfig } from "@dontcode/core";
 import * as DontCode from "@dontcode/core";
+import {PreviewHandlerConfig} from "@dontcode/core";
 
 export class DontCodePreviewManager {
   protected handlersPerLocations: Map<string, PreviewHandlerConfig[] >
@@ -46,7 +46,18 @@ export class DontCodePreviewManager {
             }
           }
         })
+      } else {
+      // Try to see if the parent position is handled
+      if ((typeof jsonContent === "string") && (position.lastIndexOf('/')>0)) {
+        if( position.endsWith('/'))  position = position.substring(0, position.length-1);
+
+        const key = position.substring(position.lastIndexOf('/')+1);
+        const parentValue = {};
+        parentValue[key] = jsonContent;
+        return this.retrieveHandlerConfig(position.substring(0,position.lastIndexOf('/')),
+          parentValue);
       }
+    }
     return ret;
   }
 }

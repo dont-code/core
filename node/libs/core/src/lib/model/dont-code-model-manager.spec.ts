@@ -44,6 +44,8 @@ describe('Model Manager', () => {
 
     expect(service.findAtPosition('creation/entities/aaaa/fields/aaab')).toHaveProperty('name', 'Field1');
     expect(service.findAtPosition('creation/screens')).toHaveProperty('aaae', {"name": "Screen1"});
+    expect(service.findAtPosition('creation/entities/ERROR')).toBeFalsy();
+
   });
 
   it('should update content correctly from commands', () => {
