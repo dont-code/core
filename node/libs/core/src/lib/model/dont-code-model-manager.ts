@@ -108,13 +108,14 @@ export class DontCodeModelManager {
     let current = this.content;
 
     path.forEach(element => {
-      if( element==="")
+      if( (element==="") || (current===null))
         return current;
       if (! current[element]) {
         if (create) {
           current[element]={};
         } else
         {
+          current=null;
           return null;
         }
       }
