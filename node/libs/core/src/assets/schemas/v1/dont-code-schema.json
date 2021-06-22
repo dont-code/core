@@ -61,7 +61,7 @@
         },
         "type": {
           "enum": [
-            "string",
+            "text",
             "number",
             "boolean"
           ]
