@@ -69,7 +69,7 @@ export class DontCodeSchema {
           },
           "type": {
             "enum": [
-              "string",
+              "text",
               "number",
               "boolean"
             ]
