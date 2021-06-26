@@ -75,8 +75,8 @@ export class DontCodeSchema {
               {
                 "Money": {
                   "enum": [
-                    "Dollars",
-                    "Euros",
+                    "Dollar",
+                    "Euro",
                     "Other"
                   ]
                 },
