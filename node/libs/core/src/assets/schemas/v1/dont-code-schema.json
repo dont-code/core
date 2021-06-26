@@ -67,8 +67,8 @@
             {
               "Money": {
                 "enum": [
-                  "Dollars",
-                  "Euros",
+                  "Dollar",
+                  "Euro",
                   "Other"
                   ]
               },
