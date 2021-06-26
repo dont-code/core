@@ -1,5 +1,5 @@
 import {
-  DontCodeSchemaEnum,
+  DontCodeSchemaEnum, DontCodeSchemaEnumValue,
   DontCodeSchemaObject,
   DontCodeSchemaRef,
   DontCodeSchemaValue
@@ -42,4 +42,100 @@ describe('Schema Item', () => {
     expect(appEntities.getReference()).toBeDefined();
 
   });
+
+  it ('should read and update enum', () => {
+    const item = new DontCodeSchemaEnum({
+      "enum": [
+        "value1", "value2"
+      ]
+    }, "root");
+    expect (item).toBeDefined();
+    expect (item.getValues()).toEqual([new DontCodeSchemaEnumValue("value1"), new DontCodeSchemaEnumValue("value2")]);
+
+    item.updateWith({
+      location: {
+        parent:''
+      },
+      add: {
+        enum: ["value3", "value4"]
+      }
+    });
+    expect (item.getValues()).toEqual([new DontCodeSchemaEnumValue("value1"), new DontCodeSchemaEnumValue("value2")
+      , new DontCodeSchemaEnumValue("value3"), new DontCodeSchemaEnumValue("value4")]);
+
+    item.updateWith({
+      location: {
+        parent:''
+      },
+      add: {
+        enum: [ "value5"]
+      },
+      props: {
+      "entity": {
+        "type": "string",
+          "format": "#/creation/entities"
+      }
+    },
+    "replace": true
+
+  });
+    expect (item.getValues()).toEqual([new DontCodeSchemaEnumValue("value1"), new DontCodeSchemaEnumValue("value2")
+      , new DontCodeSchemaEnumValue("value3"), new DontCodeSchemaEnumValue("value4"), new DontCodeSchemaEnumValue("value5")]);
+
+    expect (item.getProperties("value3")).toBeFalsy();
+    expect (item.getProperties("value5")).toBeTruthy();
+  });
+
+  it ('should read enum hierarchy', () => {
+    const item = new DontCodeSchemaEnum({
+      "enum": [
+        "Text",
+        "Number",
+        "Boolean",
+        {
+          "Money": {
+            "enum": [
+              "Dollars",
+              "Euros",
+              "Other"
+            ]
+          }
+        }
+      ]
+    }, "root");
+    expect (item).toBeDefined();
+    expect (item.getValues()).toHaveLength(4);
+    const moneyValue = item.getValues()[3];
+    expect(moneyValue.getValue()).toEqual("Money");
+    expect(moneyValue.getChildren()).toEqual ([new DontCodeSchemaEnumValue('Dollars'), new DontCodeSchemaEnumValue('Euros'), new DontCodeSchemaEnumValue('Other')]);
+
+    item.updateWith({
+      location: {
+          parent:''
+        },
+      add: {
+        enum: [{
+          "Web": {
+            "enum": [
+              "Website (url)",
+              "Image"
+            ]
+          }
+        }]
+      },
+      props: {
+        "entity": {
+          "type": "string",
+            "format": "#/creation/entities"
+        }
+      },
+      "replace": false
+      });
+
+    const webValue = item.getValues()[4];
+    expect(webValue.getValue()).toEqual("Web");
+    expect(webValue.getChildren()).toEqual ([new DontCodeSchemaEnumValue('Website (url)'), new DontCodeSchemaEnumValue('Image')]);
+    expect (item.getProperties("Image")).toBeTruthy();
+  });
+
 });
