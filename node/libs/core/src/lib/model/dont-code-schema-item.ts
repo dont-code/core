@@ -154,7 +154,6 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     return false;
   }
 
-
   getRelativeId (): string {
     return this.relativeId;
   }
@@ -164,6 +163,9 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
 
 }
 
+/**
+ * Handles an item defined as an object consisting of a name and a set of named properties)
+ */
 export class DontCodeSchemaObject extends AbstractSchemaItem {
   protected children = new Map<string, DontCodeSchemaItem>();
 
@@ -256,6 +258,9 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
 
 }
 
+/**
+ * The root item of the model is a specialized object
+ */
 export class DontCodeSchemaRoot extends DontCodeSchemaObject{
   constructor(json?:any) {
     super(json, null);
@@ -292,13 +297,16 @@ export class DontCodeSchemaRoot extends DontCodeSchemaObject{
   }
 }
 
+/**
+ * Supports selection of a value amongst a list (or a hierarchical tree)
+ */
 export class DontCodeSchemaEnum extends AbstractSchemaItem {
-  protected values = new Array<string>();
+  protected values = new Array<DontCodeSchemaEnumValue>();
   protected properties = new Map<string, DontCodeSchemaProperty>();
 
   constructor(json:any, relativeId:string, parent?:DontCodeSchemaItem) {
     super(parent, relativeId);
-    this.values.push(...json["enum"]);
+    this.updateValues (json["enum"], this.values);
   }
 
   isEnum(): boolean {
@@ -321,21 +329,45 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
     return false;
   }
 
-  getValues (): Array<string> {
+  getValues (): Array<DontCodeSchemaEnumValue> {
     return this.values;
   }
 
   updateWith(update: DontCode.ChangeConfig) {
     super.updateWith(update);
-    const toAdd = update.add['enum'] as Array<string>;
-    toAdd.forEach(value => {
-      if( this.values.indexOf(value)==-1)
-        this.values.push(value);
-      if( update.props) {
-        const props=new DontCodeSchemaProperty(update, this.relativeId+'='+value,this);
-        if( !props.isEmpty ())
-          this.properties.set(value, props );
-      }
+    this.updateValues(update.add['enum'], this.values, update);
+  }
+
+  updateValues (values:Array<any>, destination:Array<DontCodeSchemaEnumValue>, from?:DontCode.ChangeConfig):void  {
+    values.forEach(value => {
+      if( typeof value === 'string') {
+        if (!destination.find(dest => {
+          return dest.getValue()===value;
+        })) {
+          destination.push(new DontCodeSchemaEnumValue(value));
+        }
+        if( from?.props) {
+              const props = new DontCodeSchemaProperty(from, this.relativeId + '=' + value, this);
+              if (!props.isEmpty())
+                this.properties.set(value, props);
+            }
+
+        } else {
+          for (let subKey in value) {
+            if( value.hasOwnProperty(subKey)) {
+              let enumValue= destination.find(dest => {
+                return dest.getValue() ===value;
+              });
+              if( !enumValue) {
+                enumValue = new DontCodeSchemaEnumValue(subKey);
+                destination.push(enumValue);
+              }
+              if (!enumValue.getChildren())  enumValue.setChildren(Array());
+              this.updateValues(value[subKey].enum, enumValue.getChildren(), from);
+            }
+          }
+        }
+
     });
   }
 
@@ -349,6 +381,51 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
 
 }
 
+/**
+ * A Simple class to store possible hierarchies of values, and separate label from the model value
+ */
+export class DontCodeSchemaEnumValue {
+  private _label:string;
+  private _value:string;
+  private _children:Array<DontCodeSchemaEnumValue>;
+
+
+  constructor(value: string, label?: string) {
+    this._value = value;
+    if(label) {
+      this._label=label;
+    }
+  }
+
+  getLabel(): string {
+    if( this._label) return this._label;
+    else return this._value;
+  }
+
+  setLabel(value: string) {
+    this._label = value;
+  }
+
+  getValue(): string {
+    return this._value;
+  }
+
+  setValue(value: string) {
+    this._value = value;
+  }
+
+  getChildren(): Array<DontCodeSchemaEnumValue> {
+    return this._children;
+  }
+
+  setChildren(value: Array<DontCodeSchemaEnumValue>) {
+    this._children = value;
+  }
+}
+
+/**
+ * The model item is just a value that the user can change
+ */
 export class DontCodeSchemaValue extends AbstractSchemaItem {
   protected type:string;
 
@@ -367,6 +444,9 @@ export class DontCodeSchemaValue extends AbstractSchemaItem {
 
 }
 
+/**
+ * This item is a reference (in json-schema term) to a definition elsewhere in the schema.
+ */
 export class DontCodeSchemaRef extends AbstractSchemaItem {
   protected ref:string;
   protected resolvedRef=new Map<string, DontCodeSchemaItem>();
@@ -394,6 +474,9 @@ export class DontCodeSchemaRef extends AbstractSchemaItem {
   }
 }
 
+/**
+ * An Object Item in the schema can define alternative subproperties that are used depending on some values.
+ */
 export class DontCodeSchemaProperty extends DontCodeSchemaObject{
   protected replace:boolean;
   protected posAfter:string;

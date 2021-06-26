@@ -2,6 +2,7 @@ import * as DontCode from "@dontcode/core";
 import dtcde = DontCode.dtcde;
 import { DontCodeSchemaEnum, DontCodeSchemaObject, DontCodeSchemaRoot } from "./dont-code-schema-item";
 import PluginConfig = DontCode.PluginConfig;
+import {DontCodeSchemaEnumValue} from "@dontcode/core";
 
 describe('Schema Manager', () => {
   it('should work', () => {
@@ -20,8 +21,8 @@ describe('Schema Manager', () => {
     expect(screen.getChild('type')).toBeDefined();
     const screenType = screen.getChild('type') as DontCodeSchemaEnum;
     expect(screenType.getValues().length).toEqual(2);
-    expect(screenType.getValues()).toContain ('list');
-    expect(screenType.getValues()).toContain ('freeform');
+    expect(screenType.getValues()).toContainEqual (new DontCodeSchemaEnumValue('list'));
+    expect(screenType.getValues()).toContainEqual (new DontCodeSchemaEnumValue('freeform'));
     expect(screenType.getProperties('list')).toBeDefined();
     const listProps =  screenType.getProperties('list');
     expect(listProps.isEmpty()).toBeFalsy();

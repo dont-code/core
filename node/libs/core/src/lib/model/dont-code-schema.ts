@@ -69,9 +69,24 @@ export class DontCodeSchema {
           },
           "type": {
             "enum": [
-              "text",
-              "number",
-              "boolean"
+              "Text",
+              "Number",
+              "Boolean",
+              {
+                "Money": {
+                  "enum": [
+                    "Dollars",
+                    "Euros",
+                    "Other"
+                  ]
+                },
+                "Web": {
+                  "enum": [
+                    "Website (url)",
+                    "Image"
+                  ]
+                }
+              }
             ]
           }
         },
