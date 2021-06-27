@@ -20,7 +20,7 @@ export class DontCodeSchema {
         "properties": {
           "type": {
             "enum": [
-              "application"
+              "Application"
             ]
           },
           "name": {
@@ -73,6 +73,15 @@ export class DontCodeSchema {
               "Number",
               "Boolean",
               {
+                "Time": {
+                  "enum": [
+                    "Date",
+                    "Date & Time",
+                    "Time"
+                  ]
+                }
+              },
+              {
                 "Money": {
                   "enum": [
                     "Dollar",
@@ -97,7 +106,7 @@ export class DontCodeSchema {
         "properties": {
           "with": {
             "enum": [
-              "no-one"
+              "No-one"
             ]
           }
         },
@@ -111,8 +120,8 @@ export class DontCodeSchema {
           },
           "layout": {
             "enum": [
-              "flow",
-              "grid"
+              "Flow",
+              "Grid"
             ]
           },
           "components": {
@@ -129,9 +138,9 @@ export class DontCodeSchema {
         "properties": {
           "type": {
             "enum": [
-              "list",
-              "edit",
-              "view"
+              "List",
+              "Edit",
+              "View"
             ]
           },
           "entity": {

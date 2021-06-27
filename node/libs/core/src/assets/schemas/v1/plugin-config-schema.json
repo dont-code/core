@@ -65,7 +65,7 @@
         "location": {
           "$ref": "#/definitions/change-location"
         },
-        "add": {
+        "update": {
           "$ref": "#/definitions/additem"
         },
         "props": {
