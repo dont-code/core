@@ -212,7 +212,7 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
   upsertWith(change: DontCode.ChangeConfig): boolean {
     let exists = this.getChild(change.location.id);
     if( !exists) {
-      exists = AbstractSchemaItem.generateItem(change.add, change.location.id, this);
+      exists = AbstractSchemaItem.generateItem(change.update, change.location.id, this);
       if( change.location.after) {
         let newMap = new Map<string, DontCodeSchemaItem> ();
         this.children.forEach((value, key) => {
@@ -335,7 +335,7 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
 
   updateWith(update: DontCode.ChangeConfig) {
     super.updateWith(update);
-    this.updateValues(update.add['enum'], this.values, update);
+    this.updateValues(update.update['enum'], this.values, update);
   }
 
   updateValues (values:Array<any>, destination:Array<DontCodeSchemaEnumValue>, from?:DontCode.ChangeConfig):void  {

@@ -12,7 +12,7 @@
       "properties": {
         "type": {
           "enum": [
-            "application"
+            "Application"
           ]
         },
         "name": {
@@ -65,10 +65,19 @@
             "Number",
             "Boolean",
             {
+              "Time": {
+                "enum": [
+                  "Date",
+                  "Date & Time",
+                  "Time"
+                ]
+              }
+            },
+            {
               "Money": {
                 "enum": [
-                  "Dollars",
-                  "Euros",
+                  "Dollar",
+                  "Euro",
                   "Other"
                   ]
               },
@@ -89,7 +98,7 @@
       "properties": {
         "with": {
           "enum": [
-            "no-one"
+            "No-one"
           ]
         }
       },
@@ -103,8 +112,8 @@
         },
         "layout": {
           "enum": [
-            "flow",
-            "grid"
+            "Flow",
+            "Grid"
           ]
         },
         "components": {
@@ -121,9 +130,9 @@
       "properties": {
         "type": {
           "enum": [
-            "list",
-            "edit",
-            "view"
+            "List",
+            "Edit",
+            "View"
           ]
         },
         "entity": {

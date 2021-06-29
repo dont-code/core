@@ -56,7 +56,7 @@ describe('Schema Item', () => {
       location: {
         parent:''
       },
-      add: {
+      update: {
         enum: ["value3", "value4"]
       }
     });
@@ -67,7 +67,7 @@ describe('Schema Item', () => {
       location: {
         parent:''
       },
-      add: {
+      update: {
         enum: [ "value5"]
       },
       props: {
@@ -113,7 +113,7 @@ describe('Schema Item', () => {
       location: {
           parent:''
         },
-      add: {
+      update: {
         enum: [{
           "Web": {
             "enum": [

@@ -148,7 +148,7 @@ class PluginTest implements DontCode.Plugin {
             "id": "type",
             "after": "name"
           },
-          "add": {
+          "update": {
             "enum": [
               "list"
             ]
@@ -166,7 +166,7 @@ class PluginTest implements DontCode.Plugin {
             "id": "type",
             "after": "name"
           },
-          "add": {
+          "update": {
             "enum": [
               "freeform"
             ]

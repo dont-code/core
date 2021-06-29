@@ -67,7 +67,7 @@ import {DontCodeModelManager} from "./model/dont-code-model-manager";
       id?,
       after?
     },
-    add?,
+    update?,
     props?,
     replace?:boolean
 
