@@ -78,7 +78,7 @@
                 "enum": [
                   "Dollar",
                   "Euro",
-                  "Other"
+                  "Other currency"
                   ]
               },
               "Web": {

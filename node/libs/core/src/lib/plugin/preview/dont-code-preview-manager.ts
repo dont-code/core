@@ -32,7 +32,7 @@ export class DontCodePreviewManager {
             if (jsonContent) {
               const jsonValue=jsonContent[configuration.location.id] as string;
 
-              (configuration.location.values as Array<string>).forEach (targetValue => {
+              this.extractValuesAsArray(configuration.location.values).forEach (targetValue => {
                 if( targetValue === jsonValue) {
                   ret = configuration;
                   return;
@@ -59,5 +59,30 @@ export class DontCodePreviewManager {
       }
     }
     return ret;
+  }
+
+  private extractValuesAsArray(values: any): Array<string> {
+    const ret = new Array<string>();
+    this.extractValuesToArray(values, ret);
+    return ret;
+  }
+
+  private extractValuesToArray(values: any, res: Array<string>) {
+    if( Array.isArray(values) ) {
+      (values as Array<string>).forEach(value => {
+        if( typeof value === 'string') {
+          res.push(value);
+        } else {
+          this.extractValuesToArray(value, res);
+        }
+      })
+    }
+    else {
+      for (const key in values) {
+        if (values.hasOwnProperty(key)) {
+          this.extractValuesToArray(values[key], res);
+        }
+      }
+    }
   }
 }
