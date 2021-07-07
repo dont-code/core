@@ -1,4 +1,4 @@
-import { DontCodeCore } from "../../dontcode";
+import {DontCodeCore} from "../../dontcode";
 import * as DontCode from "../../globals";
 import PluginConfig = DontCode.PluginConfig;
 
@@ -94,6 +94,34 @@ describe('Preview Manager', () => {
     });
     expect (valuesConfig).toBeDefined();
     expect(valuesConfig.class.name).toBe("OtherValuesComponent");
+
+  });
+
+  it('should manage subtype of fields', () => {
+    const test = new DontCodeCore();
+
+    test.registerPlugin(new ValuesPluginTest());
+    test.registerPlugin(new SubTypeValuesPluginTest());
+    let valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+      {
+        key:"group1Value2"
+      });
+    expect (valuesConfig).toBeDefined();
+    expect(valuesConfig.class.name).toBe("SubTypeValuesComponent");
+
+    valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+      {
+        key:"value1"
+      });
+    expect (valuesConfig).toBeDefined();
+    expect(valuesConfig.class.name).toBe("ValuesComponent");
+
+    valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
+      {
+        key:"group2Value1"
+      });
+    expect (valuesConfig).toBeDefined();
+    expect(valuesConfig.class.name).toBe("SubTypeValuesComponent");
 
   });
 
@@ -205,8 +233,48 @@ class OtherValuesPluginTest implements DontCode.Plugin {
 
     }
   }
+}
+
+class SubTypeValuesPluginTest implements DontCode.Plugin {
+  getConfiguration(): PluginConfig {
+    return {
+      "plugin": {
+        "id": "SubTypeValuesPlugin",
+        "display-name": "Dont code test Plugin with subTypes ",
+        "version": "1.0.0"
+      },
+      "preview-handlers": [
+        {
+          "location": {
+            "parent": "creation/values",
+            "id":"key",
+            "values":[{
+              "group1": {
+                "enum": [
+                  "group1Value1",
+                  "group1Value2"
+                ]
+              },
+              "group2": {
+                "enum": [
+                  "group2Value1",
+                  "group2Value2"
+                ]
+              }
+            }]
+          },
+          "class": {
+            "name":"SubTypeValuesComponent",
+            "source":"subtypevalue"
+          }
+        }
+      ]
+
+    }
+  }
 
 }
+
 class NoValuesPluginTest implements DontCode.Plugin {
   getConfiguration(): PluginConfig {
     return {
