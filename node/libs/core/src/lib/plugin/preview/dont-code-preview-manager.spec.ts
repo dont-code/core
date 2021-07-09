@@ -52,8 +52,12 @@ describe('Preview Manager', () => {
     expect (valuesConfig).toBeTruthy();
     expect(valuesConfig.class.name).toBe("ValuesComponent");
 
-    const notFoundConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values");
-    expect (notFoundConfig).toBeNull();
+    try {
+     test.getPreviewManager().retrieveHandlerConfig("creation/values");
+      expect (true).toBeFalsy();
+    } catch (err) {
+      // Throw an error if it cannot find a handler because it needs to decide based on a value
+    }
   });
 
   it('should find the right plugin depending on values', () => {
