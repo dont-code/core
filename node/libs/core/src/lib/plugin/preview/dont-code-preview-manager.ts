@@ -25,6 +25,7 @@ export class DontCodePreviewManager {
   retrieveHandlerConfig (position: string, jsonContent?: any): PreviewHandlerConfig {
     const found = this.handlersPerLocations.get(position);
     let ret:PreviewHandlerConfig = null;
+    let contentNeeded=false;
 
     if (found) {
         found.forEach (configuration => {
@@ -38,6 +39,9 @@ export class DontCodePreviewManager {
                   return;
                 }
               })
+            } else {
+              // We found one handler that needs the jsonContent
+              contentNeeded=true;
             }
           } else {
             // We have found a default handler, we keep it but keep on looking for a better one
@@ -57,6 +61,11 @@ export class DontCodePreviewManager {
         return this.retrieveHandlerConfig(position.substring(0,position.lastIndexOf('/')),
           parentValue);
       }
+    }
+
+    if( (ret===null) && (contentNeeded)) {
+        // We had one potential handler but couldn't select it as the jsonContent is not provided
+      throw new Error ("Content must be provided in order to select an handler for position "+position);
     }
     return ret;
   }
