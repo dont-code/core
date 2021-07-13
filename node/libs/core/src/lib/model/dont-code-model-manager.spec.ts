@@ -193,7 +193,7 @@ describe('Model Manager', () => {
         }
       }
     });
-    source.next(DontCodeTestManager.createDeleteChange("creation", null, "entities", null, null));
+    source.next(DontCodeTestManager.createDeleteChange("creation", null, "entities", null));
     expect(service.getContent()).toEqual({
       creation: {
         name: "TestName"

@@ -2,7 +2,7 @@ import * as DontCode from "@dontcode/core";
 import {PreviewHandlerConfig} from "@dontcode/core";
 
 export class DontCodePreviewManager {
-  protected handlersPerLocations: Map<string, PreviewHandlerConfig[] >
+  protected handlersPerLocations: Map<string, PreviewHandlerConfig[] >;
 
 
   constructor() {
@@ -13,7 +13,7 @@ export class DontCodePreviewManager {
     if (config["preview-handlers"]) {
       config["preview-handlers"].forEach(value => {
         if (this.handlersPerLocations.has(value.location.parent)) {
-          this.handlersPerLocations.get(value.location.parent).push(value);
+          this.handlersPerLocations.get(value.location.parent)?.push(value);
         }
         else {
           this.handlersPerLocations.set(value.location.parent, [value]);
@@ -22,9 +22,9 @@ export class DontCodePreviewManager {
     }
   }
 
-  retrieveHandlerConfig (position: string, jsonContent?: any): PreviewHandlerConfig {
+  retrieveHandlerConfig (position: string, jsonContent?: any): PreviewHandlerConfig|null {
     const found = this.handlersPerLocations.get(position);
-    let ret:PreviewHandlerConfig = null;
+    let ret:PreviewHandlerConfig|null = null;
     let contentNeeded=false;
 
     if (found) {
@@ -56,7 +56,7 @@ export class DontCodePreviewManager {
         if( position.endsWith('/'))  position = position.substring(0, position.length-1);
 
         const key = position.substring(position.lastIndexOf('/')+1);
-        const parentValue = {};
+        const parentValue:{[index: string]:string} = {};
         parentValue[key] = jsonContent;
         return this.retrieveHandlerConfig(position.substring(0,position.lastIndexOf('/')),
           parentValue);

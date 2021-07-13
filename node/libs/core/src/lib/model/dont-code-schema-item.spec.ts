@@ -54,7 +54,8 @@ describe('Schema Item', () => {
 
     item.updateWith({
       location: {
-        parent:''
+        parent:'',
+        id:''
       },
       update: {
         enum: ["value3", "value4"]
@@ -65,7 +66,8 @@ describe('Schema Item', () => {
 
     item.updateWith({
       location: {
-        parent:''
+        parent:'',
+        id:''
       },
       update: {
         enum: [ "value5"]
@@ -111,7 +113,8 @@ describe('Schema Item', () => {
 
     item.updateWith({
       location: {
-          parent:''
+          parent:'',
+          id:''
         },
       update: {
         enum: [{

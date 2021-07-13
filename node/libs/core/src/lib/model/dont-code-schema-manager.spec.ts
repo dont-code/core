@@ -25,10 +25,10 @@ describe('Schema Manager', () => {
     expect(screenType.getValues()).toContainEqual (new DontCodeSchemaEnumValue('freeform'));
     expect(screenType.getProperties('list')).toBeDefined();
     const listProps =  screenType.getProperties('list');
-    expect(listProps.isEmpty()).toBeFalsy();
-    expect(listProps.isReplace()).toBeTruthy();
-    expect(listProps.getPosAfter()).toBeDefined();
-    expect(listProps.getChild('entity')).toBeDefined();
+    expect(listProps?.isEmpty()).toBeFalsy();
+    expect(listProps?.isReplace()).toBeTruthy();
+    expect(listProps?.getPosAfter()).toBeDefined();
+    expect(listProps?.getChild('entity')).toBeDefined();
 
   });
 

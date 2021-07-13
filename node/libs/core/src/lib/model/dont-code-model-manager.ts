@@ -56,25 +56,29 @@ export class DontCodeModelManager {
             delete parent[prop];
             break;
           case ChangeType.MOVE: {
-            const oldParentPos = change.oldPosition.substring(0, change.oldPosition.lastIndexOf('/'));
-            const oldProp = change.oldPosition.substring(change.oldPosition.lastIndexOf('/') + 1);
-            const oldParent = this.findAtPosition(oldParentPos, false);
+            if (change.oldPosition) {
+              const oldParentPos = change.oldPosition.substring(0, change.oldPosition.lastIndexOf('/'));
+              const oldProp = change.oldPosition.substring(change.oldPosition.lastIndexOf('/') + 1);
+              const oldParent = this.findAtPosition(oldParentPos, false);
 
-            // If needed, ensure the order of property is correct in target
-            const val = oldParent[oldProp];
-            delete oldParent[oldProp];
-            if (change.beforeKey) {
-              const keys = Object.keys(parent);
-              for (const key of keys) {
-                const copy = parent[key];
-                delete parent[key];
-                if (key === change.beforeKey) {
-                  parent[prop] = val;
+              // If needed, ensure the order of property is correct in target
+              const val = oldParent[oldProp];
+              delete oldParent[oldProp];
+              if (change.beforeKey) {
+                const keys = Object.keys(parent);
+                for (const key of keys) {
+                  const copy = parent[key];
+                  delete parent[key];
+                  if (key === change.beforeKey) {
+                    parent[prop] = val;
+                  }
+                  parent[key] = copy;
                 }
-                parent[key] = copy;
+              } else {
+                parent[prop] = val;
               }
             } else {
-              parent[prop] = val;
+              throw Error ('We need oldPosition to process MOVE change '+change.position);
             }
             break;
           }

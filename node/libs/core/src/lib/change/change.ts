@@ -5,8 +5,8 @@ export class Change {
   position: string;
   value: any;
   pointer?:DontCodeModelPointer;
-  oldPosition: string;
-  beforeKey: string;
+  oldPosition?: string;
+  beforeKey?: string;
 
   constructor(type: ChangeType, position: string, value: any, pointer?:DontCodeModelPointer, beforeKey?:string, oldPosition?:string) {
     this.type = type;
