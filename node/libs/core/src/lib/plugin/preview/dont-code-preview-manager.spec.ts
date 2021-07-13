@@ -15,7 +15,7 @@ describe('Preview Manager', () => {
     test.registerPlugin(new SimplePluginTest());
     const simpleConfig = test.getPreviewManager().retrieveHandlerConfig("creation/simple");
     expect (simpleConfig).toBeDefined();
-    expect(simpleConfig.class.name).toBe("SimpleComponent");
+    expect(simpleConfig?.class.name).toBe("SimpleComponent");
   });
 
   it('should manage basic plugin overriding configuration', () => {
@@ -26,7 +26,7 @@ describe('Preview Manager', () => {
       key:"value1"
     });
     expect (entityConfig).toBeDefined();
-    expect(entityConfig.class.name).toBe("BasicComponent");
+    expect(entityConfig?.class.name).toBe("BasicComponent");
 
     // Now it should select ValuePluginTest as it provides narrower criteria
     test.registerPlugin(new ValuesPluginTest());
@@ -34,7 +34,7 @@ describe('Preview Manager', () => {
       key:"value1"
     });
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("ValuesComponent");
+    expect(valuesConfig?.class.name).toBe("ValuesComponent");
   });
 
   it('should manage plugin configurations with values', () => {
@@ -46,11 +46,11 @@ describe('Preview Manager', () => {
       key:"value1"
     });
     expect (valuesConfig).toBeTruthy();
-    expect(valuesConfig.class.name).toBe("ValuesComponent");
+    expect(valuesConfig?.class.name).toBe("ValuesComponent");
 
     valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values/key","value1");
     expect (valuesConfig).toBeTruthy();
-    expect(valuesConfig.class.name).toBe("ValuesComponent");
+    expect(valuesConfig?.class.name).toBe("ValuesComponent");
 
     try {
      test.getPreviewManager().retrieveHandlerConfig("creation/values");
@@ -70,14 +70,14 @@ describe('Preview Manager', () => {
       key:"value1"
     });
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("ValuesComponent");
+    expect(valuesConfig?.class.name).toBe("ValuesComponent");
 
     valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
     {
       key:"othervalue2"
     });
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("OtherValuesComponent");
+    expect(valuesConfig?.class.name).toBe("OtherValuesComponent");
 
   });
 
@@ -90,14 +90,14 @@ describe('Preview Manager', () => {
 
     let valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values", null);
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("NoValuesComponent");
+    expect(valuesConfig?.class.name).toBe("NoValuesComponent");
 
     valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
     {
       key:"othervalue1"
     });
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("OtherValuesComponent");
+    expect(valuesConfig?.class.name).toBe("OtherValuesComponent");
 
   });
 
@@ -111,21 +111,21 @@ describe('Preview Manager', () => {
         key:"group1Value2"
       });
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("SubTypeValuesComponent");
+    expect(valuesConfig?.class.name).toBe("SubTypeValuesComponent");
 
     valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
       {
         key:"value1"
       });
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("ValuesComponent");
+    expect(valuesConfig?.class.name).toBe("ValuesComponent");
 
     valuesConfig = test.getPreviewManager().retrieveHandlerConfig("creation/values",
       {
         key:"group2Value1"
       });
     expect (valuesConfig).toBeDefined();
-    expect(valuesConfig.class.name).toBe("SubTypeValuesComponent");
+    expect(valuesConfig?.class.name).toBe("SubTypeValuesComponent");
 
   });
 
@@ -167,7 +167,8 @@ class BasicPluginTest implements DontCode.Plugin {
       "preview-handlers": [
         {
           "location": {
-            "parent": "creation/values"
+            "parent": "creation/values",
+            "id":""
           },
           "class": {
             "name": "BasicComponent",

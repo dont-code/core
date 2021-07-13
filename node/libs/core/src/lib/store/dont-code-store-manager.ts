@@ -1,9 +1,9 @@
-import { Observable } from 'rxjs';
+import {Observable} from 'rxjs';
 import {DontCodeStoreProvider} from "./dont-code-store-provider";
 
 export class DontCodeStoreManager {
 
-  private _default: DontCodeStoreProvider;
+  private _default?: DontCodeStoreProvider;
 
 
   constructor(provider?:DontCodeStoreProvider) {
@@ -11,8 +11,16 @@ export class DontCodeStoreManager {
   }
 
 
-  getProvider(): DontCodeStoreProvider {
+  getProvider(): DontCodeStoreProvider|undefined {
     return this._default;
+  }
+
+  getProviderSafe(): DontCodeStoreProvider {
+    if (this._default) {
+      return this._default;
+    }else {
+      throw new Error ('Trying to get an undefined or null provider');
+    }
   }
 
   setProvider(value: DontCodeStoreProvider) {
@@ -20,19 +28,20 @@ export class DontCodeStoreManager {
   }
 
   storeEntity (position:string, entity:any) : Promise<any> {
-    return this._default.storeEntity(position, entity);
+
+    return this.getProviderSafe().storeEntity(position, entity);
   }
 
   loadEntity (position:string, key: any) : Promise<any> {
-    return this._default.loadEntity(position, key);
+    return this.getProviderSafe().loadEntity(position, key);
   }
 
   deleteEntity (position:string, key:any): Promise<boolean> {
-    return this._default.deleteEntity(position, key);
+    return this.getProviderSafe().deleteEntity(position, key);
   }
 
   searchEntities (position:string, ...criteria:DontCodeStoreCriteria[]): Observable<Array<any>> {
-    return this._default.searchEntities(position, ...criteria);
+    return this.getProviderSafe().searchEntities(position, ...criteria);
   }
 
 }
@@ -52,8 +61,10 @@ export class DontCodeStoreCriteria {
   constructor(name: string, value: any, operator?: DontCodeStoreCriteriaOperator) {
     this.name = name;
     this.value = value;
-    this.operator = operator;
-    if (!this.operator)
+    if (!operator)
       this.operator = DontCodeStoreCriteriaOperator.EQUALS;
+    else {
+      this.operator = operator;
+    }
   }
 }

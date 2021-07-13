@@ -2,22 +2,23 @@ import { Change, ChangeType} from "../change/change";
 import { DontCodeModelPointer } from "../model/dont-code-schema";
 
 export class DontCodeTestManager {
-  public static createDeleteChange (containerSchema: string, containerItemId: string, schema: string, itemId: string, property?:string) {
+  public static createDeleteChange (containerSchema: string, containerItemId: string|null, schema: string|null, itemId: string|null, property?:string) {
     return DontCodeTestManager.createAnyChange(ChangeType.DELETE, containerSchema, containerItemId, schema, itemId, null, property);
   }
 
-  public static createMoveChange (oldPosition:string, beforeIdOrProperty:string, containerSchema: string, containerItemId: string, schema: string, itemId: string, property?:string) {
+  public static createMoveChange (oldPosition:string, beforeIdOrProperty:string|null, containerSchema: string, containerItemId: string|null, schema: string, itemId: string, property?:string) {
     const ret = DontCodeTestManager.createAnyChange(ChangeType.MOVE, containerSchema, containerItemId, schema, itemId, null, property);
     ret.oldPosition=oldPosition;
-    ret.beforeKey=beforeIdOrProperty;
+    if( beforeIdOrProperty)
+      ret.beforeKey=beforeIdOrProperty;
     return ret;
   }
 
-  public static createTestChange(containerSchema: string, containerItemId: string, schema: string, itemId: string, value: any, property?:string) {
+  public static createTestChange(containerSchema: string, containerItemId: string|null, schema: string|null, itemId: string|null, value: any, property?:string) {
     return DontCodeTestManager.createAnyChange(ChangeType.ADD, containerSchema, containerItemId, schema, itemId, value, property);
   }
 
-  public static createAnyChange(type:ChangeType, containerSchema: string, containerItemId: string, schema: string, itemId: string, value: any, property?:string) {
+  public static createAnyChange(type:ChangeType, containerSchema: string, containerItemId: string|null, schema: string|null, itemId: string|null, value: any, property?:string) {
     let calcContainerItemId=containerItemId?'/'+containerItemId:'';
     let calcItemId=itemId?'/'+itemId:'';
     let calcSchema=schema?'/'+schema:'';

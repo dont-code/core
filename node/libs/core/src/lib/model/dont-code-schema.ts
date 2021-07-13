@@ -162,15 +162,15 @@ export class DontCodeModelPointer {
 
   schemaPosition:string;
 
-  containerPosition: string;
+  containerPosition: string|undefined;  // undefined as root does not have container...
 
-  containerSchemaPosition: string;
+  containerSchemaPosition: string|undefined;  // undefined as root does not have container...
 
-  key: string;
+  key: string|null;
 
-  itemId: string;
+  itemId: string|null;
 
-  constructor(position: string, schemaPosition: string, containerPosition: string, containerSchemaPosition: string, key: string, itemId:string) {
+  constructor(position: string, schemaPosition: string, containerPosition: string|undefined, containerSchemaPosition: string|undefined, key: string|null, itemId:string|null) {
     this.position = position;
     this.schemaPosition = schemaPosition;
     this.containerPosition = containerPosition;
@@ -194,10 +194,10 @@ export class DontCodeModelPointer {
    * Find the ItemId or container key represented by the pointer
    * Usually it's the id of the item (if it's an element in a container like entity/a/fields/a) or the last container name
    */
-  calculateItemIdOrContainer (): string {
+  calculateItemIdOrContainer (): string|undefined {
     if (this.itemId) return this.itemId;
     else {
-      return this.containerPosition.substring(this.containerPosition.lastIndexOf('/')+1);
+      return this.containerPosition?.substring(this.containerPosition?.lastIndexOf('/')+1);
     }
   }
 

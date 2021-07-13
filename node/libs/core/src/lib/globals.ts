@@ -48,14 +48,14 @@ import {DontCodeModelManager} from "./model/dont-code-model-manager";
    */
   export interface PluginConfig {
     plugin: {
-      id,
-      "display-name"?,
-      "version"
+      id:string,
+      "display-name"?:string,
+      "version":string
     },
     "schema-updates"?: Array<
       {
-        id,
-        description,
+        id:string,
+        description?:string,
         changes:Array <ChangeConfig>;
       }>,
     "preview-handlers"?: Array<PreviewHandlerConfig>
@@ -63,25 +63,25 @@ import {DontCodeModelManager} from "./model/dont-code-model-manager";
 
   export interface ChangeConfig {
     location:{
-      parent,
-      id?,
-      after?
+      parent:string,
+      id:string,
+      after?:string
     },
-    update?,
-    props?,
+    update?:any,
+    props?:any,
     replace?:boolean
 
   }
 
   export interface PreviewHandlerConfig {
     location: {
-      parent,
-      id?,
-      values?
+      parent:string,
+      id:string,
+      values?:any
     },
     class: {
-      source,
-      name
+      source:string,
+      name:string
     }
   }
 

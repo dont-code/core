@@ -3,6 +3,6 @@
  * To be used by all fields managing currencies ('Euro', 'Dollar', 'Other currency' by default) in order to facilitate exchange between plugins
  */
 export class MoneyAmount {
-  amount: number;
-  currencyCode: string;
+  amount: number|undefined;
+  currencyCode: string|undefined;
 }

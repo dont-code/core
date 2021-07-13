@@ -1,5 +1,5 @@
-import { DontCodeSchemaItem, DontCodeSchemaRef, DontCodeSchemaRoot } from "./dont-code-schema-item";
-import { DontCodeModelPointer, DontCodeSchema } from "./dont-code-schema";
+import {DontCodeSchemaItem, DontCodeSchemaRef, DontCodeSchemaRoot} from "./dont-code-schema-item";
+import {DontCodeModelPointer, DontCodeSchema} from "./dont-code-schema";
 import {PluginConfig} from "../globals";
 
 export class DontCodeSchemaManager {
@@ -49,15 +49,15 @@ export class DontCodeSchemaManager {
    */
   locateItem (position:string, resolveReference?:boolean): DontCodeSchemaItem {
     const split = position.split('/');
-    let cur: DontCodeSchemaItem = this.currentSchema;
-    split.forEach(value => {
+    let cur: DontCodeSchemaItem|undefined = this.currentSchema;
+    split.forEach((value) => {
       if( !cur) {
         console.error('Could not find subItem '+value+' of '+position);
-        return cur;
+        return;
       }
       if( value && value.length>0 && value!=='#') {
         if (cur.isReference())
-          cur=this.resolveReference(cur as DontCodeSchemaRef);
+          cur = this.resolveReference(cur as DontCodeSchemaRef);
         cur = cur.getChild(value);
       }
     });
@@ -73,18 +73,20 @@ export class DontCodeSchemaManager {
   }
 
   generateSchemaPointer (queriedPosition: string) : DontCodeModelPointer {
-    const ret = new DontCodeModelPointer(queriedPosition, null,null,null,null,null);
+    let ret:DontCodeModelPointer;
 
     const position = (queriedPosition[0]==='/')?queriedPosition.substring(1):queriedPosition;
     const posElems = position.split('/');
 
     if ((posElems.length===0) || (posElems[0].length===0))  {
       // Managing the special case of asking for root
-      ret.position=queriedPosition;
-      ret.schemaPosition=queriedPosition;
-      ret.containerSchemaPosition=undefined;
-      ret.containerPosition=undefined;
+      ret = new DontCodeModelPointer(queriedPosition, queriedPosition,undefined,undefined,null,null);
+
       return ret;
+    }else {
+
+      ret = new DontCodeModelPointer(queriedPosition, ''   // to be calculated later
+       ,undefined,undefined,null,null);
     }
 
     let parentItem = this.currentSchema as DontCodeSchemaItem;
@@ -95,7 +97,7 @@ export class DontCodeSchemaManager {
         if (nextItem) {
           ret.itemId=null;
           ret.containerSchemaPosition=ret.schemaPosition;
-          if( ret.schemaPosition!==null)
+          if( (ret.schemaPosition!==null)&&(ret.schemaPosition.length>0))
             ret.schemaPosition=ret.schemaPosition+'/'+element;
           else
             ret.schemaPosition = element;
@@ -132,7 +134,7 @@ export class DontCodeSchemaManager {
   /**
    * Returns the pointer to the subElement of the given pointer. It checked whether the given propOrItemName is a property or an item
    * by looking at the schema
-   * @param parent
+   * @param panullrent
    * @param propOrItemName
    */
   generateSubSchemaPointer (parent:DontCodeModelPointer, propOrItemName: string): DontCodeModelPointer {
