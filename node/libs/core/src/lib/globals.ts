@@ -76,7 +76,7 @@ import {DontCodeModelManager} from "./model/dont-code-model-manager";
   export interface PreviewHandlerConfig {
     location: {
       parent:string,
-      id:string,
+      id?:string,
       values?:any
     },
     class: {
