@@ -31,7 +31,9 @@ export class DontCodePreviewManager {
         found.forEach (configuration => {
           if (configuration.location.values) {
             if (jsonContent) {
-              const jsonValue=jsonContent[configuration.location.id] as string;
+              let jsonValue=jsonContent as string;
+              if (configuration.location.id)
+                jsonValue=jsonContent[configuration.location.id];
 
               this.extractValuesAsArray(configuration.location.values).forEach (targetValue => {
                 if( targetValue === jsonValue) {
