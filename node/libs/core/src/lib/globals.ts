@@ -13,7 +13,10 @@ import {DontCodeModelManager} from "./model/dont-code-model-manager";
     getStoreManager (): DontCodeStoreManager;
   }
 
-  export const dtcde: Core = new DontCodeCore();
+  if (!(self as any).dontCodeCore)
+    (self as any).dontCodeCore=new DontCodeCore();
+// eslint-disable-next-line no-var
+  export var dtcde:Core = (self as any).dontCodeCore;
 
   export interface Plugin {
     getConfiguration (): PluginConfig ;
