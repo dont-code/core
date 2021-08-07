@@ -1,0 +1,10 @@
+I want to create an application named "" that will manage Dont-code plugins / Dont-code session / Recipes / Tasks, together with XXX . <- Source
+Plugin is defined by me, with the following Fields....
+Session is defined by the Dont-code session source, with the following Fields......
+
+It will display a list of plugins in cards with the following informations: title, image, description.
+It will report the count of session by month in a stackbar and the count of sessions per Id in a list
+
+A plugin can be edited by its owner only and visible to all Dont-code users.
+A session can be edited by no-one and visible to me only
+A Recipe can be edited by all dont-code users and visible to all Dont-code users.

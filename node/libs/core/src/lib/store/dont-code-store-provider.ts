@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import {DontCodeStoreCriteria} from "./dont-code-store-manager";
+import {DontCodeStoreCriteria, UploadedDocumentInfo} from "./dont-code-store-manager";
 
 /**
  * The standard interface for any store provider
@@ -14,5 +14,12 @@ export interface DontCodeStoreProvider {
 
   searchEntities (position:string, ...criteria:DontCodeStoreCriteria[]): Observable<Array<any>>;
 
-}
+  canStoreDocument (position?:string): boolean;
 
+  /**
+   * Upload documents to a server store and returns the url or the id needed to retrieve them.
+   * @param toStore
+   */
+  storeDocuments (toStore:File[], position?:string): Observable<UploadedDocumentInfo>;
+
+}

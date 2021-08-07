@@ -44,7 +44,24 @@ export class DontCodeStoreManager {
     return this.getProviderSafe().searchEntities(position, ...criteria);
   }
 
+  canStoreDocument (position?:string): boolean {
+    const res= this.getProvider()?.canStoreDocument(position);
+    if( res) return res;
+    else return false;
+  }
+
+  storeDocuments (toStore:File[], position?:string): Observable<UploadedDocumentInfo> {
+    return this.getProviderSafe().storeDocuments(toStore, position);
+  }
+
 }
+
+export type UploadedDocumentInfo = {
+  documentName:string;
+  isUrl:boolean;
+  documentId?:string;
+}
+
 
 export enum DontCodeStoreCriteriaOperator {
   EQUALS= '=',
