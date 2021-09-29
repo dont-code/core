@@ -32,6 +32,20 @@ describe('Schema Manager', () => {
 
   });
 
+  it('should manages rest plugin updates', () => {
+    const mgr = dtcde.getSchemaManager();
+    mgr.registerChanges(restPluginConfig);
+    const sources = mgr.locateItem('/creation/sources');
+    expect(sources).toBeDefined();
+    expect(sources.isArray()).toBeTruthy();
+    expect(sources.getChild('for')).toBeDefined();
+
+    const sourceType = sources.getChild('type') as DontCodeSchemaEnum;
+    expect(sourceType.getValues()).toContainEqual (new DontCodeSchemaEnumValue('Rest'));
+
+    expect(sourceType.getProperties('Rest')).toBeDefined();
+  });
+
   it('should calculate pointers correctly', () => {
     const mgr = dtcde.getSchemaManager();
     let pointer = mgr.generateSchemaPointer('creation/name');
@@ -95,20 +109,20 @@ describe('Schema Manager', () => {
 
   it('should locate items properly', () => {
     const mgr = dtcde.getSchemaManager();
-    let root = mgr.locateItem('/');
+    const root = mgr.locateItem('/');
     expect(root).toBeDefined();
     expect(root.getParent()).toBeUndefined();
     expect(root.isArray()).toBeFalsy();
 
-    let name = mgr.locateItem('creation/entities/name');
+    const name = mgr.locateItem('creation/entities/name');
     expect(name).toBeDefined();
     expect(name.isArray()).toBeFalsy();
 
-    let fields = mgr.locateItem('creation/entities/fields');
+    const fields = mgr.locateItem('creation/entities/fields');
     expect(fields).toBeDefined();
     expect(fields.isArray()).toBeTruthy();
 
-    let type = mgr.locateItem('creation/entities/fields/type');
+    const type = mgr.locateItem('creation/entities/fields/type');
     expect(type).toBeDefined();
     expect(type.isArray()).toBeFalsy();
     expect(type.isEnum()).toBeTruthy();
@@ -178,3 +192,50 @@ class PluginTest implements DontCode.Plugin {
     }
   }
 }
+
+const restPluginConfig = {
+  plugin: {
+    id: 'RestPlugin',
+    'display-name': 'A plugin for entities managed through Rest APIs .',
+    version: '1.0.0'
+  },
+  'schema-updates': [{
+    id: 'rest-field',
+    description: 'Create the list of sources',
+    changes: [{
+      location: {
+        parent: '#/creation',
+        id: 'sources'
+      },
+      update: {
+        type: 'array',
+        items: {
+          type:'object',
+          properties: {
+            for: {
+              type: 'string',
+              format: '$.creation.entities[*]'
+            }
+          }
+        }
+      },
+      replace: false
+    },{
+      location: {
+        parent: '#/creation/sources',
+        id: 'type'
+      },
+      update: {
+        enum: [
+          'Rest'
+        ]
+      },
+      props: {
+        url: {
+          type: 'string'
+        }
+      },
+      replace: false
+    }]
+  }]
+};

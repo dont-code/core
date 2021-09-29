@@ -364,7 +364,7 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
                 enumValue = new DontCodeSchemaEnumValue(subKey);
                 destination.push(enumValue);
               }
-              if (!enumValue.getChildren())  enumValue.setChildren(Array());
+              if (!enumValue.getChildren())  enumValue.setChildren([]);
               this.updateValues(value[subKey].enum, enumValue.getChildren(), from);
             }
           }
