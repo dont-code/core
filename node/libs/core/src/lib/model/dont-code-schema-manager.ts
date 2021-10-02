@@ -17,7 +17,7 @@ export class DontCodeSchemaManager {
     return this.currentSchema;
   }
 
-  private convertSchemaToMap(readSchema: any): DontCodeSchemaRoot {
+  convertSchemaToMap(readSchema: any): DontCodeSchemaRoot {
 
     return new DontCodeSchemaRoot(readSchema);
   }
