@@ -7,8 +7,8 @@ export class DontCodeSchema {
    * This is a copy of dont-code-schema.json, please don't forget to update
    */
   static defaultv1={
-    "$id": "http://dont-code.net/dont-code-schema/v1",
-    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://dont-code.net/dont-code-schema/v1",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "description": "JSON Schema v1 for dont-code",
     "type": "object",
     "required": [
@@ -29,33 +29,43 @@ export class DontCodeSchema {
           "entities": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/entity"
+              "$ref": "#/$defs/entity"
             }
           },
           "sharing": {
-            "$ref": "#/definitions/sharing"
+            "$ref": "#/$defs/sharing"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/source"
+            }
           },
           "screens": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/screen"
+              "$ref": "#/$defs/screen"
             }
           }
         },
         "additionalProperties": false
       }
     },
-    "definitions": {
+    "$defs": {
       "entity": {
         "type": "object",
         "properties": {
+          "from": {
+            type: 'string',
+            format: '$.creation.sources[*]'
+          },
           "name": {
             "type": "string"
           },
           "fields": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/field"
+              "$ref": "#/$defs/field"
             }
           }
         },
@@ -112,6 +122,18 @@ export class DontCodeSchema {
         },
         "additionalProperties": false
       },
+      "source": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "Unknown"
+            ]
+          }
+        }},
       "screen": {
         "type": "object",
         "properties": {
@@ -127,7 +149,7 @@ export class DontCodeSchema {
           "components": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/component"
+              "$ref": "#/$defs/component"
             }
           }
         },
@@ -219,7 +241,7 @@ export class DontCodeModelPointer {
    */
   getUnderPropertyOf (pointer:DontCodeModelPointer): string|null {
     if (this.schemaPosition.startsWith(pointer.schemaPosition)) {
-      let keyPos=this.schemaPosition.indexOf('/', pointer.schemaPosition.length+1);
+      const keyPos=this.schemaPosition.indexOf('/', pointer.schemaPosition.length+1);
       if( keyPos == -1)
         return this.schemaPosition.substring(pointer.schemaPosition.length+1);
       else

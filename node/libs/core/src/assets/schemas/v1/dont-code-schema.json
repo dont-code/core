@@ -1,6 +1,6 @@
 {
-  "$id": "http://dont-code.net/v1/dont-code-schema",
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dont-code.net/v1/dont-code-schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "JSON Schema v1 for dont-code",
   "type": "object",
   "required": [
@@ -21,33 +21,43 @@
         "entities": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/entity"
+            "$ref": "#/$defs/entity"
           }
         },
         "sharing": {
-          "$ref": "#/definitions/sharing"
+          "$ref": "#/$defs/sharing"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
         },
         "screens": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/screen"
+            "$ref": "#/$defs/screen"
           }
         }
       },
       "additionalProperties": false
     }
   },
-  "definitions": {
+  "$defs": {
     "entity": {
       "type": "object",
       "properties": {
+        "from": {
+          "type": "string",
+          "format": "$.creation.sources[*]"
+        },
         "name": {
           "type": "string"
         },
         "fields": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/field"
+            "$ref": "#/$defs/field"
           }
         }
       },
@@ -104,6 +114,18 @@
       },
       "additionalProperties": false
     },
+    "source": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "Unknown"
+          ]
+        }
+      }},
     "screen": {
       "type": "object",
       "properties": {
@@ -119,7 +141,7 @@
         "components": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/component"
+            "$ref": "#/$defs/component"
           }
         }
       },

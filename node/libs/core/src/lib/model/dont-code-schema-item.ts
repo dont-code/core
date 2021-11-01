@@ -182,10 +182,10 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
         this.children.set(key, AbstractSchemaItem.generateItem(props[key], key, this));
       }
     }
-    const definitions =json['definitions'];
-    if( definitions) {
-      const defsItem=AbstractSchemaItem.generateItem(definitions, 'definitions', this);
-      this.children.set('definitions', defsItem);
+    const $defs =json['$defs'];
+    if( $defs) {
+      const defsItem=AbstractSchemaItem.generateItem($defs, '$defs', this);
+      this.children.set('$defs', defsItem);
     }
   }
 
@@ -271,11 +271,11 @@ export class DontCodeSchemaRoot extends DontCodeSchemaObject{
   protected readJson (json:any) {
     super.readJson(json);
 
-    const definitions =json['definitions'];
-    if( definitions) {
-      this.children.set('definitions', new DontCodeSchemaObject( {
-        properties: definitions
-      }, 'definitions', this));
+    const $defs =json['$defs'];
+    if( $defs) {
+      this.children.set('$defs', new DontCodeSchemaObject( {
+        properties: $defs
+      }, '$defs', this));
     }
   }
 

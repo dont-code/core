@@ -6,6 +6,8 @@ export class DontCodeModel {
   static readonly APP_NAME = DontCodeModel.ROOT+'/'+DontCodeModel.APP_NAME_NODE;
   static readonly APP_ENTITIES_NODE = 'entities';
   static readonly APP_ENTITIES = DontCodeModel.ROOT+'/'+DontCodeModel.APP_ENTITIES_NODE;
+  static readonly APP_ENTITIES_FROM_NODE = 'from';
+  static readonly APP_ENTITIES_FROM = DontCodeModel.APP_ENTITIES+'/'+DontCodeModel.APP_ENTITIES_FROM_NODE;
   static readonly APP_ENTITIES_NAME_NODE = 'name';
   static readonly APP_ENTITIES_NAME = DontCodeModel.APP_ENTITIES+'/'+DontCodeModel.APP_ENTITIES_NAME_NODE;
   static readonly APP_FIELDS_NODE = 'fields';

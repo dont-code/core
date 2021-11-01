@@ -4,31 +4,63 @@ import {DontCodeStoreProvider} from "./dont-code-store-provider";
 export class DontCodeStoreManager {
 
   private _default?: DontCodeStoreProvider;
-
+  private providerByPosition = new Map<string, DontCodeStoreProvider>();
 
   constructor(provider?:DontCodeStoreProvider) {
     this._default = provider;
   }
 
-
-  getProvider(): DontCodeStoreProvider|undefined {
-    return this._default;
-  }
-
-  getProviderSafe(): DontCodeStoreProvider {
-    if (this._default) {
+  getProvider(position?:string): DontCodeStoreProvider|undefined {
+    if( position == null) {
       return this._default;
-    }else {
-      throw new Error ('Trying to get an undefined or null provider');
+    } else {
+      const ret= this.providerByPosition.get(position);
+      return ret ?? this._default;
     }
   }
 
-  setProvider(value: DontCodeStoreProvider) {
-    this._default = value;
+  getProviderSafe(position?:string): DontCodeStoreProvider {
+    const ret = this.getProvider(position);
+    if( ret == null) {
+      throw new Error ('Trying to get an undefined or null provider');
+    } else {
+    return ret;
+    }
+  }
+
+  getDefaultProvider (): DontCodeStoreProvider|undefined {
+    return this.getProvider();
+  }
+
+  getDefaultProviderSafe (): DontCodeStoreProvider {
+    return this.getProviderSafe();
+  }
+
+  setProvider(value: DontCodeStoreProvider, position?:string): void {
+    if( position==null)
+      this._default = value;
+    else {
+      this.providerByPosition.set(position, value);
+    }
+  }
+
+  setDefaultProvider (value: DontCodeStoreProvider):void {
+    this.setProvider(value);
+  }
+
+  removeProvider (position?:string): void {
+    if (position==null)
+      this._default=undefined;
+    else {
+      this.providerByPosition.delete(position);
+    }
+  }
+
+  removeDefaultProvider (): void {
+    this.removeProvider();
   }
 
   storeEntity (position:string, entity:any) : Promise<any> {
-
     return this.getProviderSafe().storeEntity(position, entity);
   }
 
