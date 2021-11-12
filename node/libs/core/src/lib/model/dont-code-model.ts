@@ -20,6 +20,8 @@ export class DontCodeModel {
   static readonly APP_SHARING= DontCodeModel.ROOT+'/'+DontCodeModel.APP_SHARING_NODE;
   static readonly APP_SHARING_WITH_NODE = 'with';
   static readonly APP_SHARING_WITH = DontCodeModel.APP_SHARING+'/'+DontCodeModel.APP_SHARING_WITH_NODE;
+  static readonly APP_SOURCES_NODE = 'sources';
+  static readonly APP_SOURCES = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SOURCES_NODE;
   static readonly APP_SCREENS_NODE = 'screens';
   static readonly APP_SCREENS = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SCREENS_NODE;
   static readonly APP_SCREENS_NAME_NODE = 'name';

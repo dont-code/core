@@ -1,12 +1,18 @@
 import {Observable} from 'rxjs';
-import {DontCodeStoreProvider} from "./dont-code-store-provider";
+import {DontCodeStoreProvider, DontCodeStoreProviderWithConfig} from "./dont-code-store-provider";
+import {DontCodeModelManager} from "../model/dont-code-model-manager";
+import {DontCodeEntityType, DontCodeSourceType} from "../globals";
+import {DontCodeSchema} from "../model/dont-code-schema";
+import {DontCodeModel} from "../model/dont-code-model";
+import {DontCodePreviewManager} from "../plugin/preview/dont-code-preview-manager";
 
 export class DontCodeStoreManager {
 
   private _default?: DontCodeStoreProvider;
   private providerByPosition = new Map<string, DontCodeStoreProvider>();
+  private providerByType = new Map<string, DontCodeStoreProviderWithConfig>();
 
-  constructor(provider?:DontCodeStoreProvider) {
+  constructor(protected modelMgr: DontCodeModelManager, protected previewMgr:DontCodePreviewManager, provider?:DontCodeStoreProvider) {
     this._default = provider;
   }
 
@@ -14,7 +20,14 @@ export class DontCodeStoreManager {
     if( position == null) {
       return this._default;
     } else {
-      const ret= this.providerByPosition.get(position);
+      let ret= this.providerByPosition.get(position);
+      if (!ret) {
+        // Try to find if the entity is
+          const srcDefinition = this.modelMgr.findTargetOfProperty (position, DontCodeModel.APP_ENTITIES_FROM_NODE) as DontCodeSourceType;
+          if (srcDefinition) {
+            ret = this.providerByType.get(srcDefinition.type)?.withConfig (srcDefinition);
+          }
+      }
       return ret ?? this._default;
     }
   }
@@ -42,6 +55,10 @@ export class DontCodeStoreManager {
     else {
       this.providerByPosition.set(position, value);
     }
+  }
+
+  setProviderForSourceType(value: DontCodeStoreProviderWithConfig, srcType:string): void {
+      this.providerByType.set(srcType, value);
   }
 
   setDefaultProvider (value: DontCodeStoreProvider):void {

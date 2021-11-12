@@ -22,22 +22,16 @@ import {DontCodeModelManager} from "./model/dont-code-model-manager";
     getConfiguration (): PluginConfig ;
   }
 
-  /**
+
+/**
    * The typescript equivalent of the dont-code-schema.json
    */
   export interface DontCodeSchemaType {
     creation: {
       type: string,
       name: string,
-      entities?: Array<
-      {
-        name:string,
-        fields?: Array<{
-          name:string,
-          type:string
-        }>
-      }
-      >,
+      entities?: Array<DontCodeEntityType>,
+      sources?: Array<DontCodeSourceType>,
       screens?: Array<
       {
         name:string
@@ -45,6 +39,22 @@ import {DontCodeModelManager} from "./model/dont-code-model-manager";
       >
     }
   }
+
+export interface DontCodeFieldType {
+  name: string;
+  type: string;
+}
+
+export interface DontCodeEntityType {
+  from: string;
+  name: string;
+  fields?: Array<DontCodeFieldType>;
+}
+
+export interface DontCodeSourceType {
+  name: string;
+  type: string;
+}
 
   /**
    * The typescript equivalent of plugin-config-schema.json

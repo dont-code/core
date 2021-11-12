@@ -127,6 +127,13 @@ describe('Schema Manager', () => {
     expect(type).toBeDefined();
     expect(type.isArray()).toBeFalsy();
     expect(type.isEnum()).toBeTruthy();
+
+      // Should raed the format field
+    const from = mgr.locateItem('creation/entities/from');
+    expect(from).toBeDefined();
+    expect(from.isArray()).toBeFalsy();
+    expect(from.getTargetPath()).toBeDefined();
+
   });
 
   it('should calculate the right key', () => {

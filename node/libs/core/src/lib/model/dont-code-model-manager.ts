@@ -1,12 +1,18 @@
 import {Change, ChangeType} from "../change/change";
 import {Subject} from "rxjs";
-
+import {DontCodeSchemaItem} from "./dont-code-schema-item";
+import {dtcde} from "../globals";
+import {DontCodeSchemaManager} from "./dont-code-schema-manager";
+import {JSONPath} from 'jsonpath-plus';
 /**
  * Stores and constantly updates the json (as an instance of the DontCodeSchema) as it is being edited / modified through Change events
  * It does not store the entity values but the description of entities, screens... as defined in the Editor
  */
 export class DontCodeModelManager {
   protected content: any;
+
+  constructor(protected schemaMgr: DontCodeSchemaManager) {
+  }
 
   /**
    * Returns the complete json stored
@@ -41,11 +47,11 @@ export class DontCodeModelManager {
             if( prop==="") {
                 // We have to update (or reset) the existing parent itself, not a subproperty represented by prop
               if( change.type===ChangeType.RESET) {
-                for (let subProp in parent) {
+                for (const subProp in parent) {
                   delete parent[subProp];
                 }
               }
-              for (let subProp in change.value) {
+              for (const subProp in change.value) {
                 parent[subProp]=change.value[subProp];
               }
             } else {
@@ -129,4 +135,74 @@ export class DontCodeModelManager {
     return current;
   }
 
+  /**
+   * Enable querying the model for any value, following jsonPath model
+   * To use when potentially you expect multiple values
+   * @param query: the query as a jsonPath
+   * @param if the jsonPath contains a placeholder, it's value is given here
+   * @param position: in case the jsonPath is relative
+   */
+  queryModelToArray (query: string, position?: string): Array<any> {
+    let root = this.content;
+    if (position) {
+      root = this.findAtPosition(position, false);
+    }
+    const result = JSONPath({path:query, json:root, resultType: "value", wrap:false, flatten:true});
+    return result;
+  }
+
+  /**
+   * Enable querying the model for any value, following jsonPath model
+   * To use when potentially you expect a single value.
+   * @param query: the query as a  jsonPath
+   * @param position: in case the jsonPath is relative
+   */
+  queryModelToSingle (query: string, position?:string): any {
+    let root = this.content;
+    if (position) {
+      root = this.findAtPosition(position, false);
+    }
+    const result = JSONPath({path:query, json:root, resultType: "value", wrap:false});
+    if (Array.isArray(result)) {
+      if( result.length<=1)
+        return result[0];
+      else throw new Error ("Mulitple results returned by queryModelToSingle with path "+query);
+    }
+    return result;
+  }
+
+  findAllPossibleTargetsOfProperty(property: string, position: string, schemaItem?:DontCodeSchemaItem): Array<any> {
+    if( !schemaItem) {
+      const ptr = this.schemaMgr.generateSchemaPointer(position);
+      schemaItem = this.schemaMgr.locateItem(ptr.subPropertyPointer(property).schemaPosition, true);
+    }
+    const targetPath = schemaItem?.getTargetPath();
+    if ((schemaItem) && (targetPath)) {
+      const lastDotPos = targetPath.lastIndexOf('.');
+      return this.queryModelToArray(targetPath.substring(0, lastDotPos)+'.*');
+    }
+    else {
+      throw new Error("No Schema or no format definition for "+position+'/'+property);
+    }
+  }
+
+  findTargetOfProperty(property: string, position: string, schemaItem?:DontCodeSchemaItem): any {
+    const src = this.findAtPosition(position, false);
+    if ((src) && (src[property])) {
+      if( !schemaItem) {
+        const ptr = this.schemaMgr.generateSchemaPointer(position);
+        schemaItem = this.schemaMgr.locateItem(ptr.subPropertyPointer(property).schemaPosition, true);
+      }
+      const targetPath = schemaItem?.getTargetPath();
+      if ((schemaItem)&&(targetPath)) {
+        const lastDotPos = targetPath.lastIndexOf('.');
+//        const filteredQuery = targetPath.substring(0, lastDotPos)+'[?(@.'+targetPath.substring(lastDotPos+1)+'==="'+src[property]+'")]';
+        const filteredQuery = targetPath.substring(0, lastDotPos)+'[?(@[\''+targetPath.substring(lastDotPos+1)+'\']==="'+src[property]+'")]';
+        return this.queryModelToSingle(filteredQuery);
+      } else {
+        throw new Error("No Schema or no format definition for "+position+'/'+property);
+      }
+    }
+    return undefined;
+  }
 }

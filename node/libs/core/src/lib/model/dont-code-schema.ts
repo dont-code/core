@@ -57,7 +57,7 @@ export class DontCodeSchema {
         "properties": {
           "from": {
             type: 'string',
-            format: '$.creation.sources[*]'
+            format: '$.creation.sources.name'
           },
           "name": {
             "type": "string"
