@@ -23,7 +23,7 @@ export class DontCodeStoreManager {
       let ret= this.providerByPosition.get(position);
       if (!ret) {
         // Try to find if the entity is
-          const srcDefinition = this.modelMgr.findTargetOfProperty (position, DontCodeModel.APP_ENTITIES_FROM_NODE) as DontCodeSourceType;
+          const srcDefinition = this.modelMgr.findTargetOfProperty (DontCodeModel.APP_ENTITIES_FROM_NODE, position) as DontCodeSourceType;
           if (srcDefinition) {
             ret = this.providerByType.get(srcDefinition.type)?.withConfig (srcDefinition);
           }
