@@ -33,12 +33,15 @@ export interface DontCodeSchemaItem {
 
   getRelativeId (): string|undefined;
   setRelativeId (relativeId:string|undefined): void;
+
+  getTargetPath(): string|undefined;
 }
 
 export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
   protected parent: DontCodeSchemaItem|undefined;
   protected array = false;
   protected relativeId:string|undefined;
+  protected targetPath:string|undefined;
 
   protected constructor(parent:DontCodeSchemaItem|undefined, relativeId?:string) {
     this.parent=parent;
@@ -144,6 +147,7 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
   }
 
   updateWith(update: DontCode.ChangeConfig):void {
+    //
   }
 
   getProperties(code: string): DontCodeSchemaProperty | undefined {
@@ -161,10 +165,18 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     this.relativeId = relativeId;
   }
 
+  getTargetPath(): string|undefined {
+    return this.targetPath;
+  }
+
+  setTargetPath(newPath:string): void {
+    this.targetPath=newPath;
+  }
+
 }
 
 /**
- * Handles an item defined as an object consisting of a name and a set of named properties)
+ * Handles an item defined as an object consisting of a name and a set of named children
  */
 export class DontCodeSchemaObject extends AbstractSchemaItem {
   protected children = new Map<string, DontCodeSchemaItem>();
@@ -178,15 +190,15 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
   protected readJson (json:any) {
     const props =json['properties'];
     if( props) {
-      for (var key in props) {
+      for (const key in props) {
         this.children.set(key, AbstractSchemaItem.generateItem(props[key], key, this));
       }
     }
-    const definitions =json['definitions'];
+    /*const definitions =json['$defs'];
     if( definitions) {
-      const defsItem=AbstractSchemaItem.generateItem(definitions, 'definitions', this);
-      this.children.set('definitions', defsItem);
-    }
+      const defsItem=AbstractSchemaItem.generateItem(definitions, '$defs', this);
+      this.children.set('$defs', defsItem);
+    }*/
   }
 
   isEnum(): boolean {
@@ -210,11 +222,11 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
   }
 
   upsertWith(change: DontCode.ChangeConfig): boolean {
-    let existsOrNot = this.getChild(change.location.id);
+    const existsOrNot = this.getChild(change.location.id);
     if( !existsOrNot) {
-      let exists = AbstractSchemaItem.generateItem(change.update, change.location.id, this);
+      const exists = AbstractSchemaItem.generateItem(change.update, change.location.id, this);
       if( change.location.after) {
-        let newMap = new Map<string, DontCodeSchemaItem> ();
+        const newMap = new Map<string, DontCodeSchemaItem> ();
         this.children.forEach((value, key) => {
           newMap.set(key, value);
           if (key===change.location.after) {
@@ -271,11 +283,12 @@ export class DontCodeSchemaRoot extends DontCodeSchemaObject{
   protected readJson (json:any) {
     super.readJson(json);
 
-    const definitions =json['definitions'];
-    if( definitions) {
-      this.children.set('definitions', new DontCodeSchemaObject( {
-        properties: definitions
-      }, 'definitions', this));
+        // Let the base class believe it's a property and do all the work !
+    const $defs =json['$defs'];
+    if( $defs) {
+      this.children.set('$defs', new DontCodeSchemaObject( {
+        properties: $defs
+      }, '$defs', this));
     }
   }
 
@@ -309,6 +322,7 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
   constructor(json:any, relativeId?:string, parent?:DontCodeSchemaItem) {
     super(parent, relativeId);
     this.updateValues (json["enum"], this.values);
+    this.targetPath = json["format"];
   }
 
   isEnum(): boolean {
@@ -355,7 +369,7 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
             }
 
         } else {
-          for (let subKey in value) {
+          for (const subKey in value) {
             if( value.hasOwnProperty(subKey)) {
               let enumValue= destination.find(dest => {
                 return dest.getValue() ===value;
@@ -436,6 +450,7 @@ export class DontCodeSchemaValue extends AbstractSchemaItem {
   constructor(json:any, relativeId?:string, parent?:DontCodeSchemaItem) {
     super(parent, relativeId);
     this.type=json["type"];
+    this.targetPath = json["format"];
   }
 
   isValue(): boolean {

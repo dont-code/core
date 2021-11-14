@@ -6,6 +6,8 @@ export class DontCodeModel {
   static readonly APP_NAME = DontCodeModel.ROOT+'/'+DontCodeModel.APP_NAME_NODE;
   static readonly APP_ENTITIES_NODE = 'entities';
   static readonly APP_ENTITIES = DontCodeModel.ROOT+'/'+DontCodeModel.APP_ENTITIES_NODE;
+  static readonly APP_ENTITIES_FROM_NODE = 'from';
+  static readonly APP_ENTITIES_FROM = DontCodeModel.APP_ENTITIES+'/'+DontCodeModel.APP_ENTITIES_FROM_NODE;
   static readonly APP_ENTITIES_NAME_NODE = 'name';
   static readonly APP_ENTITIES_NAME = DontCodeModel.APP_ENTITIES+'/'+DontCodeModel.APP_ENTITIES_NAME_NODE;
   static readonly APP_FIELDS_NODE = 'fields';
@@ -18,6 +20,8 @@ export class DontCodeModel {
   static readonly APP_SHARING= DontCodeModel.ROOT+'/'+DontCodeModel.APP_SHARING_NODE;
   static readonly APP_SHARING_WITH_NODE = 'with';
   static readonly APP_SHARING_WITH = DontCodeModel.APP_SHARING+'/'+DontCodeModel.APP_SHARING_WITH_NODE;
+  static readonly APP_SOURCES_NODE = 'sources';
+  static readonly APP_SOURCES = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SOURCES_NODE;
   static readonly APP_SCREENS_NODE = 'screens';
   static readonly APP_SCREENS = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SCREENS_NODE;
   static readonly APP_SCREENS_NAME_NODE = 'name';

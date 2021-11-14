@@ -1,5 +1,7 @@
-import {Change, ChangeType, DontCodeTestManager, dtcde} from "@dontcode/core";
 import {Subject} from "rxjs";
+import { Change, ChangeType } from "../change/change";
+import {dtcde} from "../globals";
+import { DontCodeTestManager } from "../test/dont-code-test-manager";
 
 describe('Model Manager', () => {
   it('should find the element at any position', () => {
@@ -45,6 +47,85 @@ describe('Model Manager', () => {
     expect(service.findAtPosition('creation/entities/aaaa/fields/aaab')).toHaveProperty('name', 'Field1');
     expect(service.findAtPosition('creation/screens')).toHaveProperty('aaae', {"name": "Screen1"});
     expect(service.findAtPosition('creation/entities/ERROR')).toBeFalsy();
+
+  });
+
+  it('should manage properties target', () => {
+    const service = dtcde.getModelManager();
+    service.resetContent({
+      creation: {
+        name: "Test2",
+        type: "application",
+        entities: {
+          "aaaa": {
+            name: "Entity1",
+            from: "Source1",
+            fields: {
+              "aaab": {
+                name: "Field1",
+                type: "string"
+              }
+            }
+          },
+          "aaac": {
+            name: 'Entity2',
+            fields: {
+              "aaad": {
+                name: 'Name',
+                type: 'boolean'
+              }
+            }
+          },
+          "aaba": {
+            name: 'Entity3',
+            from: "WrongSource",
+            fields: {
+              "aabb": {
+                name: 'Name',
+                type: 'string'
+              }
+            }
+          }
+        },
+        sources: {
+          "aaae": {
+            name: "Source1",
+            type: "Rest",
+            url: "https://test-url.com"
+          },
+          "aaag": {
+            name: "Source2",
+            type: "File",
+            path: "$home/docs/test.txt"
+          },
+        }
+      }
+    });
+
+      // First check the queries are correct
+    const queryResult1 = service.queryModelToArray("$.creation.entities.*");
+    expect(queryResult1).toHaveLength(3);
+
+    //const queryResult2 = service.queryModelToArray('$.creation.entities[?(@.name==="Entity2")]');
+
+    const queryResult2 = service.queryModelToSingle('$.creation.entities[?(@.name==="Entity2")]');
+    expect(queryResult2).toHaveProperty('fields');
+
+    const entity1 = service.findAtPosition('creation/entities/aaaa');
+    expect(entity1).toHaveProperty('from', 'Source1');
+    const sources = service.findAllPossibleTargetsOfProperty('from', 'creation/entities/aaaa');
+    expect(sources).toHaveLength(2);
+    expect(sources[0].type).toEqual("Rest");
+    expect(sources[0].url).toBeTruthy();
+
+    let source = service.findTargetOfProperty('from', 'creation/entities/aaaa');
+    expect(source).toBeTruthy();
+    expect(source.type).toEqual("Rest");
+
+    source = service.findTargetOfProperty('from', 'creation/entities/aaac');
+    expect(source).toBeFalsy();
+    source = service.findTargetOfProperty('from', 'creation/entities/aaad');
+    expect(source).toBeFalsy();
 
   });
 

@@ -18,8 +18,8 @@ export class DontCodeCore implements DontCode.Core {
       this.schemaManager = new DontCodeSchemaManager();
       this.pluginManager = new DontCodePluginManager();
       this.previewManager = new DontCodePreviewManager();
-      this.storeManager = new DontCodeStoreManager();
-      this.modelManager = new DontCodeModelManager();
+      this.modelManager = new DontCodeModelManager(this.schemaManager);
+      this.storeManager = new DontCodeStoreManager(this.modelManager, this.previewManager);
     }
 
     registerPlugin(plugin: DontCode.Plugin): void {

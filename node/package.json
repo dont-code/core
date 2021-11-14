@@ -52,5 +52,8 @@
   },
   "optionalDependencies": {
     "fsevents": "^2.3.2"
+  },
+  "dependencies": {
+    "jsonpath-plus": "^6.0.1"
   }
 }

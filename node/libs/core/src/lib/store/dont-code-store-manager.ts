@@ -1,34 +1,83 @@
 import {Observable} from 'rxjs';
-import {DontCodeStoreProvider} from "./dont-code-store-provider";
+import {DontCodeStoreProvider, DontCodeStoreProviderWithConfig} from "./dont-code-store-provider";
+import {DontCodeModelManager} from "../model/dont-code-model-manager";
+import {DontCodeEntityType, DontCodeSourceType} from "../globals";
+import {DontCodeSchema} from "../model/dont-code-schema";
+import {DontCodeModel} from "../model/dont-code-model";
+import {DontCodePreviewManager} from "../plugin/preview/dont-code-preview-manager";
 
 export class DontCodeStoreManager {
 
   private _default?: DontCodeStoreProvider;
+  private providerByPosition = new Map<string, DontCodeStoreProvider>();
+  private providerByType = new Map<string, DontCodeStoreProviderWithConfig>();
 
-
-  constructor(provider?:DontCodeStoreProvider) {
+  constructor(protected modelMgr: DontCodeModelManager, protected previewMgr:DontCodePreviewManager, provider?:DontCodeStoreProvider) {
     this._default = provider;
   }
 
-
-  getProvider(): DontCodeStoreProvider|undefined {
-    return this._default;
-  }
-
-  getProviderSafe(): DontCodeStoreProvider {
-    if (this._default) {
+  getProvider(position?:string): DontCodeStoreProvider|undefined {
+    if( position == null) {
       return this._default;
-    }else {
-      throw new Error ('Trying to get an undefined or null provider');
+    } else {
+      let ret= this.providerByPosition.get(position);
+      if (!ret) {
+        // Try to find if the entity is
+          const srcDefinition = this.modelMgr.findTargetOfProperty (DontCodeModel.APP_ENTITIES_FROM_NODE, position) as DontCodeSourceType;
+          if (srcDefinition) {
+            ret = this.providerByType.get(srcDefinition.type)?.withConfig (srcDefinition);
+          }
+      }
+      return ret ?? this._default;
     }
   }
 
-  setProvider(value: DontCodeStoreProvider) {
-    this._default = value;
+  getProviderSafe(position?:string): DontCodeStoreProvider {
+    const ret = this.getProvider(position);
+    if( ret == null) {
+      throw new Error ('Trying to get an undefined or null provider');
+    } else {
+    return ret;
+    }
+  }
+
+  getDefaultProvider (): DontCodeStoreProvider|undefined {
+    return this.getProvider();
+  }
+
+  getDefaultProviderSafe (): DontCodeStoreProvider {
+    return this.getProviderSafe();
+  }
+
+  setProvider(value: DontCodeStoreProvider, position?:string): void {
+    if( position==null)
+      this._default = value;
+    else {
+      this.providerByPosition.set(position, value);
+    }
+  }
+
+  setProviderForSourceType(value: DontCodeStoreProviderWithConfig, srcType:string): void {
+      this.providerByType.set(srcType, value);
+  }
+
+  setDefaultProvider (value: DontCodeStoreProvider):void {
+    this.setProvider(value);
+  }
+
+  removeProvider (position?:string): void {
+    if (position==null)
+      this._default=undefined;
+    else {
+      this.providerByPosition.delete(position);
+    }
+  }
+
+  removeDefaultProvider (): void {
+    this.removeProvider();
   }
 
   storeEntity (position:string, entity:any) : Promise<any> {
-
     return this.getProviderSafe().storeEntity(position, entity);
   }
 

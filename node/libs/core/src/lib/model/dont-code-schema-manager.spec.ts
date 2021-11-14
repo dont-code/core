@@ -16,8 +16,8 @@ describe('Schema Manager', () => {
     const mgr = dtcde.getSchemaManager();
     const plugin = new PluginTest();
     mgr.registerChanges(plugin.getConfiguration());
-    expect(mgr.locateItem('/definitions/screen')).toBeDefined();
-    const screen = mgr.locateItem('/definitions/screen') as DontCodeSchemaObject;
+    expect(mgr.locateItem('/$defs/screen')).toBeDefined();
+    const screen = mgr.locateItem('/$defs/screen') as DontCodeSchemaObject;
     expect(screen.getChild('type')).toBeDefined();
     const screenType = screen.getChild('type') as DontCodeSchemaEnum;
     expect(screenType.getValues().length).toEqual(2);
@@ -35,10 +35,11 @@ describe('Schema Manager', () => {
   it('should manages rest plugin updates', () => {
     const mgr = dtcde.getSchemaManager();
     mgr.registerChanges(restPluginConfig);
-    const sources = mgr.locateItem('/creation/sources');
+    let sources = mgr.locateItem('/creation/sources');
     expect(sources).toBeDefined();
     expect(sources.isArray()).toBeTruthy();
-    expect(sources.getChild('for')).toBeDefined();
+    sources = mgr.locateItem('/creation/sources', true);
+    expect(sources.isArray()).toBeFalsy();
 
     const sourceType = sources.getChild('type') as DontCodeSchemaEnum;
     expect(sourceType.getValues()).toContainEqual (new DontCodeSchemaEnumValue('Rest'));
@@ -126,6 +127,13 @@ describe('Schema Manager', () => {
     expect(type).toBeDefined();
     expect(type.isArray()).toBeFalsy();
     expect(type.isEnum()).toBeTruthy();
+
+      // Should raed the format field
+    const from = mgr.locateItem('creation/entities/from');
+    expect(from).toBeDefined();
+    expect(from.isArray()).toBeFalsy();
+    expect(from.getTargetPath()).toBeDefined();
+
   });
 
   it('should calculate the right key', () => {
@@ -158,7 +166,7 @@ class PluginTest implements DontCode.Plugin {
         "description": "A screen displaying a list of items",
         "changes": [{
           "location": {
-            "parent": "#/definitions/screen",
+            "parent": "#/$defs/screen",
             "id": "type",
             "after": "name"
           },
@@ -169,14 +177,14 @@ class PluginTest implements DontCode.Plugin {
           },
           "props": {
             "entity": {
-              "$ref": "#/definitions/entity",
+              "$ref": "#/$defs/entity",
               "format": "#/creation/entities"
             }
           },
           "replace": true
         }, {
           "location": {
-            "parent": "/definitions/screen",
+            "parent": "/$defs/screen",
             "id": "type",
             "after": "name"
           },
@@ -204,25 +212,7 @@ const restPluginConfig = {
     description: 'Create the list of sources',
     changes: [{
       location: {
-        parent: '#/creation',
-        id: 'sources'
-      },
-      update: {
-        type: 'array',
-        items: {
-          type:'object',
-          properties: {
-            for: {
-              type: 'string',
-              format: '$.creation.entities[*]'
-            }
-          }
-        }
-      },
-      replace: false
-    },{
-      location: {
-        parent: '#/creation/sources',
+        parent: '#/$defs/source',
         id: 'type'
       },
       update: {
