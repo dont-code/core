@@ -73,6 +73,10 @@ export class DontCodeStoreManager {
     }
   }
 
+  removeProviderForSourceType (srcType:string): void {
+    this.providerByType.delete(srcType);
+  }
+
   removeDefaultProvider (): void {
     this.removeProvider();
   }
