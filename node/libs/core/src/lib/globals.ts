@@ -71,7 +71,8 @@ export interface DontCodeSourceType {
         description?:string,
         changes:Array <ChangeConfig>;
       }>,
-    "preview-handlers"?: Array<PreviewHandlerConfig>
+    "preview-handlers"?: Array<ChangeHandlerConfig>,
+    "global-handlers"?: Array<ChangeHandlerConfig>
   }
 
   export interface ChangeConfig {
@@ -86,7 +87,7 @@ export interface DontCodeSourceType {
 
   }
 
-  export interface PreviewHandlerConfig {
+  export interface ChangeHandlerConfig {
     location: {
       parent:string,
       id?:string,

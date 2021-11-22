@@ -1,12 +1,12 @@
 import * as DontCode from "@dontcode/core";
-import {PreviewHandlerConfig} from "@dontcode/core";
+import {ChangeHandlerConfig} from "@dontcode/core";
 
 export class DontCodePreviewManager {
-  protected handlersPerLocations: Map<string, PreviewHandlerConfig[] >;
+  protected handlersPerLocations: Map<string, ChangeHandlerConfig[] >;
 
 
   constructor() {
-    this.handlersPerLocations = new Map<string, DontCode.PreviewHandlerConfig[]>();
+    this.handlersPerLocations = new Map<string, DontCode.ChangeHandlerConfig[]>();
   }
 
   registerHandlers (config: DontCode.PluginConfig): void {
@@ -22,9 +22,9 @@ export class DontCodePreviewManager {
     }
   }
 
-  retrieveHandlerConfig (position: string, jsonContent?: any): PreviewHandlerConfig|null {
+  retrieveHandlerConfig (position: string, jsonContent?: any): ChangeHandlerConfig|null {
     const found = this.handlersPerLocations.get(position);
-    let ret:PreviewHandlerConfig|null = null;
+    let ret:ChangeHandlerConfig|null = null;
     let contentNeeded=false;
 
     if (found) {
