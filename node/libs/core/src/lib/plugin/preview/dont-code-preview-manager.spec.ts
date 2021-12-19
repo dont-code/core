@@ -129,6 +129,46 @@ describe('Preview Manager', () => {
 
   });
 
+  it('should manage global handlers', (done) => {
+    const test = new DontCodeCore();
+
+    test.registerPlugin(new GlobalHandlerPluginTest());
+    const gHandlers = test.getPreviewManager().getGlobalHandlers();
+    expect (gHandlers.size).toBe(2);
+    expect (gHandlers.get('creation/sources')).toHaveLength(2);
+    expect (gHandlers.get('creation/sources')![0]).toHaveProperty('class.name','GlobalTestHandler');
+    expect (gHandlers.get('creation/sources')![1]).toHaveProperty('location.parent','creation/sources');
+    expect (gHandlers.get('creation/entities')).toHaveLength(1);
+    expect (gHandlers.get('creation/entities')![0]).toHaveProperty('class.name','GlobalTestHandler2');
+    let counter=0;
+
+    test.getPreviewManager().receiveGlobalHandlers().subscribe( {
+      next: (value) => {
+        counter++;
+        switch (counter) {
+          case 1:
+            expect(value.location.parent).toBe('creation/sources');
+            break;
+          case 2:
+            expect(value.class.name).toBe('GlobalTestHandler2');
+            break;
+          case 3:
+            expect(value.location.parent).toBe('creation/sources');
+            done();
+            break;
+          default:
+            done('Invalid number of global handlers found:' + counter);
+            break;
+
+        }
+      },
+      error: (err) => {
+        done(err);
+      }
+  });
+
+  });
+
 });
 
 class SimplePluginTest implements DontCode.Plugin {
@@ -306,3 +346,46 @@ class NoValuesPluginTest implements DontCode.Plugin {
 
 }
 
+class GlobalHandlerPluginTest implements DontCode.Plugin {
+  getConfiguration(): PluginConfig {
+    return {
+      "plugin": {
+        "id": "GlobalHandlerPluginTest",
+        "display-name": "Testing Global Handlers ",
+        "version": "1.0.0"
+      },
+      "global-handlers": [
+        {
+          "location": {
+            "parent": "creation/sources",
+            "id":"type"
+          },
+          "class": {
+            "name":"GlobalTestHandler",
+            "source":"global-test-module"
+          }
+        },
+        {
+          "location": {
+            "parent": "creation/entities",
+            "id":"name"
+          },
+          "class": {
+            "name":"GlobalTestHandler2",
+            "source":"global-test-module"
+          }
+        },
+        {
+          "location": {
+            "parent": "creation/sources",
+            "id":"type"
+          },
+          "class": {
+            "name":"GlobalTestHandler3",
+            "source":"global-test-module"
+          }
+        }
+      ]
+    }
+  }
+}

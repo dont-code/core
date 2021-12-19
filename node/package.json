@@ -27,6 +27,9 @@
     "workspace-generator": "nx workspace-generator"
   },
   "private": false,
+  "dependencies": {
+    "jsonpath-plus": "^6.0.1"
+  },
   "devDependencies": {
     "@nrwl/eslint-plugin-nx": "12.5.7",
     "@nrwl/jest": "12.5.7",
@@ -36,10 +39,10 @@
     "@nrwl/workspace": "12.5.7",
     "@types/jest": "^26.0.24",
     "@types/node": "14.14.33",
-    "@typescript-eslint/eslint-plugin": "^4.28.2",
-    "@typescript-eslint/parser": "^4.28.2",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
     "dotenv": "8.2.0",
-    "eslint": "^7.30.0",
+    "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "jest": "27.0.6",
     "jest-preset-typescript": "^1.2.0",
@@ -52,8 +55,5 @@
   },
   "optionalDependencies": {
     "fsevents": "^2.3.2"
-  },
-  "dependencies": {
-    "jsonpath-plus": "^6.0.1"
   }
 }
