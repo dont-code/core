@@ -72,6 +72,12 @@ export class DontCodeSchemaManager {
     return this.locateItem(ref.getReference());
   }
 
+  generateParentPointer (pointer: DontCodeModelPointer): DontCodeModelPointer | undefined {
+    if (pointer.containerPosition)
+      return this.generateSchemaPointer(pointer.containerPosition);
+    return;
+  }
+
   generateSchemaPointer (queriedPosition: string) : DontCodeModelPointer {
     let ret:DontCodeModelPointer;
 
@@ -81,7 +87,6 @@ export class DontCodeSchemaManager {
     if ((posElems.length===0) || (posElems[0].length===0))  {
       // Managing the special case of asking for root
       ret = new DontCodeModelPointer(queriedPosition, queriedPosition,undefined,undefined,null,null);
-
       return ret;
     }else {
 

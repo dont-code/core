@@ -19,12 +19,12 @@ export class DontCodeTestManager {
   }
 
   public static createAnyChange(type:ChangeType, containerSchema: string, containerItemId: string|null, schema: string|null, itemId: string|null, value: any, property?:string) {
-    let calcContainerItemId=containerItemId?'/'+containerItemId:'';
-    let calcItemId=itemId?'/'+itemId:'';
-    let calcSchema=schema?'/'+schema:'';
-    let calcProperty=property?'/'+property:'';
-    let calcPropertySchemaItem = (property)?calcSchema + calcItemId:'';
-    let calcPropertySchema = (property)?calcSchema:'';
+    const calcContainerItemId=containerItemId?'/'+containerItemId:'';
+    const calcItemId=itemId?'/'+itemId:'';
+    const calcSchema=schema?'/'+schema:'';
+    const calcProperty=property?'/'+property:'';
+    const calcPropertySchemaItem = (property)?calcSchema + calcItemId:(itemId)?calcSchema:'';
+    const calcPropertySchema = (property)?calcSchema:'';
 
     return new Change(type,
       containerSchema + calcContainerItemId + calcSchema + calcItemId + calcProperty,

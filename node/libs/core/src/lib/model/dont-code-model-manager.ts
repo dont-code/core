@@ -1,9 +1,11 @@
 import {Change, ChangeType} from "../change/change";
 import {Subject} from "rxjs";
 import {DontCodeSchemaItem} from "./dont-code-schema-item";
-import {dtcde} from "../globals";
 import {DontCodeSchemaManager} from "./dont-code-schema-manager";
 import {JSONPath} from 'jsonpath-plus';
+import {DontCodeModelPointer} from "./dont-code-schema";
+
+
 /**
  * Stores and constantly updates the json (as an instance of the DontCodeSchema) as it is being edited / modified through Change events
  * It does not store the entity values but the description of entities, screens... as defined in the Editor
@@ -27,6 +29,232 @@ export class DontCodeModelManager {
    */
   resetContent (newContent: any) {
     this.content = newContent;
+  }
+
+  /**
+   * Apply the change to the current model and split it into multiple atomic changes for each modified property
+   * @param toApply
+   */
+  applyChange (toApply: Change): Array<Change> {
+    let pointer = toApply.pointer??this.schemaMgr.generateSchemaPointer(toApply.position);
+    toApply.pointer = pointer;
+    const parentPosition = pointer.containerPosition;
+    const subElem = toApply.pointer?.key?? toApply.pointer?.itemId;
+    if (parentPosition && subElem)
+      pointer = this.schemaMgr.generateParentPointer(pointer)!;
+
+    const atomicChanges = new AtomicChange ();
+    atomicChanges.isRoot=true;
+    atomicChanges.name = pointer.position;
+    let lastChange = atomicChanges;
+    let content = this.findAtPosition(pointer.position);
+
+    if( content==null) {
+        // Are we trying to delete a non existing content ?
+      if ((toApply.type === ChangeType.DELETE) ||
+        ((toApply.type === ChangeType.RESET) && (toApply.value == null))) {
+        return []; // Nothing has changed
+      } else {
+        // we are adding something, so create the parent
+        content = this.findAtPosition(pointer.position, true, atomicChanges);
+        let basePosition = pointer.position;
+        while (lastChange.subChanges.length>0) {
+          basePosition = basePosition.substring(0, basePosition.lastIndexOf('/'));
+          lastChange = lastChange.subChanges[0];
+        }
+        atomicChanges.name=basePosition;
+      }
+    }
+
+    this.applyChangeRecursive(toApply, content, toApply.value, toApply.pointer, lastChange);
+    return this.generateChanges (toApply, atomicChanges,this.schemaMgr.generateSchemaPointer(atomicChanges.name));
+  }
+
+  protected applyChangeRecursive (srcChange: Change, oldContent: any, newContent: any, pointer: DontCodeModelPointer, atomicChanges: AtomicChange): void {
+    if( srcChange.pointer == null)
+      throw new Error ('Cannot apply a change without a pointer at position '+srcChange.position);
+
+    const subElem = pointer.key??pointer?.itemId;
+    if (subElem) {
+      //const subPointer = pointer.subItemOrPropertyPointer(subElem, pointer?.key==null);
+      switch (srcChange.type) {
+        case ChangeType.ADD:
+        case ChangeType.UPDATE: {
+          if (oldContent[subElem]==null) {
+            atomicChanges.createSubChange(ChangeType.ADD, subElem);
+          } else {
+            atomicChanges.createSubChange(ChangeType.UPDATE, subElem);
+          }
+          this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
+          oldContent[subElem]=newContent;
+        }
+        break;
+        case ChangeType.RESET: {
+          atomicChanges.createSubChange(ChangeType.RESET, subElem);
+          this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
+          oldContent[subElem]=newContent;
+        }
+        break;
+        case ChangeType.DELETE: {
+          if( oldContent[subElem]) {
+            atomicChanges.createSubChange(ChangeType.DELETE, subElem);
+            this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
+            delete oldContent[subElem];
+          }
+        }
+        break;
+        case ChangeType.MOVE: {
+          if( oldContent[subElem]) {
+            atomicChanges.createSubChange(ChangeType.DELETE, subElem);
+            this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
+            delete oldContent[subElem];
+          }
+        }
+        break;
+        default:
+          throw new Error ('No support for change of type '+srcChange.type);
+      }
+    }
+
+/*    switch (srcChange.type) {
+      case ChangeType.ADD:
+      case ChangeType.UPDATE: {
+            // Create a new property or replace existing one
+          if (typeof (srcChange.value) === 'object') {
+            if ((subElem) && (content.hasOwnProperty(subElem))) {
+              this.generateAtomicSubChanges (srcChange, content[subElem], srcChange.value, srcChange.pointer, atomicChanges);
+            } else if (subElem) {
+              content[subElem]={};
+              content=content[subElem];
+              atomicChanges.push(new Change(ChangeType.ADD, srcChange.position, srcChange.value, srcChange.pointer));
+              this.generateAtomicSubChanges (srcChange, content, srcChange.value, srcChange.pointer, atomicChanges);
+            } else {
+              this.generateAtomicSubChanges (srcChange, content, srcChange.value, pointer, atomicChanges);
+            }
+          } else {
+            if( subElem) {
+              if( content.hasOwnProperty(subElem)) {
+                if (content[subElem]!== srcChange.value) {
+                  // Updates the values only if it's different
+                  atomicChanges.push(new Change(ChangeType.UPDATE, srcChange.position, srcChange.value, srcChange.pointer));
+                  content[subElem] = srcChange.value;
+                }
+              } else {
+
+                //atomicChanges.push(new Change (ChangeType.UPDATE, pointer.position, null, pointer));  // Tells the parent has been updated
+                atomicChanges.push(new Change (ChangeType.ADD, srcChange.position, srcChange.value, srcChange.pointer));
+                content[subElem] = srcChange.value;
+              }
+            }
+            else {
+              throw new Error('Cannot set element for parent'+ srcChange.pointer);
+            }
+          }
+        }
+        break;
+      case ChangeType.RESET:
+        atomicChanges.push(srcChange);
+        if (typeof (srcChange.value) === 'object')
+          this.generateAtomicSubChanges (srcChange, content, srcChange.value, pointer, atomicChanges);
+        else {
+          if( subElem)
+            content[subElem] = srcChange.value;
+          else {
+            throw new Error('Cannot set element for parent'+ srcChange.pointer);
+          }
+        }
+        break;
+      case ChangeType.MOVE:
+        break;
+      case ChangeType.DELETE:
+        atomicChanges.push(srcChange);
+        if (typeof (srcChange.value) === 'object')
+          this.generateAtomicSubChanges (srcChange, content, srcChange.value, pointer, atomicChanges);
+        else {
+          if( subElem)
+            content[subElem] = srcChange.value;
+          else {
+            throw new Error('Cannot set element for parent'+ srcChange.pointer);
+          }
+        }
+        break;
+      default:
+        throw new Error ('Invalid change type '+srcChange.type);
+    }
+*/
+
+  }
+
+  /**
+   * By checking the differences between old and new content, and depending on the src change type, generate a change for each sub element hierarchically
+   * @param src
+   * @param oldContent
+   * @param newContent
+   * @param atomicChanges
+   */
+  compareRecursiveIfNeeded (src: Change, oldContent:any, newContent:any, pointer: DontCodeModelPointer, atomicChanges:AtomicChange): void {
+    if( (oldContent==null) || (typeof (oldContent) !== 'object'))
+      oldContent = {};
+    if( (newContent==null) || (typeof (newContent) !== 'object'))
+      newContent = {};
+    const alreadyChecked = new Set<string> ();
+
+      // Check if existing elements have been deleted or updated
+    for (const oldSubProperty in oldContent) {
+      const subPointer = this.schemaMgr.generateSubSchemaPointer(pointer, oldSubProperty);
+      const subPosition = subPointer.position;
+      alreadyChecked.add(oldSubProperty);
+      if (newContent.hasOwnProperty(oldSubProperty)) {
+        this.applyChangeRecursive(src, oldContent[oldSubProperty], newContent[oldSubProperty], subPointer,atomicChanges);
+      } else {
+        // It doesn't exist in the new element, so it's deleted
+        this.applyChangeRecursive(new Change(ChangeType.DELETE, subPosition, null, subPointer),
+          oldContent[oldSubProperty], null, subPointer, atomicChanges);
+      }
+    }
+
+      // Check if new elements have been added
+    for (const newSubProperty in newContent) {
+      if( !alreadyChecked.has(newSubProperty)) {
+        const subPointer = this.schemaMgr.generateSubSchemaPointer(pointer, newSubProperty);
+        const subPosition = subPointer.position;
+        this.applyChangeRecursive(new Change(ChangeType.ADD, subPosition, newContent[newSubProperty], subPointer),
+          oldContent, newContent[newSubProperty], subPointer, atomicChanges);
+      }
+
+    }
+  }
+
+  protected generateChanges(src: Change, atomicChanges: AtomicChange, pointer?:DontCodeModelPointer, result?:Array<Change>): Array<Change> {
+    if (result==null)
+      result = new Array<Change>();
+
+    if( src.pointer==null)
+      throw new Error("Cannot generate changes without the pointer");
+
+    if( pointer == null)
+      pointer = src.pointer;
+
+    if (atomicChanges.type!=null) {
+      pointer = this.schemaMgr.generateSubSchemaPointer(pointer, atomicChanges.name);
+      result.push(new Change(atomicChanges.type, pointer.position, null, pointer));
+    } else {
+      // First check if we need to send an UPDATED change to this element because a subElement is added / removed
+      for (let i=0;i<atomicChanges.subChanges.length;i++) {
+        const cur = atomicChanges.subChanges[i];
+        if (cur.type !== ChangeType.UPDATE) {
+             result.push(new Change (ChangeType.UPDATE, pointer.position, null, pointer));
+        }
+      }
+    }
+
+      // Then recurse through all subelements, generating changes along the way
+    for (let i=0;i<atomicChanges.subChanges.length;i++) {
+      const cur = atomicChanges.subChanges[i];
+      this.generateChanges(src, cur, pointer, result);
+    }
+
+    return result;
   }
 
   /**
@@ -100,15 +328,15 @@ export class DontCodeModelManager {
    * @param position
    * @param create
    */
-  findAtPosition (position:string, create?:boolean): any {
+  findAtPosition (position:string, create?:boolean, added?:AtomicChange): any {
     const path=position.split ('/');
     if (this.content == null) {
       if( create) {
         this.content = {
-          creation: {
-            type:'application',
-            name:'unknown'
-          }
+          creation: {}
+        };
+        if (added) {
+          added = added.createSubChange (ChangeType.ADD, 'creation');
         }
       } else {
         return null;
@@ -116,13 +344,21 @@ export class DontCodeModelManager {
     }
 
     let current = this.content;
+    let currentPath= "";
 
     path.forEach(element => {
       if( (element==="") || (current===null))
         return current;
+      if (currentPath.length === 0)
+        currentPath = element;
+      else
+        currentPath = currentPath + '/' + element;
       if (! current[element]) {
         if (create) {
           current[element]={};
+          if( added) {
+            added = added.createSubChange(ChangeType.ADD, element);
+          }
         } else
         {
           current=null;
@@ -204,5 +440,45 @@ export class DontCodeModelManager {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Did one of the change add a direct subelement of the one in position ? If yes, then we assume the element at position has changed
+   * @param toCheck
+   * @param changes
+   * @private
+   */
+  protected hasAffected(toCheck: DontCodeModelPointer, changes: Change[]): boolean {
+    for (let i=0;i<changes.length;i++) {
+      const change = changes[i];
+      if (change.type!==ChangeType.UPDATE) {
+          // If the n-1 last / is the same as the lastSlash then the element is a direct subElement
+        if (change.pointer?.isPropertyOf(toCheck)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+}
+
+class AtomicChange {
+  type!:ChangeType;
+  name = "";
+  subChanges = new Array <AtomicChange>();
+  isRoot = false;
+
+  constructor(type?:ChangeType, name?:string) {
+    if (type)
+      this.type = type;
+    if (name)
+      this.name = name;
+  }
+
+  createSubChange(type: ChangeType, elementName: string):AtomicChange {
+    const newChange = new AtomicChange(type, elementName);
+    this.subChanges.push(newChange);
+    return newChange;
   }
 }

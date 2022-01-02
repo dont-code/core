@@ -229,7 +229,7 @@ export class DontCodeModelPointer {
    * @return the property name or null
    */
   isPropertyOf (pointer:DontCodeModelPointer): string|null {
-    if (pointer.schemaPosition===this.containerSchemaPosition) {
+    if (pointer.position===this.containerPosition) {
       return this.calculateKeyOrContainer();
     }else return null;
   }
@@ -266,8 +266,8 @@ export class DontCodeModelPointer {
    */
   subPropertyPointer (subProp:string): DontCodeModelPointer {
     const newPointer = new DontCodeModelPointer(
-      (this.position==='/')?subProp:this.position+'/'+subProp,
-      (this.schemaPosition==='/')?subProp:this.schemaPosition+'/'+subProp,
+      (this.position==='/' || this.position==='')?subProp:this.position+'/'+subProp,
+      (this.schemaPosition==='/' || this.schemaPosition==='')?subProp:this.schemaPosition+'/'+subProp,
       this.position,
       this.schemaPosition,
       subProp,
