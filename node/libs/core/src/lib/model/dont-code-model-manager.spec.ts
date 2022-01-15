@@ -149,8 +149,9 @@ describe('Model Manager', () => {
     });
   });
 
-  function checkChanges(atomicChanges: Array<Change>, expected: Array<{ position: string; type: ChangeType, value?:any }>): void {
+  function checkChanges(atomicChanges: Array<Change>, expected: Array<{ position: string; type: ChangeType, oldPosition?:string }>): void {
     atomicChanges.forEach((value, index) => {
+      expect(index).toBeLessThan(expected.length);
       expect(value).toMatchObject (expected[index]);
     });
     expect(atomicChanges).toHaveLength(expected.length);
@@ -158,6 +159,7 @@ describe('Model Manager', () => {
 
   it('should support simple value changes', () => {
     const service = dtcde.getModelManager();
+      // Test creation of a simple property including its parent
     service.resetContent({});
     let atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("creation", null, null, null, "TestName", "name"));
     expect(service.getContent()).toEqual({
@@ -171,6 +173,7 @@ describe('Model Manager', () => {
       {type: ChangeType.ADD, position: 'creation/name'}
     ]);
 
+    // Test creation of a simple property generates an update of its parent
     atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("creation", null, null, null, "TestApp", "type"));
     expect(service.getContent()).toEqual({
       creation: {
@@ -179,15 +182,41 @@ describe('Model Manager', () => {
       }
     });
     checkChanges (atomicChanges,[
-      {type: ChangeType.UPDATE, position: 'creation'},
-      {type:ChangeType.ADD, position:'creation/type'}
+      {type:ChangeType.UPDATE, position: 'creation'},
+      {type:ChangeType.ADD, position: 'creation/type'}
     ]);
 
+    // Test deletion of a simple property generates an update of its parent
+    atomicChanges = service.applyChange(DontCodeTestManager.createDeleteChange("creation", null, null, null, "type"));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName'
+      }
+    });
+    checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position: 'creation'},
+      {type:ChangeType.DELETE, position: 'creation/type'}
+    ]);
+
+    // Test reset of a simple property generates an update of its parent
+    atomicChanges = service.applyChange(DontCodeTestManager.createAnyChange(ChangeType.RESET, "creation", null, null, null, "appli", "type"));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName',
+        type: 'appli'
+      }
+    });
+    checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position: 'creation'},
+      {type:ChangeType.RESET, position:'creation/type'}
+    ]);
+
+    // Test creation of a simple property can create multiple subHierarchy
     atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("creation", null, 'entities', 'a', "TestEntity", "name"));
     expect(service.getContent()).toEqual({
       creation: {
         name: "TestName",
-        type: "TestApp",
+        type: 'appli',
         entities: {
           "a": {
             "name":"TestEntity"
@@ -196,14 +225,332 @@ describe('Model Manager', () => {
       }
     });
     checkChanges (atomicChanges,[
-      {type: ChangeType.UPDATE, position: 'creation'},
+      {type:ChangeType.UPDATE, position: 'creation'},
       {type:ChangeType.ADD, position:'creation/entities'},
       {type:ChangeType.ADD, position:'creation/entities/a'},
       {type:ChangeType.ADD, position:'creation/entities/a/name'}
     ]);
+
+    // Test move of a simple property generates creation of new parent and update of old parent
+    atomicChanges = service.applyChange(DontCodeTestManager.createMoveChange("creation/entities/a/name",null, "creation", null, 'entities', 'b', "name"));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        type: 'appli',
+        entities: {
+          "a": {
+          },
+          "b": {
+            "name":"TestEntity"
+          }
+        }
+      }
+    });
+    checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation/entities'},
+      {type:ChangeType.ADD, position:'creation/entities/b'},
+      {type:ChangeType.UPDATE, position:'creation/entities/a'},
+      {type:ChangeType.MOVE, position:'creation/entities/b/name', oldPosition:'creation/entities/a/name'}
+    ]);
+
+
+    // Test move of a simple property generates an update of both parents
+    atomicChanges = service.applyChange(DontCodeTestManager.createMoveChange("creation/entities/b/name",null, "creation", null, 'entities', 'a', "name"));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        type: 'appli',
+        entities: {
+          "a": {
+            "name":"TestEntity"
+          },
+          "b": {
+          }
+        }
+      }
+    });
+    checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation/entities/a'},
+      {type:ChangeType.UPDATE, position:'creation/entities/b'},
+      {type:ChangeType.MOVE, position:'creation/entities/a/name', oldPosition:'creation/entities/b/name'}
+    ]);
   });
 
   it('should support array changes by position', () => {
+    const service = dtcde.getModelManager();
+    // Test you can add an complete object as an element of to be created array
+    service.resetContent({
+      creation: {
+        name: "TestName"
+      }
+    });
+    let atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("creation", null, 'entities', 'a', {
+      name: 'TestEntityA',
+      from: 'TestSourceA'
+    }));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          }
+        }
+      },
+    });
+    checkChanges(atomicChanges, [
+      {type: ChangeType.UPDATE, position: 'creation'},
+      {type: ChangeType.ADD, position: 'creation/entities'},
+      {type: ChangeType.ADD, position: 'creation/entities/a'},
+      {type: ChangeType.ADD, position: 'creation/entities/a/name'},
+      {type: ChangeType.ADD, position: 'creation/entities/a/from'},
+    ]);
+
+    // Test you can add another element of an array
+    atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("creation", null, 'entities', 'b', {
+      name: 'TestEntityB',
+      from: 'TestSourceB'
+    }));
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          },
+          'b': {
+            name:'TestEntityB',
+            from:'TestSourceB'
+          }
+        }
+      },
+    });
+    checkChanges(atomicChanges, [
+      {type: ChangeType.UPDATE, position: 'creation/entities'},
+      {type: ChangeType.ADD, position: 'creation/entities/b'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/name'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/from'},
+    ]);
+
+
+      // Check the hierarchy is correctly managed when adding a complex object in an array
+    atomicChanges = service.applyChange(DontCodeTestManager.createAnyChange(ChangeType.UPDATE, "creation", null, 'entities', 'b', {
+      name: 'NewTestEntityB',
+      fields: {
+        'aa': {
+          'name':'TestFieldAA',
+          'type':'int'
+        },
+        'ab': {
+          'name':'TestFieldAB',
+          'type':'int'
+        }
+      }
+    }));
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          },
+          'b': {
+            name:'NewTestEntityB',
+            fields: {
+              'aa': {
+                'name':'TestFieldAA',
+                'type':'int'
+              },
+              'ab': {
+                'name':'TestFieldAB',
+                'type':'int'
+              }
+            }
+          }
+        }
+      },
+    });
+    checkChanges(atomicChanges, [
+      {type: ChangeType.UPDATE, position: 'creation/entities/b'},
+      {type: ChangeType.UPDATE, position: 'creation/entities/b/name'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/from'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/fields'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/fields/aa'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/fields/aa/name'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/fields/aa/type'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/fields/ab'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/fields/ab/name'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/fields/ab/type'}
+    ]);
+
+    // Check the RESET of a complex object in a array generates the right events
+    atomicChanges = service.applyChange(DontCodeTestManager.createAnyChange( ChangeType.RESET,"creation",null, 'entities', 'b', {
+      name:'NewTestEntityB',
+      from:'TestSourceB'
+    }));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          },
+          'b': {
+            name:'NewTestEntityB',
+            from:'TestSourceB'
+          }
+        }
+      },
+    });
+    checkChanges(atomicChanges, [
+      {type: ChangeType.UPDATE, position: 'creation/entities'},
+      {type: ChangeType.RESET, position: 'creation/entities/b'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/fields'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/fields/aa'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/fields/aa/name'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/fields/aa/type'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/fields/ab'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/fields/ab/name'},
+      {type: ChangeType.DELETE, position: 'creation/entities/b/fields/ab/type'},
+      {type: ChangeType.ADD, position: 'creation/entities/b/from'},
+    ]);
+
+    // Check the element can be inserted anywhere in an array
+    const insertChange = DontCodeTestManager.createTestChange("creation", null, 'entities', 'c', {
+      name: 'TestEntityC',
+      from: 'TestSourceC'
+    });
+    insertChange.beforeKey='b';
+
+    atomicChanges = service.applyChange(insertChange);
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          },
+          'c': {
+            name:'TestEntityC',
+            from:'TestSourceC'
+          },
+          'b': {
+            name:'NewTestEntityB',
+            from:'TestSourceB'
+          }
+        }
+      },
+    });
+    // Test the element has been inserted at the correct position
+    expect(Object.keys(service.getContent()['creation']['entities'])).toStrictEqual(['a','c','b']);
+
+
+    // Check one can DELETE an element in an array
+    atomicChanges = service.applyChange(DontCodeTestManager.createDeleteChange( "creation", null, 'entities', 'c'));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          },
+          'b': {
+            name:'NewTestEntityB',
+            from:'TestSourceB'
+          }
+        }
+      },
+    });
+    checkChanges(atomicChanges, [
+      {type: ChangeType.UPDATE, position: 'creation/entities'},
+      {type: ChangeType.DELETE, position: 'creation/entities/c'},
+      {type: ChangeType.DELETE, position: 'creation/entities/c/name'},
+      {type: ChangeType.DELETE, position: 'creation/entities/c/from'},
+    ]);
+
+    // Check one can MOVE elements inside an array
+    atomicChanges = service.applyChange(DontCodeTestManager.createMoveChange( "creation/entities/b","a","creation", null, 'entities', 'b'));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'b': {
+            name:'NewTestEntityB',
+            from:'TestSourceB'
+          },
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          }
+        }
+      },
+    });
+    checkChanges(atomicChanges, [
+      {type: ChangeType.UPDATE, position: 'creation/entities'},
+      {type: ChangeType.MOVE, position: 'creation/entities/b', oldPosition:'creation/entities/b'}
+    ]);
+
+      // Check one can move an item from one parent to another
+    service.resetContent({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA'
+          },
+          'b': {
+            name:'TestEntityB',
+            fields: {
+              'ab': {
+                'name':'TestFieldAB',
+                'type':'int'
+              }
+            }
+          }
+        }
+      }
+    });
+    atomicChanges = service.applyChange(DontCodeTestManager.createMoveChange( "creation/entities/b/fields/ab",null,"creation/entities", 'a', 'fields', 'aa'));
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        entities: {
+          'a': {
+            name:'TestEntityA',
+            from:'TestSourceA',
+            fields: {
+              'aa': {
+                'name':'TestFieldAB',
+                'type':'int'
+              }
+            }
+          },
+          'b': {
+            name:'TestEntityB',
+            fields: {}
+          }
+        }
+      }
+    });
+    checkChanges(atomicChanges, [
+      {type: ChangeType.UPDATE, position: 'creation/entities/a'},
+      {type: ChangeType.ADD, position: 'creation/entities/a/fields'},
+      {type: ChangeType.UPDATE, position: 'creation/entities/b/fields'},
+      {type: ChangeType.MOVE, position: 'creation/entities/a/fields/aa', oldPosition:'creation/entities/b/fields/ab'},
+      {type: ChangeType.MOVE, position: 'creation/entities/a/fields/aa/name', oldPosition:'creation/entities/b/fields/ab/name'},
+      {type: ChangeType.MOVE, position: 'creation/entities/a/fields/aa/type', oldPosition:'creation/entities/b/fields/ab/type'}
+    ]);
+
   });
 
   it('should support array changes by subValue', () => {
@@ -215,11 +562,28 @@ describe('Model Manager', () => {
   it('should support object updates by subValue', () => {
   });
 
-  it('should add content correctly', () => {
+  it('should support additional tests', () => {
     const service = dtcde.getModelManager();
     service.resetContent({});
 
-    let atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("creation/entities", 'a', null, null, "TestEntity", "name"));
+    let atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("", null, null, null, {
+      name: "TestName",
+      type: "TestApp"
+    }, "creation"));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: "TestName",
+        type: "TestApp"
+      }
+    });
+    checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:''},
+      {type:ChangeType.ADD, position:'creation'},
+      {type:ChangeType.ADD, position:'creation/name'},
+      {type:ChangeType.ADD, position:'creation/type'}
+    ]);
+
+    atomicChanges = service.applyChange(DontCodeTestManager.createTestChange("creation/entities", 'a', null, null, "TestEntity", "name"));
     expect(service.getContent()).toEqual({
       creation: {
         name: "TestName",
@@ -232,6 +596,7 @@ describe('Model Manager', () => {
       }
     });
     checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation'},
       {type:ChangeType.ADD, position:'creation/entities'},
       {type:ChangeType.ADD, position:'creation/entities/a'},
       {type:ChangeType.ADD, position:'creation/entities/a/name'}
@@ -319,6 +684,7 @@ describe('Model Manager', () => {
       }
     });
     checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation'},
       {type:ChangeType.ADD, position:'creation/entities'},
       {type:ChangeType.ADD, position:'creation/entities/b'},
       {type:ChangeType.ADD, position:'creation/entities/b/name'},
@@ -373,6 +739,7 @@ describe('Model Manager', () => {
       }
     });
     checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation'},
       {type:ChangeType.ADD, position:'creation/entities'},
       {type:ChangeType.ADD, position:'creation/entities/c'},
       {type:ChangeType.ADD, position:'creation/entities/c/name'}
@@ -405,7 +772,7 @@ describe('Model Manager', () => {
         entities: {
           "c": {
             name: "TestEntity4",
-            source: "whatever"
+            from: "whatever"
           }
         },
         screens: {
@@ -426,6 +793,7 @@ describe('Model Manager', () => {
     });
 
     checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation'},
       {type:ChangeType.ADD, position:'creation/screens'},
       {type:ChangeType.ADD, position:'creation/screens/c'},
       {type:ChangeType.ADD, position:'creation/screens/c/name'},
@@ -458,6 +826,7 @@ describe('Model Manager', () => {
       }
     });
     checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation'},
       {type:ChangeType.ADD, position:'creation/screens'},
       {type:ChangeType.ADD, position:'creation/screens/ab'},
       {type:ChangeType.ADD, position:'creation/screens/ab/components'},
@@ -484,6 +853,7 @@ describe('Model Manager', () => {
       }
     });
     checkChanges (atomicChanges,[
+      {type:ChangeType.UPDATE, position:'creation/screens/ab/components'},
       {type:ChangeType.ADD, position:'creation/screens/ab/components/ef'},
       {type:ChangeType.ADD, position:'creation/screens/ab/components/ef/name'}
     ]);

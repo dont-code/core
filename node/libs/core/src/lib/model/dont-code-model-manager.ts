@@ -40,7 +40,7 @@ export class DontCodeModelManager {
     toApply.pointer = pointer;
     const parentPosition = pointer.containerPosition;
     const subElem = toApply.pointer?.key?? toApply.pointer?.itemId;
-    if (parentPosition && subElem)
+    if ((parentPosition!=null) && (subElem!=null))
       pointer = this.schemaMgr.generateParentPointer(pointer)!;
 
     const atomicChanges = new AtomicChange ();
@@ -70,50 +70,80 @@ export class DontCodeModelManager {
     return this.generateChanges (toApply, atomicChanges,this.schemaMgr.generateSchemaPointer(atomicChanges.name));
   }
 
-  protected applyChangeRecursive (srcChange: Change, oldContent: any, newContent: any, pointer: DontCodeModelPointer, atomicChanges: AtomicChange): void {
+  protected applyChangeRecursive (srcChange: Change, oldContent: any, newContent: any, pointer: DontCodeModelPointer, atomicChanges: AtomicChange, oldPosition?:string): void {
     if( srcChange.pointer == null)
       throw new Error ('Cannot apply a change without a pointer at position '+srcChange.position);
+
+    if( oldPosition==null)
+      oldPosition = srcChange.oldPosition;
 
     const subElem = pointer.key??pointer?.itemId;
     if (subElem) {
       //const subPointer = pointer.subItemOrPropertyPointer(subElem, pointer?.key==null);
       switch (srcChange.type) {
         case ChangeType.ADD:
-        case ChangeType.UPDATE: {
-          if (oldContent[subElem]==null) {
-            atomicChanges.createSubChange(ChangeType.ADD, subElem);
-          } else {
-            atomicChanges.createSubChange(ChangeType.UPDATE, subElem);
-          }
-          this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
-          oldContent[subElem]=newContent;
-        }
-        break;
+        case ChangeType.UPDATE:
         case ChangeType.RESET: {
-          atomicChanges.createSubChange(ChangeType.RESET, subElem);
-          this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
-          oldContent[subElem]=newContent;
+          let curAtomicChange;
+          if ((srcChange.type===ChangeType.RESET) && (srcChange.position===pointer.position))  // Create a RESET change for the root element reset only
+          {
+            curAtomicChange= atomicChanges.createSubChange(ChangeType.RESET, subElem);
+          } else  if (oldContent[subElem]==null) {
+            curAtomicChange= atomicChanges.createSubChange(ChangeType.ADD, subElem);
+          } else if ((typeof (newContent)==='object') || (Object.keys(oldContent[subElem])===Object.keys(newContent))){
+            curAtomicChange= atomicChanges.createSubChange(undefined, subElem);
+          } else if ((typeof (newContent)==='object') || (oldContent[subElem]!==newContent)){
+            curAtomicChange= atomicChanges.createSubChange(ChangeType.UPDATE, subElem);
+          }
+
+          if( curAtomicChange)
+            this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, curAtomicChange);
+          this.insertProperty(oldContent, subElem, newContent, srcChange.beforeKey);
         }
         break;
         case ChangeType.DELETE: {
           if( oldContent[subElem]) {
-            atomicChanges.createSubChange(ChangeType.DELETE, subElem);
-            this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
+            const curAtomicChange = atomicChanges.createSubChange(ChangeType.DELETE, subElem);
+            this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, curAtomicChange);
             delete oldContent[subElem];
           }
         }
         break;
         case ChangeType.MOVE: {
-          if( oldContent[subElem]) {
-            atomicChanges.createSubChange(ChangeType.DELETE, subElem);
-            this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, atomicChanges);
-            delete oldContent[subElem];
+          // If it's the root of move, then find the value to move from the oldPosition
+          if (srcChange.position===pointer.position) {
+            if (oldPosition==null)
+              throw new Error ('Cannot process MOVE change without oldPosition'+srcChange.position);
+            if (newContent==null) {
+              newContent = this.findAtPosition(oldPosition);
+            }
+            if( newContent) {
+              const curAtomicChange = atomicChanges.createSubChange(ChangeType.MOVE, subElem, oldPosition);
+              if (srcChange.position!==oldPosition) // When we reorder elements of an array, it's a move to the same position: No changes
+              {
+                this.compareRecursiveIfNeeded(srcChange, oldContent, newContent, pointer, curAtomicChange, oldPosition);
+                this.insertProperty(oldContent, subElem, newContent, srcChange.beforeKey);
+                // Really perform the change
+                const splittedPosition = DontCodeModelPointer.splitPosition(oldPosition)!;
+                const parentContent = this.findAtPosition(splittedPosition.parent);
+                delete parentContent[splittedPosition.element];
+              }else {
+                // Just insert the same element at a different position in the object
+                this.insertProperty(oldContent, subElem, newContent, srcChange.beforeKey);
+              }
+            }
+          } else {
+            // The move has already been done, so just createSubChange and loop through subElements
+            const curAtomicChange = atomicChanges.createSubChange(ChangeType.MOVE, subElem, oldPosition);
+            this.compareRecursiveIfNeeded (srcChange, oldContent, newContent, pointer, curAtomicChange, oldPosition);
           }
         }
         break;
         default:
           throw new Error ('No support for change of type '+srcChange.type);
       }
+    } else {
+      this.compareRecursiveIfNeeded(srcChange, oldContent, newContent, pointer, atomicChanges, oldPosition);
     }
 
 /*    switch (srcChange.type) {
@@ -192,7 +222,7 @@ export class DontCodeModelManager {
    * @param newContent
    * @param atomicChanges
    */
-  compareRecursiveIfNeeded (src: Change, oldContent:any, newContent:any, pointer: DontCodeModelPointer, atomicChanges:AtomicChange): void {
+  compareRecursiveIfNeeded (src: Change, oldContent:any, newContent:any, pointer: DontCodeModelPointer, atomicChanges:AtomicChange, oldPosition?:string): void {
     if( (oldContent==null) || (typeof (oldContent) !== 'object'))
       oldContent = {};
     if( (newContent==null) || (typeof (newContent) !== 'object'))
@@ -205,23 +235,30 @@ export class DontCodeModelManager {
       const subPosition = subPointer.position;
       alreadyChecked.add(oldSubProperty);
       if (newContent.hasOwnProperty(oldSubProperty)) {
-        this.applyChangeRecursive(src, oldContent[oldSubProperty], newContent[oldSubProperty], subPointer,atomicChanges);
+        this.applyChangeRecursive(src, oldContent, newContent[oldSubProperty], subPointer,atomicChanges, oldPosition);
       } else {
         // It doesn't exist in the new element, so it's deleted
         this.applyChangeRecursive(new Change(ChangeType.DELETE, subPosition, null, subPointer),
-          oldContent[oldSubProperty], null, subPointer, atomicChanges);
+          oldContent, null, subPointer, atomicChanges, oldPosition);
       }
     }
 
       // Check if new elements have been added
     for (const newSubProperty in newContent) {
-      if( !alreadyChecked.has(newSubProperty)) {
+      if (src.type===ChangeType.MOVE) {
+        const subPointer = this.schemaMgr.generateSubSchemaPointer(pointer, newSubProperty);
+        const subPosition = subPointer.position;
+        //src.oldPosition = subPosition;
+        this.applyChangeRecursive(src,
+          oldContent, newContent[newSubProperty], subPointer, atomicChanges, oldPosition+'/'+newSubProperty);
+
+      }
+      else if( !alreadyChecked.has(newSubProperty)) {
         const subPointer = this.schemaMgr.generateSubSchemaPointer(pointer, newSubProperty);
         const subPosition = subPointer.position;
         this.applyChangeRecursive(new Change(ChangeType.ADD, subPosition, newContent[newSubProperty], subPointer),
           oldContent, newContent[newSubProperty], subPointer, atomicChanges);
       }
-
     }
   }
 
@@ -236,22 +273,36 @@ export class DontCodeModelManager {
       pointer = src.pointer;
 
     if (atomicChanges.type!=null) {
-      pointer = this.schemaMgr.generateSubSchemaPointer(pointer, atomicChanges.name);
-      result.push(new Change(atomicChanges.type, pointer.position, null, pointer));
+      //pointer = this.schemaMgr.generateSubSchemaPointer(pointer, atomicChanges.name);
+      if(atomicChanges.type === ChangeType.MOVE) {
+        if (atomicChanges.oldPosition==null)
+          throw new Error ("A Move Change must have an oldPosition set "+pointer.position );
+        if ((atomicChanges.oldPosition!==pointer.position)&& (src.position===pointer.position)) {
+          // Generate an update of the old position only if it's different from the new position, as for the new position an update has already been generated
+          result.push(new Change (ChangeType.UPDATE, DontCodeModelPointer.parentPosition(atomicChanges.oldPosition)!, null));
+        }
+        result.push(new Change (ChangeType.MOVE, pointer.position, null, pointer, undefined, atomicChanges.oldPosition));
+      } else {
+        result.push(new Change(atomicChanges.type, pointer.position, null, pointer));
+      }
     } else {
       // First check if we need to send an UPDATED change to this element because a subElement is added / removed
       for (let i=0;i<atomicChanges.subChanges.length;i++) {
         const cur = atomicChanges.subChanges[i];
-        if (cur.type !== ChangeType.UPDATE) {
+        if ((cur.type!=null) && (cur.type !== ChangeType.UPDATE)) {
              result.push(new Change (ChangeType.UPDATE, pointer.position, null, pointer));
+             break;
         }
+        /*if( (cur.type === ChangeType.MOVE) && (cur.oldPosition != null)) {
+          result.push(new Change (ChangeType.UPDATE, cur.oldPosition, null));
+        }*/
       }
     }
 
       // Then recurse through all subelements, generating changes along the way
     for (let i=0;i<atomicChanges.subChanges.length;i++) {
       const cur = atomicChanges.subChanges[i];
-      this.generateChanges(src, cur, pointer, result);
+      this.generateChanges(src, cur, this.schemaMgr.generateSubSchemaPointer(pointer, cur.name), result);
     }
 
     return result;
@@ -461,6 +512,31 @@ export class DontCodeModelManager {
     return false;
   }
 
+  /**
+   * Insert a property at the end of an object or before the specified property
+   * @param parent
+   * @param propName
+   * @param value
+   * @param beforeProp
+   */
+  insertProperty (parent: any, propName:string, value:any, beforeProp?:string) {
+    if (beforeProp) {
+        // Reinsert all properties of the object and inject the new one at the right order
+      const keys = Object.keys(parent);
+      for (const key of keys) {
+        const copy = parent[key];
+        delete parent[key];
+        if (key === beforeProp) {
+          parent[propName] = value;
+        }
+        parent[key] = copy;
+      }
+    } else {
+      parent[propName] = value;
+    }
+
+  }
+
 }
 
 class AtomicChange {
@@ -468,16 +544,18 @@ class AtomicChange {
   name = "";
   subChanges = new Array <AtomicChange>();
   isRoot = false;
+  oldPosition: string|undefined;
 
-  constructor(type?:ChangeType, name?:string) {
+  constructor(type?:ChangeType, name?:string, oldPosition?:string) {
     if (type)
       this.type = type;
     if (name)
       this.name = name;
+    this.oldPosition = oldPosition;
   }
 
-  createSubChange(type: ChangeType, elementName: string):AtomicChange {
-    const newChange = new AtomicChange(type, elementName);
+  createSubChange(type: ChangeType|undefined, elementName: string, oldPosition?:string):AtomicChange {
+    const newChange = new AtomicChange(type, elementName, oldPosition);
     this.subChanges.push(newChange);
     return newChange;
   }

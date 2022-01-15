@@ -293,4 +293,40 @@ export class DontCodeModelPointer {
     );
     return newPointer;
   }
+
+  /**
+   * Safely returns the parent position
+   * @param position
+   */
+  public static parentPosition (position?:string): string|null {
+    if( (position==null) || (position.length===0))
+      return null;
+    const lastSlash=position.lastIndexOf('/');
+    if (lastSlash==-1)
+      return '';
+    else {
+      return position.substring(0, lastSlash);
+    }
+  }
+
+  /**
+   * Safely returns the parent position and last element
+   * @param position
+   */
+  public static splitPosition (position?:string): { parent:string, element:string }|null {
+    if( (position==null) || (position.length===0))
+      return null;
+    const lastSlash=position.lastIndexOf('/');
+    if (lastSlash==-1)
+      return {
+        parent:'',
+        element:position
+      };
+    else {
+      return {
+        parent:position.substring(0, lastSlash),
+        element:position.substring(lastSlash+1)
+      };
+    }
+  }
 }

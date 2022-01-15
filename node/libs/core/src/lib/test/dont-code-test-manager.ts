@@ -21,8 +21,12 @@ export class DontCodeTestManager {
   public static createAnyChange(type:ChangeType, containerSchema: string, containerItemId: string|null, schema: string|null, itemId: string|null, value: any, property?:string) {
     const calcContainerItemId=containerItemId?'/'+containerItemId:'';
     const calcItemId=itemId?'/'+itemId:'';
-    const calcSchema=schema?'/'+schema:'';
-    const calcProperty=property?'/'+property:'';
+    let calcSchema=schema?'/'+schema:'';
+    if( containerSchema.length==0)
+      calcSchema=schema?schema:'';
+    let calcProperty=property?'/'+property:'';
+    if( (containerSchema.length==0)&& (calcSchema.length==0))
+      calcProperty=property?property:'';
     const calcPropertySchemaItem = (property)?calcSchema + calcItemId:(itemId)?calcSchema:'';
     const calcPropertySchema = (property)?calcSchema:'';
 

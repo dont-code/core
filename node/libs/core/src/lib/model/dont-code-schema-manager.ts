@@ -73,7 +73,7 @@ export class DontCodeSchemaManager {
   }
 
   generateParentPointer (pointer: DontCodeModelPointer): DontCodeModelPointer | undefined {
-    if (pointer.containerPosition)
+    if (pointer.containerPosition!=null)
       return this.generateSchemaPointer(pointer.containerPosition);
     return;
   }
