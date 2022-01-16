@@ -6,7 +6,7 @@ export class DontCodeTestManager {
     return DontCodeTestManager.createAnyChange(ChangeType.DELETE, containerSchema, containerItemId, schema, itemId, null, property);
   }
 
-  public static createMoveChange (oldPosition:string, beforeIdOrProperty:string|null, containerSchema: string, containerItemId: string|null, schema: string, itemId: string, property?:string) {
+  public static createMoveChange (oldPosition:string, beforeIdOrProperty:string|null, containerSchema: string, containerItemId: string|null, schema: string, itemId: string|null, property?:string) {
     const ret = DontCodeTestManager.createAnyChange(ChangeType.MOVE, containerSchema, containerItemId, schema, itemId, null, property);
     ret.oldPosition=oldPosition;
     if( beforeIdOrProperty)

@@ -44,20 +44,24 @@ export class DontCodeSchemaManager {
 
   /**
    * Locate an item from it's position in the model
-   * @param position
+   * @param schemaPosition
    * @param resolveReference true to resolve the last reference instead of returning a @DontCodeSchemaRef
    */
-  locateItem (position:string, resolveReference?:boolean): DontCodeSchemaItem {
-    const split = position.split('/');
+  locateItem (schemaPosition:string, resolveReference?:boolean): DontCodeSchemaItem {
+    const split = schemaPosition.split('/');
     let cur: DontCodeSchemaItem|undefined = this.currentSchema;
     split.forEach((value) => {
       if( !cur) {
-        console.error('Could not find subItem '+value+' of '+position);
-        return;
+        console.error('Could not find subItem '+value+' of '+schemaPosition);
+        throw new Error('Could not find subItem '+value+' of '+schemaPosition);
       }
       if( value && value.length>0 && value!=='#') {
         if (cur.isReference())
           cur = this.resolveReference(cur as DontCodeSchemaRef);
+        if( !cur) {
+          console.error('Could not find reference '+(cur as unknown as DontCodeSchemaRef)?.getReference()+' of '+schemaPosition);
+          throw new Error ('Could not find reference '+(cur as unknown as DontCodeSchemaRef)?.getReference()+' of '+schemaPosition);
+        }
         cur = cur.getChild(value);
       }
     });
@@ -68,7 +72,7 @@ export class DontCodeSchemaManager {
     return cur;
   }
 
-  resolveReference (ref:DontCodeSchemaRef): DontCodeSchemaItem {
+  resolveReference (ref:DontCodeSchemaRef): DontCodeSchemaItem{
     return this.locateItem(ref.getReference());
   }
 
@@ -116,6 +120,10 @@ export class DontCodeSchemaManager {
           if( nextItem.isReference())
             nextItem = this.resolveReference(nextItem as DontCodeSchemaRef);
 
+          if (nextItem==null) {
+            // Cannot find the next item in the schema: Error in the url
+            throw new Error('Cannot parse \''+position+'\' from the schema as '+nextItem+' is reference an unknown element');
+          }
           parentItem = nextItem;
 
         } else {

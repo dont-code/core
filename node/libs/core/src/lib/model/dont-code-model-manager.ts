@@ -121,7 +121,7 @@ export class DontCodeModelManager {
               const curAtomicChange = atomicChanges.createSubChange(ChangeType.MOVE, subElem, oldPosition);
               if (srcChange.position!==oldPosition) // When we reorder elements of an array, it's a move to the same position: No changes
               {
-                this.compareRecursiveIfNeeded(srcChange, oldContent, newContent, pointer, curAtomicChange, oldPosition);
+                this.compareRecursiveIfNeeded(srcChange, null, newContent, pointer, curAtomicChange, oldPosition);
                 this.insertProperty(oldContent, subElem, newContent, srcChange.beforeKey);
                 // Really perform the change
                 const splittedPosition = DontCodeModelPointer.splitPosition(oldPosition)!;
@@ -237,9 +237,11 @@ export class DontCodeModelManager {
       if (newContent.hasOwnProperty(oldSubProperty)) {
         this.applyChangeRecursive(src, oldContent, newContent[oldSubProperty], subPointer,atomicChanges, oldPosition);
       } else {
-        // It doesn't exist in the new element, so it's deleted
-        this.applyChangeRecursive(new Change(ChangeType.DELETE, subPosition, null, subPointer),
-          oldContent, null, subPointer, atomicChanges, oldPosition);
+//        if ((src.type===ChangeType.RESET) || (!this.schemaMgr.locateItem(pointer.position, false).isArray())) {
+          // It doesn't exist in the new element, so it's deleted
+          this.applyChangeRecursive(new Change(ChangeType.DELETE, subPosition, null, subPointer),
+            oldContent, null, subPointer, atomicChanges, oldPosition);
+  //        }
       }
     }
 
