@@ -749,12 +749,6 @@ describe('Model Manager', () => {
     ]);
   });
 
-  it('should support object updates by position', () => {
-  });
-
-  it('should support object updates by subValue', () => {
-  });
-
   it('should support additional tests', () => {
     const service = dtcde.getModelManager();
     service.resetContent({});
