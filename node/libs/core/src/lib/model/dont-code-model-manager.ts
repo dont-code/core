@@ -39,7 +39,7 @@ export class DontCodeModelManager {
     let pointer = toApply.pointer??this.schemaMgr.generateSchemaPointer(toApply.position);
     toApply.pointer = pointer;
     const parentPosition = pointer.containerPosition;
-    const subElem = toApply.pointer?.key?? toApply.pointer?.itemId;
+    const subElem = toApply.pointer?.lastElement;
     if ((parentPosition!=null) && (subElem!=null))
       pointer = this.schemaMgr.generateParentPointer(pointer)!;
 
@@ -77,7 +77,7 @@ export class DontCodeModelManager {
     if( oldPosition==null)
       oldPosition = srcChange.oldPosition;
 
-    const subElem = pointer.key??pointer?.itemId;
+    const subElem = pointer.lastElement;
     if (subElem) {
       //const subPointer = pointer.subItemOrPropertyPointer(subElem, pointer?.key==null);
       switch (srcChange.type) {
@@ -87,10 +87,14 @@ export class DontCodeModelManager {
           let curAtomicChange;
           if ((srcChange.type===ChangeType.RESET) && (srcChange.position===pointer.position))  // Create a RESET change for the root element reset only
           {
-            curAtomicChange= atomicChanges.createSubChange(ChangeType.RESET, subElem);
+            if ((typeof (newContent) ==='object') && (this.isTheSameForParent(oldContent[subElem],newContent))) {
+              curAtomicChange = atomicChanges.createSubChange(undefined, subElem);
+            } else if ((typeof (newContent) === 'object') || (oldContent[subElem]!==newContent)) {
+              curAtomicChange= atomicChanges.createSubChange(ChangeType.RESET, subElem);
+            }
           } else  if (oldContent[subElem]==null) {
             curAtomicChange= atomicChanges.createSubChange(ChangeType.ADD, subElem);
-          } else if ((typeof (newContent)==='object') || (Object.keys(oldContent[subElem])===Object.keys(newContent))){
+          } else if ((typeof (newContent)==='object') && (this.isTheSameForParent(oldContent[subElem],newContent))){
             curAtomicChange= atomicChanges.createSubChange(undefined, subElem);
           } else if ((typeof (newContent)==='object') || (oldContent[subElem]!==newContent)){
             curAtomicChange= atomicChanges.createSubChange(ChangeType.UPDATE, subElem);
@@ -213,6 +217,23 @@ export class DontCodeModelManager {
     }
 */
 
+  }
+
+  /**
+   * Check if the values are the same, or the objects property names are the same, so that we can define it impacts or not the parent
+   * @param oldValue
+   * @param newValue
+   */
+  isTheSameForParent (oldValue:any, newValue:any): boolean {
+    if ((typeof (oldValue)==='object') && (typeof (newValue)==='object')) {
+      const oldKeys = Object.keys(oldValue);
+      const newKeys = Object.keys(newValue);
+      return ((oldKeys.length===newKeys.length) && (oldKeys.every((value,index) => {
+        return value === newKeys[index];
+      })));
+    } else {
+      return oldValue===newValue;
+    }
   }
 
   /**
@@ -463,7 +484,7 @@ export class DontCodeModelManager {
   findAllPossibleTargetsOfProperty(property: string, position: string, schemaItem?:DontCodeSchemaItem): Array<any> {
     if( !schemaItem) {
       const ptr = this.schemaMgr.generateSchemaPointer(position);
-      schemaItem = this.schemaMgr.locateItem(ptr.subPropertyPointer(property).schemaPosition, true);
+      schemaItem = this.schemaMgr.locateItem(ptr.subPropertyPointer(property).positionInSchema, true);
     }
     const targetPath = schemaItem?.getTargetPath();
     if ((schemaItem) && (targetPath)) {
@@ -480,7 +501,7 @@ export class DontCodeModelManager {
     if ((src) && (src[property])) {
       if( !schemaItem) {
         const ptr = this.schemaMgr.generateSchemaPointer(position);
-        schemaItem = this.schemaMgr.locateItem(ptr.subPropertyPointer(property).schemaPosition, true);
+        schemaItem = this.schemaMgr.locateItem(ptr.subPropertyPointer(property).positionInSchema, true);
       }
       const targetPath = schemaItem?.getTargetPath();
       if ((schemaItem)&&(targetPath)) {
@@ -506,7 +527,7 @@ export class DontCodeModelManager {
       const change = changes[i];
       if (change.type!==ChangeType.UPDATE) {
           // If the n-1 last / is the same as the lastSlash then the element is a direct subElement
-        if (change.pointer?.isPropertyOf(toCheck)) {
+        if (change.pointer?.isSubItemOf(toCheck)) {
           return true;
         }
       }

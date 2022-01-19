@@ -37,8 +37,8 @@ export class DontCodeTestManager {
         containerSchema + calcSchema + calcProperty,
         containerSchema + calcContainerItemId+ calcPropertySchemaItem,
         containerSchema + calcPropertySchema,
-        property?property:null,
-        property?null:itemId
+        property??itemId??undefined,
+        itemId==null
       ));
   };
 

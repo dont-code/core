@@ -82,20 +82,22 @@ export class DontCodeSchemaManager {
     return;
   }
 
+  /**
+   * Generates a new and complete DontCodeModelPointer from the specified position
+   * @param queriedPosition
+   */
   generateSchemaPointer (queriedPosition: string) : DontCodeModelPointer {
     let ret:DontCodeModelPointer;
 
-    const position = (queriedPosition[0]==='/')?queriedPosition.substring(1):queriedPosition;
+    const position = queriedPosition;
     const posElems = position.split('/');
 
     if ((posElems.length===0) || (posElems[0].length===0))  {
       // Managing the special case of asking for root
-      ret = new DontCodeModelPointer(queriedPosition, queriedPosition,undefined,undefined,null,null);
+      ret = new DontCodeModelPointer(queriedPosition, queriedPosition);
       return ret;
     }else {
-
-      ret = new DontCodeModelPointer(queriedPosition, ''   // to be calculated later
-       ,undefined,undefined,null,null);
+      ret = new DontCodeModelPointer(queriedPosition, '');
     }
 
     let parentItem = this.currentSchema as DontCodeSchemaItem;
@@ -104,12 +106,12 @@ export class DontCodeSchemaManager {
       if (!ignoreNext) {
         let nextItem = parentItem.getChild(element);
         if (nextItem) {
-          ret.itemId=null;
-          ret.containerSchemaPosition=ret.schemaPosition;
-          if( (ret.schemaPosition!==null)&&(ret.schemaPosition.length>0))
-            ret.schemaPosition=ret.schemaPosition+'/'+element;
+          ret.isProperty=true;
+          ret.containerPositionInSchema=ret.positionInSchema;
+          if( (ret.positionInSchema!==null)&&(ret.positionInSchema.length>0))
+            ret.positionInSchema=ret.positionInSchema+'/'+element;
           else
-            ret.schemaPosition = element;
+            ret.positionInSchema = element;
 
           if (nextItem.isArray()) {
             ignoreNext = true;
@@ -131,15 +133,14 @@ export class DontCodeSchemaManager {
           throw new Error('Cannot parse \''+position+'\' from the schema as '+element+' is not a child of '+parentItem.getRelativeId());
         }
       } else {
-        ret.itemId=element;
+        ret.isProperty=false;
         ignoreNext=false;
       }
     });
 
-    ret.containerSchemaPosition=ret.schemaPosition.substring(0, ret.schemaPosition.lastIndexOf('/'));
+    ret.containerPositionInSchema=ret.positionInSchema.substring(0, ret.positionInSchema.lastIndexOf('/'));
     ret.containerPosition=ret.position.substring(0, ret.position.lastIndexOf('/'));
-    if (ret.itemId===null)
-      ret.key = posElems[posElems.length-1];
+    ret.lastElement= posElems[posElems.length-1];
 
     return ret;
   }
@@ -151,7 +152,7 @@ export class DontCodeSchemaManager {
    * @param propOrItemName
    */
   generateSubSchemaPointer (parent:DontCodeModelPointer, propOrItemName: string): DontCodeModelPointer {
-    if (this.locateItem(parent.schemaPosition, true).getChild(propOrItemName)) {
+    if (this.locateItem(parent.positionInSchema, true).getChild(propOrItemName)) {
       return parent.subPropertyPointer(propOrItemName);
     } else {
       return parent.subItemPointer(propOrItemName);

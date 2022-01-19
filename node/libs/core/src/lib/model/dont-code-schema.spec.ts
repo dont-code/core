@@ -6,13 +6,13 @@ import {DontCodeModelPointer} from "@dontcode/core";
 
 describe('Model Pointer', () => {
   it('should calculate subItem properly', () => {
-    const rootPtr = new DontCodeModelPointer('/','/', undefined,undefined,null,null);
+    const rootPtr = new DontCodeModelPointer('','', undefined,undefined,'');
 
     expect(rootPtr).toBeDefined();
     const sub = rootPtr.subPropertyPointer('creation');
 
     expect(sub.position).toEqual('creation');
-    expect(sub.schemaPosition).toEqual('creation');
+    expect(sub.positionInSchema).toEqual('creation');
 
   });
 

@@ -3,6 +3,7 @@ import dtcde = DontCode.dtcde;
 import { DontCodeSchemaEnum, DontCodeSchemaObject, DontCodeSchemaRoot } from "./dont-code-schema-item";
 import PluginConfig = DontCode.PluginConfig;
 import {DontCodeSchemaEnumValue} from "@dontcode/core";
+import {windowCount} from "rxjs/operators";
 
 describe('Schema Manager', () => {
   it('should work', () => {
@@ -52,59 +53,59 @@ describe('Schema Manager', () => {
     let pointer = mgr.generateSchemaPointer('creation/name');
     expect(pointer).toEqual({
       position:'creation/name',
-      schemaPosition:'creation/name',
+      positionInSchema:'creation/name',
       containerPosition:'creation',
-      containerSchemaPosition:'creation',
-      key:'name',
-      itemId:null
+      containerPositionInSchema:'creation',
+      lastElement:'name',
+      isProperty: true
     });
 
-    pointer = mgr.generateSchemaPointer('/');
+    pointer = mgr.generateSchemaPointer('');
     expect(pointer).toEqual({
-      position:'/',
-      schemaPosition:'/',
+      position:'',
+      positionInSchema:'',
       containerPosition:undefined,
-      containerSchemaPosition:undefined,
-      key:null,
-      itemId:null
+      containerPositionInSchema:undefined,
+      lastElement:'',
+      isProperty:undefined
     });
 
     pointer = mgr.generateSchemaPointer('creation/screens/aaaa/name');
     expect(pointer).toEqual({
       position:'creation/screens/aaaa/name',
-      schemaPosition:'creation/screens/name',
+      positionInSchema:'creation/screens/name',
       containerPosition:'creation/screens/aaaa',
-      containerSchemaPosition:'creation/screens',
-      key:'name',
-      itemId:null
+      containerPositionInSchema:'creation/screens',
+      lastElement:'name',
+      isProperty:true
     });
     pointer = mgr.generateSchemaPointer('creation/screens/aaaa');
     expect(pointer).toEqual({
       position:'creation/screens/aaaa',
-      schemaPosition:'creation/screens',
+      positionInSchema:'creation/screens',
       containerPosition:'creation/screens',
-      containerSchemaPosition:'creation',
-      key:null,
-      itemId:'aaaa'
+      containerPositionInSchema:'creation',
+      lastElement:'aaaa',
+      isProperty:false
     });
     pointer = mgr.generateSchemaPointer('creation/entities/aaaa/fields/aabb/type');
     expect(pointer).toEqual({
       position:'creation/entities/aaaa/fields/aabb/type',
-      schemaPosition:'creation/entities/fields/type',
+      positionInSchema:'creation/entities/fields/type',
       containerPosition:'creation/entities/aaaa/fields/aabb',
-      containerSchemaPosition:'creation/entities/fields',
-      key:'type',
-      itemId:null
+      containerPositionInSchema:'creation/entities/fields',
+      lastElement:'type',
+      isProperty:true
     });
 
     pointer = mgr.generateSchemaPointer('creation/entities/aaaa/fields/aabb');
     expect(pointer).toEqual({
       position:'creation/entities/aaaa/fields/aabb',
-      schemaPosition:'creation/entities/fields',
+      positionInSchema:'creation/entities/fields',
       containerPosition:'creation/entities/aaaa/fields',
-      containerSchemaPosition:'creation/entities',
-      key:null,
-      itemId:'aabb'
+      containerPositionInSchema:'creation/entities',
+      lastElement:'aabb',
+      isProperty:false
     });
   });
 
