@@ -129,26 +129,6 @@ describe('Model Manager', () => {
 
   });
 
-  it('should still work in compatible asynchronous mode', () => {
-    const service = dtcde.getModelManager();
-    service.resetContent({});
-    const source = new Subject<Change>();
-    service.receiveUpdatesFrom(source);
-    source.next(DontCodeTestManager.createTestChange("creation", null, null, null, "TestName", "name"));
-    expect(service.getContent()).toEqual({
-      creation: {
-        name: "TestName"
-      }
-    });
-    source.next(DontCodeTestManager.createTestChange("creation", null, null, null, "TestApp", "type"));
-    expect(service.getContent()).toEqual({
-      creation: {
-        name: "TestName",
-        type: "TestApp"
-      }
-    });
-  });
-
   function checkChanges(atomicChanges: Array<Change>, expected: Array<{ position: string; type: ChangeType, oldPosition?:string }>): void {
     atomicChanges.forEach((value, index) => {
       expect(index).toBeLessThan(expected.length);
@@ -1065,9 +1045,7 @@ describe('Model Manager', () => {
         }
       }
     });
-    const source = new Subject<Change>();
-    service.receiveUpdatesFrom(source);
-    source.next(DontCodeTestManager.createDeleteChange("creation", null, null, null, "type"));
+    service.applyChange(DontCodeTestManager.createDeleteChange("creation", null, null, null, "type"));
     expect(service.getContent()).toEqual({
       creation: {
         name: "TestName",
@@ -1083,7 +1061,7 @@ describe('Model Manager', () => {
         }
       }
     });
-    source.next(DontCodeTestManager.createDeleteChange("creation", null, "entities", "a"));
+    service.applyChange(DontCodeTestManager.createDeleteChange("creation", null, "entities", "a"));
     expect(service.getContent()).toEqual({
       creation: {
         name: "TestName",
@@ -1095,7 +1073,7 @@ describe('Model Manager', () => {
         }
       }
     });
-    source.next(DontCodeTestManager.createDeleteChange("creation", null, "entities", "b", "name"));
+    service.applyChange(DontCodeTestManager.createDeleteChange("creation", null, "entities", "b", "name"));
     expect(service.getContent()).toEqual({
       creation: {
         name: "TestName",
@@ -1106,7 +1084,7 @@ describe('Model Manager', () => {
         }
       }
     });
-    source.next(DontCodeTestManager.createDeleteChange("creation", null, "entities", null));
+    service.applyChange(DontCodeTestManager.createDeleteChange("creation", null, "entities", null));
     expect(service.getContent()).toEqual({
       creation: {
         name: "TestName"
@@ -1139,37 +1117,32 @@ describe('Model Manager', () => {
     });
     const start = Object.keys(service.getContent().creation.entities);
     expect(start).toEqual(["a", "b", "c"]);
-    const source = new Subject<Change>();
-    service.receiveUpdatesFrom(source);
     // from a,b,c to b,a,c
-    source.next(DontCodeTestManager.createMoveChange("creation/entities/b", "a", "creation", null, "entities", "b"));
+    service.applyChange(DontCodeTestManager.createMoveChange("creation/entities/b", "a", "creation", null, "entities", "b"));
     expect(Object.keys(service.getContent().creation.entities)).toStrictEqual(["b", "a", "c"]);
     // from b,a,c to b,c,a
-    source.next(DontCodeTestManager.createMoveChange("creation/entities/c", "a", "creation", null, "entities", "c"));
+    service.applyChange(DontCodeTestManager.createMoveChange("creation/entities/c", "a", "creation", null, "entities", "c"));
     expect(Object.keys(service.getContent().creation.entities)).toStrictEqual(["b", "c", "a"]);
     // from b,c,a to c,a,b
-    source.next(DontCodeTestManager.createMoveChange("creation/entities/b", null, "creation", null, "entities", "b"));
+    service.applyChange(DontCodeTestManager.createMoveChange("creation/entities/b", null, "creation", null, "entities", "b"));
     expect(Object.keys(service.getContent().creation.entities)).toStrictEqual(["c", "a", "b"]);
   });
 
-  it('should reset content correctly from commands', () => {
+  it('should reset content correctly', () => {
     const service = dtcde.getModelManager();
-    //service.resetContent({});
-    const source = new Subject<Change>();
-    service.receiveUpdatesFrom(source);
-    source.next(new Change(ChangeType.RESET, "creation",null));
+    service.applyChange(new Change(ChangeType.RESET, "creation",null));
     expect(service.getContent()).toEqual({
       creation: null
     });
 
     const toReset={ type:'application', name:'Name'};
-    source.next(new Change(ChangeType.RESET, "creation", toReset ));
+    service.applyChange(new Change(ChangeType.RESET, "creation", toReset ));
     expect(service.getContent()).toEqual({
       creation: toReset
     });
 
     const toRoot={ creation: {type:'application', name:'NameNew'}};
-    source.next(new Change(ChangeType.RESET, "/",toRoot ));
+    service.applyChange(new Change(ChangeType.RESET, "",toRoot ));
     expect(service.getContent()).toEqual(toRoot);
   });
 });

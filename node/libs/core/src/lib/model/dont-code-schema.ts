@@ -238,6 +238,37 @@ export class DontCodeModelPointer {
   }
 
   /**
+   * Finds the next item in the position and returns its value and position in the string
+   * @param position
+   * @param from
+   */
+  public static nextItemAndPosition(position: string, from: number): {pos:number, value:string|null} {
+    let posSlash = position.indexOf("/", from);
+    if (posSlash===from) {
+      from = from +1;
+      posSlash = position.indexOf("/", from);
+    }
+    if(posSlash!==-1)
+      posSlash=posSlash-1;
+    else {
+      if (posSlash===from) {
+        posSlash=-1;
+      } else {
+        posSlash=position.length-1;
+      }
+    }
+
+    let value=null;
+    if( posSlash!==-1)
+      value = position.substring(from, posSlash+1);
+
+    return {
+      pos: posSlash,
+      value: value
+    }
+  }
+
+  /**
    * Find the name of the last element pointed by this pointer
    * Usually it's the value of key (if it's a field) or the last container name (if it's an element in a container like entity/a/fields/a)
    * @deprecated
