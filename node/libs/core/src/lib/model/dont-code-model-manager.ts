@@ -77,8 +77,9 @@ export class DontCodeModelManager {
       oldPosition = srcChange.oldPosition;
 
     const subElem = pointer.lastElement;
-    if (subElem) {
+    if ((subElem)||(subElem.length===0)) {
       //const subPointer = pointer.subItemOrPropertyPointer(subElem, pointer?.key==null);
+      const oldSubContent = subElem.length===0?oldContent:oldContent[subElem];
       switch (srcChange.type) {
         case ChangeType.ADD:
         case ChangeType.UPDATE:
@@ -86,27 +87,28 @@ export class DontCodeModelManager {
           let curAtomicChange;
           if ((srcChange.type===ChangeType.RESET) && (srcChange.position===pointer.position))  // Create a RESET change for the root element reset only
           {
-            if ((typeof (newContent) ==='object') && (this.isTheSameForParent(oldContent[subElem],newContent))) {
-              curAtomicChange = atomicChanges.createSubChange(undefined, subElem);
-            } else if ((typeof (newContent) === 'object') || (oldContent[subElem]!==newContent)) {
-              curAtomicChange= atomicChanges.createSubChange(ChangeType.RESET, subElem);
+            if ((typeof (newContent) ==='object') && (this.isTheSameForParent(oldSubContent,newContent))) {
+              curAtomicChange = atomicChanges.createSubChange(undefined, subElem, null);
+            } else if ((typeof (newContent) === 'object') || (oldSubContent!==newContent)) {
+              curAtomicChange= atomicChanges.createSubChange(ChangeType.RESET, subElem, newContent);
             }
-          } else  if (oldContent[subElem]==null) {
-            curAtomicChange= atomicChanges.createSubChange(ChangeType.ADD, subElem);
-          } else if ((typeof (newContent)==='object') && (this.isTheSameForParent(oldContent[subElem],newContent))){
-            curAtomicChange= atomicChanges.createSubChange(undefined, subElem);
-          } else if ((typeof (newContent)==='object') || (oldContent[subElem]!==newContent)){
-            curAtomicChange= atomicChanges.createSubChange(ChangeType.UPDATE, subElem);
+          } else  if (oldSubContent==null) {
+            curAtomicChange= atomicChanges.createSubChange(ChangeType.ADD, subElem, newContent);
+          } else if ((typeof (newContent)==='object') && (this.isTheSameForParent(oldSubContent,newContent))){
+            curAtomicChange= atomicChanges.createSubChange(undefined, subElem, null);
+          } else if ((typeof (newContent)==='object') || (oldSubContent!==newContent)){
+            curAtomicChange= atomicChanges.createSubChange(ChangeType.UPDATE, subElem, newContent);
           }
 
           if( curAtomicChange)
-            this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, curAtomicChange);
-          this.insertProperty(oldContent, subElem, newContent, srcChange.beforeKey);
+            this.compareRecursiveIfNeeded (srcChange, oldSubContent, newContent, pointer, curAtomicChange);
+          if( subElem.length>0) // Special case when changing the root element (subElem = '')
+            this.insertProperty(oldContent, subElem, newContent, srcChange.beforeKey);
         }
         break;
         case ChangeType.DELETE: {
           if( oldContent[subElem]) {
-            const curAtomicChange = atomicChanges.createSubChange(ChangeType.DELETE, subElem);
+            const curAtomicChange = atomicChanges.createSubChange(ChangeType.DELETE, subElem, null);
             this.compareRecursiveIfNeeded (srcChange, oldContent[subElem], newContent, pointer, curAtomicChange);
             delete oldContent[subElem];
           }
@@ -121,7 +123,7 @@ export class DontCodeModelManager {
               newContent = this.findAtPosition(oldPosition);
             }
             if( newContent) {
-              const curAtomicChange = atomicChanges.createSubChange(ChangeType.MOVE, subElem, oldPosition);
+              const curAtomicChange = atomicChanges.createSubChange(ChangeType.MOVE, subElem, newContent, oldPosition);
               if (srcChange.position!==oldPosition) // When we reorder elements of an array, it's a move to the same position: No changes
               {
                 this.compareRecursiveIfNeeded(srcChange, null, newContent, pointer, curAtomicChange, oldPosition);
@@ -137,7 +139,7 @@ export class DontCodeModelManager {
             }
           } else {
             // The move has already been done, so just createSubChange and loop through subElements
-            const curAtomicChange = atomicChanges.createSubChange(ChangeType.MOVE, subElem, oldPosition);
+            const curAtomicChange = atomicChanges.createSubChange(ChangeType.MOVE, subElem, null, oldPosition);
             this.compareRecursiveIfNeeded (srcChange, oldContent, newContent, pointer, curAtomicChange, oldPosition);
           }
         }
@@ -298,25 +300,25 @@ export class DontCodeModelManager {
     if( pointer == null)
       pointer = src.pointer;
 
-    if (atomicChanges.type!=null) {
+    if (atomicChanges. type!=null) {
       //pointer = this.schemaMgr.generateSubSchemaPointer(pointer, atomicChanges.name);
       if(atomicChanges.type === ChangeType.MOVE) {
         if (atomicChanges.oldPosition==null)
           throw new Error ("A Move Change must have an oldPosition set "+pointer.position );
         if ((atomicChanges.oldPosition!==pointer.position)&& (src.position===pointer.position)) {
           // Generate an update of the old position only if it's different from the new position, as for the new position an update has already been generated
-          result.push(new Change (ChangeType.UPDATE, DontCodeModelPointer.parentPosition(atomicChanges.oldPosition)!, null));
+          result.push(new Change (ChangeType.UPDATE, DontCodeModelPointer.parentPosition(atomicChanges.oldPosition)!, atomicChanges.value));
         }
-        result.push(new Change (ChangeType.MOVE, pointer.position, null, pointer, undefined, atomicChanges.oldPosition));
+        result.push(new Change (ChangeType.MOVE, pointer.position, atomicChanges.value, pointer, undefined, atomicChanges.oldPosition));
       } else {
-        result.push(new Change(atomicChanges.type, pointer.position, null, pointer));
+        result.push(new Change(atomicChanges.type, pointer.position, atomicChanges.value, pointer));
       }
     } else {
       // First check if we need to send an UPDATED change to this element because a subElement is added / removed
       for (let i=0;i<atomicChanges.subChanges.length;i++) {
         const cur = atomicChanges.subChanges[i];
-        if ((cur.type!=null) && (cur.type !== ChangeType.UPDATE)) {
-             result.push(new Change (ChangeType.UPDATE, pointer.position, null, pointer));
+        if ((cur.type!=null) && (cur.type !== ChangeType.UPDATE) && (cur.name.length>0)) {
+             result.push(new Change (ChangeType.UPDATE, pointer.position, this.findAtPosition(pointer.position), pointer));
              break;
         }
         /*if( (cur.type === ChangeType.MOVE) && (cur.oldPosition != null)) {
@@ -410,11 +412,7 @@ export class DontCodeModelManager {
     if (this.content == null) {
       if( create) {
         this.content = {
-          creation: {}
         };
-        if (added) {
-          added = added.createSubChange (ChangeType.ADD, 'creation');
-        }
       } else {
         return null;
       }
@@ -434,7 +432,7 @@ export class DontCodeModelManager {
         if (create) {
           current[element]={};
           if( added) {
-            added = added.createSubChange(ChangeType.ADD, element);
+            added = added.createSubChange(ChangeType.ADD, element, {});
           }
         } else
         {
@@ -558,17 +556,19 @@ class AtomicChange {
   subChanges = new Array <AtomicChange>();
   isRoot = false;
   oldPosition: string|undefined;
+  value:any;
 
-  constructor(type?:ChangeType, name?:string, oldPosition?:string) {
+  constructor(type?:ChangeType, name?:string, value?:any, oldPosition?:string) {
     if (type)
       this.type = type;
     if (name)
       this.name = name;
     this.oldPosition = oldPosition;
+    this.value=value;
   }
 
-  createSubChange(type: ChangeType|undefined, elementName: string, oldPosition?:string):AtomicChange {
-    const newChange = new AtomicChange(type, elementName, oldPosition);
+  createSubChange(type: ChangeType|undefined, elementName: string, value:any, oldPosition?:string):AtomicChange {
+    const newChange = new AtomicChange(type, elementName, value, oldPosition);
     this.subChanges.push(newChange);
     return newChange;
   }

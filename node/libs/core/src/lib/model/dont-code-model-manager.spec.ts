@@ -1144,5 +1144,44 @@ describe('Model Manager', () => {
     const toRoot={ creation: {type:'application', name:'NameNew'}};
     service.applyChange(new Change(ChangeType.RESET, "",toRoot ));
     expect(service.getContent()).toEqual(toRoot);
+
+    service.resetContent(null);
+    const atomicChanges = service.applyChange (new Change (ChangeType.RESET, '', {
+      creation: {
+        name:'CreationName',
+        entities: {
+          'a': {
+            name:'entityA'
+          },
+          'b': {
+            name:'entityB'
+          }
+        }
+      }
+    }));
+    expect(service.getContent()).toEqual({
+      creation: {
+        name:'CreationName',
+        entities: {
+          'a': {
+            name:'entityA'
+          },
+          'b': {
+            name:'entityB'
+          }
+        }
+      }
+    });
+    checkChanges (atomicChanges,[
+      {type:ChangeType.RESET, position:''},
+      {type:ChangeType.ADD, position:'creation'},
+      {type:ChangeType.ADD, position:'creation/name'},
+      {type:ChangeType.ADD, position:'creation/entities'},
+      {type:ChangeType.ADD, position:'creation/entities/a'},
+      {type:ChangeType.ADD, position:'creation/entities/a/name'},
+      {type:ChangeType.ADD, position:'creation/entities/b'},
+      {type:ChangeType.ADD, position:'creation/entities/b/name'}
+    ]);
+
   });
 });
