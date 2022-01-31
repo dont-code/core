@@ -1,4 +1,5 @@
 import { DontCodeModel } from './dont-code-model';
+import {DontCodeSchemaManager} from "./dont-code-schema-manager";
 
 export class DontCodeSchema {
   static ROOT= '/properties/'+DontCodeModel.ROOT;
@@ -182,44 +183,115 @@ export class DontCodeSchema {
 export class DontCodeModelPointer {
   position:string;
 
-  schemaPosition:string;
+  positionInSchema:string;
 
-  containerPosition: string|undefined;  // undefined as root does not have container...
+  containerPosition?: string;  // undefined as root does not have container...
+  containerPositionInSchema?: string;  // undefined as root does not have container...
 
-  containerSchemaPosition: string|undefined;  // undefined as root does not have container...
+  lastElement: string;
+  isProperty?: boolean;
 
-  key: string|null;
-
-  itemId: string|null;
-
-  constructor(position: string, schemaPosition: string, containerPosition: string|undefined, containerSchemaPosition: string|undefined, key: string|null, itemId:string|null) {
+  constructor(position: string, schemaPosition: string, containerPosition?: string, containerSchemaPosition?: string, lastElement?: string, isProperty?:boolean) {
     this.position = position;
-    this.schemaPosition = schemaPosition;
+    this.positionInSchema = schemaPosition;
     this.containerPosition = containerPosition;
-    this.containerSchemaPosition = containerSchemaPosition;
-    this.key = key;
-    this.itemId = itemId;
+    this.containerPositionInSchema = containerSchemaPosition;
+    if (lastElement)
+      this.lastElement=lastElement;
+    else
+      this.lastElement = '';
+    this.isProperty = isProperty;
+    this.fillMissingElements ();
+  }
+
+  fillMissingElements (optionalSchemaMgr?: DontCodeSchemaManager):void {
+    if ((this.position==null)||(this.positionInSchema==null)) {
+      throw new Error ("Cannot fill Elements for an empty position");
+    }
+
+    if (this.containerPosition==null) {
+      this.containerPosition = DontCodeModelPointer.parentPosition (this.position)?? undefined;
+    }
+    if (this.containerPositionInSchema==null) {
+      this.containerPositionInSchema = DontCodeModelPointer.parentPosition(this.positionInSchema)?? undefined;
+    }
+    if( (this.lastElement == null)||(this.lastElement.length==0)) {
+      this.lastElement = DontCodeModelPointer.lastElementOf (this.position)??this.position;
+    }
+
+    if ((this.isProperty==null) && (optionalSchemaMgr)) {
+      if( this.containerPositionInSchema)
+        this.isProperty = optionalSchemaMgr.locateItem(this.containerPositionInSchema, true).getChild(this.lastElement)!=null;
+      else
+        this.isProperty = true; // We only have properties at root level
+    }
+  }
+
+  /**
+   * Finds the last element of this position
+   * @param position
+   */
+  public static lastElementOf (position?:string): string | undefined {
+    if( position==null)
+      return position;
+    return position.substring(position.lastIndexOf('/')+1);
+  }
+
+  /**
+   * Finds the next item in the position and returns its value and position in the string
+   * @param position
+   * @param from
+   */
+  public static nextItemAndPosition(position: string, from: number): {pos:number, value:string|null} {
+    let posSlash = position.indexOf("/", from);
+    if (posSlash===from) {
+      from = from +1;
+      posSlash = position.indexOf("/", from);
+    }
+    if(posSlash!==-1)
+      posSlash=posSlash-1;
+    else {
+      if (posSlash===from) {
+        posSlash=-1;
+      } else {
+        posSlash=position.length-1;
+      }
+    }
+
+    let value=null;
+    if( posSlash!==-1)
+      value = position.substring(from, posSlash+1);
+
+    return {
+      pos: posSlash,
+      value: value
+    }
   }
 
   /**
    * Find the name of the last element pointed by this pointer
    * Usually it's the value of key (if it's a field) or the last container name (if it's an element in a container like entity/a/fields/a)
+   * @deprecated
    */
+
   calculateKeyOrContainer (): string {
-    if (this.key) return this.key;
-    else {
-      return this.schemaPosition.substring(this.schemaPosition.lastIndexOf('/')+1);
+    if( this.isProperty===true) {
+      return this.lastElement;
+    } else {
+      return DontCodeModelPointer.lastElementOf(this.containerPosition) ?? '';
     }
   }
 
   /**
    * Find the ItemId or container key represented by the pointer
    * Usually it's the id of the item (if it's an element in a container like entity/a/fields/a) or the last container name
+   * @Deprecated
    */
   calculateItemIdOrContainer (): string|undefined {
-    if (this.itemId) return this.itemId;
-    else {
-      return this.containerPosition?.substring(this.containerPosition?.lastIndexOf('/')+1);
+    if( this.isProperty===false) {
+      return this.lastElement;
+    } else {
+      return DontCodeModelPointer.lastElementOf(this.containerPosition) ?? '';
     }
   }
 
@@ -228,10 +300,10 @@ export class DontCodeModelPointer {
    * @param pointer
    * @return the property name or null
    */
-  isPropertyOf (pointer:DontCodeModelPointer): string|null {
-    if (pointer.schemaPosition===this.containerSchemaPosition) {
-      return this.calculateKeyOrContainer();
-    }else return null;
+  isSubItemOf (pointer:DontCodeModelPointer): string|null {
+    if (pointer.position===this.containerPosition) {
+      return this.lastElement;
+    } else return null;
   }
 
   /**
@@ -239,13 +311,13 @@ export class DontCodeModelPointer {
    * @param pointer
    * @return the property name or null
    */
-  getUnderPropertyOf (pointer:DontCodeModelPointer): string|null {
-    if (this.schemaPosition.startsWith(pointer.schemaPosition)) {
-      const keyPos=this.schemaPosition.indexOf('/', pointer.schemaPosition.length+1);
+  isUnderSubItemOf (pointer:DontCodeModelPointer): string|null {
+    if (this.positionInSchema.startsWith(pointer.positionInSchema)) {
+      const keyPos=this.positionInSchema.indexOf('/', pointer.positionInSchema.length+1);
       if( keyPos == -1)
-        return this.schemaPosition.substring(pointer.schemaPosition.length+1);
+        return this.positionInSchema.substring(pointer.positionInSchema.length+1);
       else
-        return this.schemaPosition.substring(pointer.schemaPosition.length+1, keyPos);
+        return this.positionInSchema.substring(pointer.positionInSchema.length+1, keyPos);
     }
     else return null;
   }
@@ -266,12 +338,11 @@ export class DontCodeModelPointer {
    */
   subPropertyPointer (subProp:string): DontCodeModelPointer {
     const newPointer = new DontCodeModelPointer(
-      (this.position==='/')?subProp:this.position+'/'+subProp,
-      (this.schemaPosition==='/')?subProp:this.schemaPosition+'/'+subProp,
+      (this.position==='')?subProp:this.position+'/'+subProp,
+      (this.positionInSchema==='')?subProp:this.positionInSchema+'/'+subProp,
       this.position,
-      this.schemaPosition,
-      subProp,
-      null
+      this.positionInSchema,
+      subProp, true
     );
     return newPointer;
   }
@@ -284,13 +355,48 @@ export class DontCodeModelPointer {
    */
   subItemPointer (subItem:string): DontCodeModelPointer {
     const newPointer = new DontCodeModelPointer(
-      (this.position==='/')?subItem:this.position+'/'+subItem,
-      this.schemaPosition,
+      (this.position==='')?subItem:this.position+'/'+subItem,
+      this.positionInSchema,
       this.position,
-      this.containerSchemaPosition,
-      null,
-      subItem
+      this.containerPositionInSchema,
+      subItem, false
     );
     return newPointer;
+  }
+
+  /**
+   * Safely returns the parent position
+   * @param position
+   */
+  public static parentPosition (position?:string): string|null {
+    if( (position==null) || (position.length===0))
+      return null;
+    const lastSlash=position.lastIndexOf('/');
+    if (lastSlash==-1)
+      return '';
+    else {
+      return position.substring(0, lastSlash);
+    }
+  }
+
+  /**
+   * Safely returns the parent position and last element
+   * @param position
+   */
+  public static splitPosition (position?:string): { parent:string, element:string }|null {
+    if( (position==null) || (position.length===0))
+      return null;
+    const lastSlash=position.lastIndexOf('/');
+    if (lastSlash==-1)
+      return {
+        parent:'',
+        element:position
+      };
+    else {
+      return {
+        parent:position.substring(0, lastSlash),
+        element:position.substring(lastSlash+1)
+      };
+    }
   }
 }

@@ -10,9 +10,9 @@ export class DontCodeStoreManager {
 
   private _default?: DontCodeStoreProvider;
   private providerByPosition = new Map<string, DontCodeStoreProvider>();
-  private providerByType = new Map<string, DontCodeStoreProviderWithConfig>();
+  private providerByType = new Map<string, DontCodeStoreProvider>();
 
-  constructor(protected modelMgr: DontCodeModelManager, protected previewMgr:DontCodePreviewManager, provider?:DontCodeStoreProvider) {
+  constructor(protected modelMgr: DontCodeModelManager, provider?:DontCodeStoreProvider) {
     this._default = provider;
   }
 
@@ -25,7 +25,7 @@ export class DontCodeStoreManager {
         // Try to find if the entity is
           const srcDefinition = this.modelMgr.findTargetOfProperty (DontCodeModel.APP_ENTITIES_FROM_NODE, position) as DontCodeSourceType;
           if (srcDefinition) {
-            ret = this.providerByType.get(srcDefinition.type)?.withConfig (srcDefinition);
+            ret = this.providerByType.get(srcDefinition.type);
           }
       }
       return ret ?? this._default;
@@ -57,7 +57,7 @@ export class DontCodeStoreManager {
     }
   }
 
-  setProviderForSourceType(value: DontCodeStoreProviderWithConfig, srcType:string): void {
+  setProviderForSourceType(value: DontCodeStoreProvider, srcType:string): void {
       this.providerByType.set(srcType, value);
   }
 
@@ -71,6 +71,10 @@ export class DontCodeStoreManager {
     else {
       this.providerByPosition.delete(position);
     }
+  }
+
+  removeProviderForSourceType (srcType:string): void {
+    this.providerByType.delete(srcType);
   }
 
   removeDefaultProvider (): void {

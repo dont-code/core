@@ -1,6 +1,6 @@
 {
   "name": "@dontcode/core",
-  "version": "0.3.12",
+  "version": "0.4.0",
   "private": false,
   "main": "index.js",
   "peerDependencies": {

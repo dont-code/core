@@ -6,7 +6,7 @@ export class DontCodeTestManager {
     return DontCodeTestManager.createAnyChange(ChangeType.DELETE, containerSchema, containerItemId, schema, itemId, null, property);
   }
 
-  public static createMoveChange (oldPosition:string, beforeIdOrProperty:string|null, containerSchema: string, containerItemId: string|null, schema: string, itemId: string, property?:string) {
+  public static createMoveChange (oldPosition:string, beforeIdOrProperty:string|null, containerSchema: string, containerItemId: string|null, schema: string, itemId: string|null, property?:string) {
     const ret = DontCodeTestManager.createAnyChange(ChangeType.MOVE, containerSchema, containerItemId, schema, itemId, null, property);
     ret.oldPosition=oldPosition;
     if( beforeIdOrProperty)
@@ -19,12 +19,16 @@ export class DontCodeTestManager {
   }
 
   public static createAnyChange(type:ChangeType, containerSchema: string, containerItemId: string|null, schema: string|null, itemId: string|null, value: any, property?:string) {
-    let calcContainerItemId=containerItemId?'/'+containerItemId:'';
-    let calcItemId=itemId?'/'+itemId:'';
+    const calcContainerItemId=containerItemId?'/'+containerItemId:'';
+    const calcItemId=itemId?'/'+itemId:'';
     let calcSchema=schema?'/'+schema:'';
+    if( containerSchema.length==0)
+      calcSchema=schema?schema:'';
     let calcProperty=property?'/'+property:'';
-    let calcPropertySchemaItem = (property)?calcSchema + calcItemId:'';
-    let calcPropertySchema = (property)?calcSchema:'';
+    if( (containerSchema.length==0)&& (calcSchema.length==0))
+      calcProperty=property?property:'';
+    const calcPropertySchemaItem = (property)?calcSchema + calcItemId:(itemId)?calcSchema:'';
+    const calcPropertySchema = (property)?calcSchema:'';
 
     return new Change(type,
       containerSchema + calcContainerItemId + calcSchema + calcItemId + calcProperty,
@@ -33,8 +37,8 @@ export class DontCodeTestManager {
         containerSchema + calcSchema + calcProperty,
         containerSchema + calcContainerItemId+ calcPropertySchemaItem,
         containerSchema + calcPropertySchema,
-        property?property:null,
-        property?null:itemId
+        property??itemId??undefined,
+        property!=null
       ));
   };
 

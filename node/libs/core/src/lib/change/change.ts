@@ -11,6 +11,7 @@ export class Change {
   constructor(type: ChangeType, position: string, value: any, pointer?:DontCodeModelPointer, beforeKey?:string, oldPosition?:string) {
     this.type = type;
     this.position = position;
+    if( position==='/') throw new Error ("Root position is defined by empty string and not slash anymore");
     this.value = value;
     this.pointer = pointer;
     this.beforeKey = beforeKey;

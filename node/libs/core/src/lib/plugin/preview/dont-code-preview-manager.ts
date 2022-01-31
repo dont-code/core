@@ -1,30 +1,59 @@
-import * as DontCode from "@dontcode/core";
-import {PreviewHandlerConfig} from "@dontcode/core";
+import {ChangeHandlerConfig, PluginConfig} from "../../globals";
+import {Observable, ReplaySubject, Subject, Subscription} from "rxjs";
 
 export class DontCodePreviewManager {
-  protected handlersPerLocations: Map<string, PreviewHandlerConfig[] >;
+  protected handlersPerLocations: Map<string, ChangeHandlerConfig[] >;
+  protected globalHandlersPerLocations: Map<string, ChangeHandlerConfig[] >;
 
+  protected globalHandlers: ReplaySubject<ChangeHandlerConfig>=new ReplaySubject();
 
   constructor() {
-    this.handlersPerLocations = new Map<string, DontCode.PreviewHandlerConfig[]>();
+    this.handlersPerLocations = new Map<string, ChangeHandlerConfig[]>();
+    this.globalHandlersPerLocations = new Map<string, ChangeHandlerConfig[]>();
   }
 
-  registerHandlers (config: DontCode.PluginConfig): void {
+  registerHandlers (config: PluginConfig): void {
     if (config["preview-handlers"]) {
       config["preview-handlers"].forEach(value => {
-        if (this.handlersPerLocations.has(value.location.parent)) {
-          this.handlersPerLocations.get(value.location.parent)?.push(value);
+        let array=this.handlersPerLocations.get(value.location.parent);
+        if (!array) {
+          array = new Array<ChangeHandlerConfig>();
+          this.handlersPerLocations.set(value.location.parent, array);
         }
-        else {
-          this.handlersPerLocations.set(value.location.parent, [value]);
+        array.push(value);
+      });
+    }
+    if (config["global-handlers"]) {
+      config["global-handlers"].forEach(value => {
+        let array = this.handlersPerLocations.get(value.location.parent);
+        if (!array) {
+          array = new Array<ChangeHandlerConfig>();
+          this.handlersPerLocations.set(value.location.parent, array);
         }
+        array.push(value);
+          // Update the global handlers as well
+        array = this.globalHandlersPerLocations.get(value.location.parent);
+        if (!array) {
+          array = new Array<ChangeHandlerConfig>();
+          this.globalHandlersPerLocations.set(value.location.parent, array);
+        }
+        array.push(value);
+        this.globalHandlers.next(value);
       });
     }
   }
 
-  retrieveHandlerConfig (position: string, jsonContent?: any): PreviewHandlerConfig|null {
+  getGlobalHandlers () : Map<string, Array<ChangeHandlerConfig>> {
+    return this.globalHandlersPerLocations;
+  }
+
+  receiveGlobalHandlers (): Observable<ChangeHandlerConfig> {
+    return this.globalHandlers;
+  }
+
+  retrieveHandlerConfig (position: string, jsonContent?: any): ChangeHandlerConfig|null {
     const found = this.handlersPerLocations.get(position);
-    let ret:PreviewHandlerConfig|null = null;
+    let ret:ChangeHandlerConfig|null = null;
     let contentNeeded=false;
 
     if (found) {

@@ -1,6 +1,6 @@
 {
   "$id": "http://dont-code.net/v1/plugin-config-schema",
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "JSON Schema v1 for plugins to update the dont-code schema",
   "type": "object",
   "required": [
@@ -8,22 +8,28 @@
   ],
   "properties": {
     "plugin": {
-      "$ref": "#/definitions/plugin"
+      "$ref": "#/$defs/plugin"
     },
     "schema-updates": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/schema-update"
+        "$ref": "#/$defs/schema-update"
       }
     },
     "preview-handlers": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/preview-handler"
+        "$ref": "#/$defs/change-handler"
+      }
+    },
+    "global-handlers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/change-handler"
       }
     }
   },
-  "definitions": {
+  "$defs": {
     "plugin": {
       "type": "object",
       "required": [
@@ -54,7 +60,7 @@
         "changes": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/change"
+            "$ref": "#/$defs/change"
           }
         }
       }
@@ -63,13 +69,13 @@
       "type": "object",
       "properties": {
         "location": {
-          "$ref": "#/definitions/change-location"
+          "$ref": "#/$defs/change-location"
         },
         "update": {
-          "$ref": "#/definitions/additem"
+          "$ref": "#/$defs/additem"
         },
         "props": {
-          "$ref": "#/definitions/itemprops"
+          "$ref": "#/$defs/itemprops"
         },
         "replace": {
           "type": "boolean"
@@ -110,11 +116,11 @@
       },
       "additionalProperties": true
     },
-    "preview-handler": {
+    "change-handler": {
       "type": "object",
       "properties": {
         "location": {
-          "$ref": "#/definitions/change-location"
+          "$ref": "#/$defs/change-location"
         },
         "class": {
           "type": "object",

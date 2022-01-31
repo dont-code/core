@@ -8,7 +8,7 @@ describe('Test Manager', () => {
     });
 
     const resultPointer = change.pointer;
-    expect(resultPointer?.schemaPosition).toBe('creation/entities/fields');
-    expect(resultPointer?.containerSchemaPosition).toBe('creation/entities');
+    expect(resultPointer?.positionInSchema).toBe('creation/entities/fields');
+    expect(resultPointer?.containerPositionInSchema).toBe('creation/entities');
   });
 });
