@@ -475,7 +475,9 @@ describe('Model Manager', () => {
     });
     checkChanges(atomicChanges, [
       {type: ChangeType.UPDATE, position: 'creation/entities'},
-      {type: ChangeType.MOVE, position: 'creation/entities/b', oldPosition:'creation/entities/b'}
+      {type: ChangeType.MOVE, position: 'creation/entities/b', oldPosition:'creation/entities/b'},
+      {type: ChangeType.MOVE, position: 'creation/entities/b/name', oldPosition:'creation/entities/b/name'},
+      {type: ChangeType.MOVE, position: 'creation/entities/b/from', oldPosition:'creation/entities/b/from'}
     ]);
 
       // Check one can move an item from one parent to another
