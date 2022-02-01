@@ -134,6 +134,7 @@ export class DontCodeModelManager {
                 delete parentContent[splittedPosition.element];
               }else {
                 // Just insert the same element at a different position in the object
+                this.compareRecursiveIfNeeded(srcChange, null, newContent, pointer, curAtomicChange, oldPosition);
                 this.insertProperty(oldContent, subElem, newContent, srcChange.beforeKey);
               }
             }
