@@ -104,7 +104,7 @@ export class DontCodeSchemaManager {
     let ignoreNext = false;
     posElems.forEach(element => {
       if (!ignoreNext) {
-        let nextItem = parentItem.getChild(element);
+        let nextItem = parentItem.getChild(element)??parentItem.isPossibleDynamicProperty(element);
         if (nextItem) {
           ret.isProperty=true;
           ret.containerPositionInSchema=ret.positionInSchema;

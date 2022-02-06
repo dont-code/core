@@ -107,6 +107,18 @@ describe('Schema Manager', () => {
       lastElement:'aabb',
       isProperty:false
     });
+
+    // Check the dynamic properties are correctly handled
+    mgr.registerChanges(new PluginTest().getConfiguration());
+    pointer = mgr.generateSchemaPointer("creation/screens/a/entity");
+    expect(pointer).toEqual({
+      position:'creation/screens/a/entity',
+      positionInSchema:'creation/screens/entity',
+      containerPosition:'creation/screens/a',
+      containerPositionInSchema:'creation/screens',
+      lastElement:'entity',
+      isProperty:true
+    });
   });
 
   it('should locate items properly', () => {

@@ -1,4 +1,5 @@
 import * as DontCode from "../globals";
+import {Symbol} from "rxjs/internal/Rx";
 
 /**
  * Stores and manipulate the schema representing a dont-code application
@@ -28,8 +29,15 @@ export interface DontCodeSchemaItem {
   getChild(id?: string): DontCodeSchemaItem | undefined;
 //  getChildIndex (child:DontCodeSchemaItem): number;
   getChildren (): IterableIterator<[string, DontCodeSchemaItem]>;
+  allProperties (): IterableIterator<[string, DontCodeSchemaProperty]>;
   getProperties(code: string): DontCodeSchemaProperty | undefined;
   hasProperties (code:string): boolean;
+
+  /**
+   * Check if possibly the property named code can be assigned to this schemaItem by one of its child dynamically.
+   * @param code
+   */
+  isPossibleDynamicProperty (code: string): DontCodeSchemaProperty | undefined;
 
   getRelativeId (): string|undefined;
   setRelativeId (relativeId:string|undefined): void;
@@ -150,6 +158,10 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     //
   }
 
+  allProperties(): IterableIterator<[string, DontCodeSchemaProperty]> {
+    return [].values();
+  }
+
   getProperties(code: string): DontCodeSchemaProperty | undefined {
     return undefined;
   }
@@ -171,6 +183,19 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
 
   setTargetPath(newPath:string): void {
     this.targetPath=newPath;
+  }
+
+  isPossibleDynamicProperty(code: string): DontCodeSchemaProperty | undefined {
+    const children = this.getChildren();
+    for (const child of children) {
+      const childProps = child[1].allProperties ();
+      for (const childProp of childProps) {
+        if (childProp[1].getChild(code)) {
+          return childProp[1];
+        }
+      }
+    }
+    return undefined;
   }
 
 }
@@ -385,6 +410,11 @@ export class DontCodeSchemaEnum extends AbstractSchemaItem {
         }
 
     });
+  }
+
+
+  allProperties(): IterableIterator<[string, DontCodeSchemaProperty]> {
+    return this.properties.entries();
   }
 
   getProperties(code: string): DontCodeSchemaProperty | undefined {
