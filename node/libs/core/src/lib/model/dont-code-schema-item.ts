@@ -29,6 +29,10 @@ export interface DontCodeSchemaItem {
   getChild(id?: string): DontCodeSchemaItem | undefined;
 //  getChildIndex (child:DontCodeSchemaItem): number;
   getChildren (): IterableIterator<[string, DontCodeSchemaItem]>;
+
+  /**
+   * Returns all properties
+   */
   allProperties (): IterableIterator<[string, DontCodeSchemaProperty]>;
   getProperties(code: string): DontCodeSchemaProperty | undefined;
   hasProperties (code:string): boolean;

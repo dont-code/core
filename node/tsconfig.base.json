@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "importHelpers": true,
+    "downlevelIteration": true,
     "target": "es2015",
     "module": "esnext",
     "typeRoots": ["node_modules/@types"],
