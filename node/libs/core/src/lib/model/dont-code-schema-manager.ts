@@ -2,6 +2,11 @@ import {DontCodeSchemaItem, DontCodeSchemaRef, DontCodeSchemaRoot} from "./dont-
 import {DontCodeModelPointer, DontCodeSchema} from "./dont-code-schema";
 import {PluginConfig} from "../globals";
 
+/**
+ * Manages the schema used to describe an application in Dont-code.
+ * A schema is provided by default, but can be updated by plugins.
+ * That means plugins can add or modify new fields or entities thus changing the way applications are edited and described.
+ */
 export class DontCodeSchemaManager {
   protected currentSchema:DontCodeSchemaRoot;
   protected readSchema: any;
