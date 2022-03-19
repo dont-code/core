@@ -22,6 +22,12 @@ export class DontCodeModel {
   static readonly APP_SHARING_WITH = DontCodeModel.APP_SHARING+'/'+DontCodeModel.APP_SHARING_WITH_NODE;
   static readonly APP_SOURCES_NODE = 'sources';
   static readonly APP_SOURCES = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SOURCES_NODE;
+  static readonly APP_SOURCES_NAME_NODE = 'name';
+  static readonly APP_SOURCES_NAME = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SOURCES_NODE+'/'+DontCodeModel.APP_SOURCES_NAME_NODE;
+  static readonly APP_SOURCES_TYPE_NODE = 'type';
+  static readonly APP_SOURCES_TYPE = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SOURCES_NODE+'/'+DontCodeModel.APP_SOURCES_TYPE_NODE;
+  static readonly APP_SOURCES_URL_NODE = 'url';
+  static readonly APP_SOURCES_URL = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SOURCES_NODE+'/'+DontCodeModel.APP_SOURCES_URL_NODE;
   static readonly APP_SCREENS_NODE = 'screens';
   static readonly APP_SCREENS = DontCodeModel.ROOT+'/'+DontCodeModel.APP_SCREENS_NODE;
   static readonly APP_SCREENS_NAME_NODE = 'name';
