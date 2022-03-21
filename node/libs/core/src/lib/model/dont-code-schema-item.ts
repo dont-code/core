@@ -12,6 +12,8 @@ export interface DontCodeSchemaItem {
   isValue (): boolean;
   isReference (): boolean;
   isRoot (): boolean;
+  isReadonly (): boolean;
+  isHidden ():boolean;
 
   /**
    * Adds or update a child with the change given by the plugin
@@ -52,6 +54,8 @@ export interface DontCodeSchemaItem {
 export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
   protected parent: DontCodeSchemaItem|undefined;
   protected array = false;
+  protected readOnly = false;
+  protected hidden = false;
   protected relativeId:string|undefined;
   protected targetPath:string|undefined;
 
@@ -88,6 +92,22 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     return false;
   }
 
+  isHidden () : boolean {
+    return this.hidden;
+  }
+
+  setHidden (val:boolean): void {
+    this.hidden = val;
+  }
+
+  isReadonly(): boolean {
+    return this.readOnly;
+  }
+
+  setReadonly (val:boolean): void {
+    this.readOnly = val;
+  }
+
   public static generateItem ( json:any, itemId:string, parent?:DontCodeSchemaItem): AbstractSchemaItem {
     let isArray = Array.isArray(json);
 
@@ -121,6 +141,8 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem{
     {
       return json;
     }
+    if (json['readOnly']===true) ret.setReadonly(true);
+    if (json['writeOnly']===true) ret.setHidden(true);
     ret.setArray(isArray);
     return ret;
   }

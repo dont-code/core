@@ -1,4 +1,5 @@
 import {
+  AbstractSchemaItem,
   DontCodeSchemaEnum, DontCodeSchemaEnumValue,
   DontCodeSchemaObject,
   DontCodeSchemaRef,
@@ -139,6 +140,47 @@ describe('Schema Item', () => {
     expect(webValue.getValue()).toEqual("Web");
     expect(webValue.getChildren()).toEqual ([new DontCodeSchemaEnumValue('Website (url)'), new DontCodeSchemaEnumValue('Image')]);
     expect (item.getProperties("Image")).toBeTruthy();
+  });
+
+  it('should support hidden and readOnly', () => {
+    const item = AbstractSchemaItem.generateItem({
+        "type": "object",
+        "readOnly": true,
+        "writeOnly": true,
+        "properties": {
+          "type": {
+            "readOnly": true,
+            "writeOnly": true,
+            "enum": [
+              "application"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "entities": {
+            "readOnly": true,
+            "writeOnly": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/entity"
+            }
+          }
+        }
+      }, 'root'
+    );
+    expect(item.isReadonly()).toBeTruthy();
+    expect(item.isHidden()).toBeTruthy();
+    const appType=item.getChild('type') as DontCodeSchemaEnum;
+    expect(appType.isReadonly()).toBeTruthy();
+    expect(appType.isHidden()).toBeTruthy();
+    const appName=item.getChild('name') as DontCodeSchemaValue;
+    expect(appName.isReadonly()).toBeFalsy();
+    expect(appName.isHidden()).toBeFalsy();
+    const appEntities=item.getChild('entities') as DontCodeSchemaRef;
+    expect(appEntities.isReadonly()).toBeTruthy();
+    expect(appEntities.isHidden()).toBeTruthy();
+
   });
 
 });
