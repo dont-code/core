@@ -20,13 +20,14 @@ export class DontCodeStoreManager {
     if( position == null) {
       return this._default;
     } else {
-      let ret= this.providerByPosition.get(position);
+      let ret=null;
+      // Try to find if the entity is loaded from a defined source
+      const srcDefinition = this.modelMgr.findTargetOfProperty (DontCodeModel.APP_ENTITIES_FROM_NODE, position) as DontCodeSourceType;
+      if (srcDefinition) {
+        ret = this.providerByType.get(srcDefinition.type);
+      }
       if (!ret) {
-        // Try to find if the entity is
-          const srcDefinition = this.modelMgr.findTargetOfProperty (DontCodeModel.APP_ENTITIES_FROM_NODE, position) as DontCodeSourceType;
-          if (srcDefinition) {
-            ret = this.providerByType.get(srcDefinition.type);
-          }
+        ret= this.providerByPosition.get(position);
       }
       return ret ?? this._default;
     }
@@ -82,29 +83,29 @@ export class DontCodeStoreManager {
   }
 
   storeEntity (position:string, entity:any) : Promise<any> {
-    return this.getProviderSafe().storeEntity(position, entity);
+    return this.getProviderSafe(position).storeEntity(position, entity);
   }
 
   loadEntity (position:string, key: any) : Promise<any> {
-    return this.getProviderSafe().loadEntity(position, key);
+    return this.getProviderSafe(position).loadEntity(position, key);
   }
 
   deleteEntity (position:string, key:any): Promise<boolean> {
-    return this.getProviderSafe().deleteEntity(position, key);
+    return this.getProviderSafe(position).deleteEntity(position, key);
   }
 
   searchEntities (position:string, ...criteria:DontCodeStoreCriteria[]): Observable<Array<any>> {
-    return this.getProviderSafe().searchEntities(position, ...criteria);
+    return this.getProviderSafe(position).searchEntities(position, ...criteria);
   }
 
   canStoreDocument (position?:string): boolean {
-    const res= this.getProvider()?.canStoreDocument(position);
+    const res= this.getProvider(position)?.canStoreDocument(position);
     if( res) return res;
     else return false;
   }
 
   storeDocuments (toStore:File[], position?:string): Observable<UploadedDocumentInfo> {
-    return this.getProviderSafe().storeDocuments(toStore, position);
+    return this.getProviderSafe(position).storeDocuments(toStore, position);
   }
 
 }
