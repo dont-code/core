@@ -1,14 +1,8 @@
 {
+  "extends": "@nrwl/workspace/presets/npm.json",
   "npmScope": "dontcode",
-  "implicitDependencies": {
-    "workspace.json": "*",
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
-    },
-    "tslint.json": "*",
-    "nx.json": "*",
-    "tsconfig.base.json": "*"
+  "affected": {
+    "defaultBase": "master"
   },
   "tasksRunnerOptions": {
     "default": {
@@ -18,20 +12,7 @@
       }
     }
   },
-  "projects": {
-    "core": {
-      "tags": []
-    }
-  },
-  "affected": {
-    "defaultBase": "master"
-  },
-  "targetDependencies": {
-    "build": [
-      {
-        "target": "build",
-        "projects": "dependencies"
-      }
-    ]
+  "cli": {
+    "defaultCollection": "@nrwl/workspace"
   }
 }

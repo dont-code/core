@@ -3,9 +3,10 @@
   "compilerOptions": {
     "outDir": "../dist/out-tsc/tools",
     "rootDir": ".",
-    "module": "ES2015",
+    "module": "commonjs",
     "target": "es5",
-    "types": ["node"]
+    "types": ["node"],
+    "importHelpers": false
   },
   "include": ["**/*.ts"]
 }

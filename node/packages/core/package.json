@@ -1,0 +1,11 @@
+{
+  "name": "@dontcode/core",
+  "version": "0.5.0",
+  "type": "commonjs",
+  "private": false,
+  "main": "index.js",
+  "peerDependencies": {
+    "rxjs": "^7.5.5",
+    "jsonpath-plus": "^6.0.1"
+  }
+}
