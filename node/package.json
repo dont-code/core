@@ -9,6 +9,7 @@
     "jsonpath-plus": "^6.0.1"
   },
   "devDependencies": {
+    "nx": "^13.10.1",
     "@nrwl/cli": "13.10.1",
     "@nrwl/eslint-plugin-nx": "13.10.1",
     "@nrwl/jest": "13.10.1",
