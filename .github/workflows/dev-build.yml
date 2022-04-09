@@ -39,10 +39,10 @@ jobs:
       - name: Npm install
         run: npm ci
       - name: building
-        run: npm run nx run core:build
+        run: nx run core:build
 #      - uses: actions/upload-artifact@v1
 #        with:
 #          name: distribution
 #          path: node/dist/libs/core
       - name: Unit tests
-        run: npm run nx run core:test
+        run: nx run core:test
