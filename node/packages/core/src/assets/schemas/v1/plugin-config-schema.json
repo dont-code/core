@@ -1,0 +1,129 @@
+{
+  "$id": "http://dont-code.net/v1/plugin-config-schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "JSON Schema v1 for plugins to update the dont-code schema",
+  "type": "object",
+  "required": ["plugin"],
+  "properties": {
+    "plugin": {
+      "$ref": "#/$defs/plugin"
+    },
+    "schema-updates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/schema-update"
+      }
+    },
+    "preview-handlers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/change-handler"
+      }
+    },
+    "global-handlers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/change-handler"
+      }
+    }
+  },
+  "$defs": {
+    "plugin": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "display-name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "schema-update": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/change"
+          }
+        }
+      }
+    },
+    "change": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/change-location"
+        },
+        "update": {
+          "$ref": "#/$defs/additem"
+        },
+        "props": {
+          "$ref": "#/$defs/itemprops"
+        },
+        "replace": {
+          "type": "boolean"
+        }
+      }
+    },
+    "change-location": {
+      "type": "object",
+      "required": ["parent", "id"],
+      "properties": {
+        "parent": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "before": {
+          "type": "string"
+        },
+        "after": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "additem": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": true
+    },
+    "itemprops": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": true
+    },
+    "change-handler": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/change-location"
+        },
+        "class": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

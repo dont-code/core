@@ -20,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x]
+        node-version: [16.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -37,12 +37,14 @@ jobs:
           path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Npm install
-        run: npm ci
+        run: |
+          npm install -g nx
+          npm ci
       - name: building
-        run: npm run nx run core:build
+        run: nx run core:build
 #      - uses: actions/upload-artifact@v1
 #        with:
 #          name: distribution
 #          path: node/dist/libs/core
       - name: Unit tests
-        run: npm run nx run core:test
+        run: nx run core:test
