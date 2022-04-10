@@ -46,7 +46,7 @@ jobs:
           npm ci
       - name: Build
         run: npm version patch
-        working-directory: node/libs/core
+        working-directory: node/packages/core
       - name: Build
         run: nx run core:build
       - name: get-npm-version
