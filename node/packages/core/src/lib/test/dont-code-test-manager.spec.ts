@@ -1,4 +1,4 @@
-import {DontCodeTestManager,} from '@dontcode/core';
+import { DontCodeTestManager } from '@dontcode/core';
 
 describe('Test Manager', () => {
   it('should generate correct changes', () => {

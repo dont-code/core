@@ -1,18 +1,40 @@
 {
-  "extends": "@nrwl/workspace/presets/npm.json",
   "npmScope": "dontcode",
   "affected": {
     "defaultBase": "master"
   },
+  "cli": {
+  "defaultCollection": "@nrwl/web"
+  },
+  "implicitDependencies": {
+    "package.json": {
+      "dependencies": "*",
+      "devDependencies": "*"
+    },
+    ".eslintrc.json": "*"
+  },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/workspace/tasks-runners/default",
+      "runner": "nx/tasks-runners/default",
       "options": {
         "cacheableOperations": ["build", "lint", "test", "e2e"]
       }
     }
   },
-  "cli": {
-    "defaultCollection": "@nrwl/workspace"
+  "targetDependencies": {
+    "build": [
+      {
+        "target": "build",
+        "projects": "dependencies"
+      }
+    ]
+  },
+  "defaultProject": "core",
+  "generators": {
+    "@nrwl/web:library": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest"
+    }
   }
 }
