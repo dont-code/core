@@ -1,15 +1,39 @@
 {
   "root": "packages/core",
   "sourceRoot": "packages/core/src",
+  "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/core",
-        "main": "packages/core/src/index.ts",
+        "entryFile": "packages/core/src/index.ts",
         "tsConfig": "packages/core/tsconfig.lib.json",
-        "assets": ["packages/core/*.md"]
+        "project": "packages/core/package.json",
+        "compiler": "babel",
+        "globals": [
+          {
+            "moduleId":"rxjs",
+            "global": "rxjs"
+          },
+          {
+            "moduleId":"jsonpath-plus",
+            "global": "jsonpath-plus"
+          }
+        ],
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "packages/core/src/assets/",
+            "output": "/assets/"
+          },
+          {
+            "glob": "*.md",
+            "input": "packages/core/",
+            "output": "/"
+          }
+        ]
       }
     },
     "lint": {
