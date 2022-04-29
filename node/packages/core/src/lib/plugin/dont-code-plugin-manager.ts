@@ -15,6 +15,7 @@ export class DontCodePluginManager {
     const fullId = config.plugin.id + '-v' + config.plugin.version;
     this.plugins.set(fullId, plugin);
 
+    console.debug ("Setting up", fullId);
     schemaManager.registerChanges(config);
     previewManager.registerHandlers(config);
   }
