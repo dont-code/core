@@ -34,7 +34,15 @@
             "output": "/"
           }
         ]
-      }
+      },
+      "configurations": {
+        "production": {
+        },
+        "development": {
+          "rollupConfig": "tools/getRollupOptions.js"
+        }
+      },
+      "defaultConfiguration": "production"
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
