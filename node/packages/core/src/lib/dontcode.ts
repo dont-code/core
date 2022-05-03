@@ -29,6 +29,10 @@ export class DontCodeCore implements DontCode.Core {
     );
   }
 
+  initPlugins (): void {
+    this.pluginManager.initPlugins (this);
+  }
+
   getSchemaUri(): string {
     return 'schemas/v1/dont-code-schema.json';
   }

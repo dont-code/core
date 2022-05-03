@@ -1,6 +1,7 @@
 import { DontCodeCore } from './dontcode';
 import * as DontCode from './globals';
 import PluginConfig = DontCode.PluginConfig;
+import {Core} from "./globals";
 
 describe('dontcode', () => {
   it('should work', () => {
@@ -25,5 +26,8 @@ class PluginTest implements DontCode.Plugin {
         version: '1.0.0',
       },
     };
+  }
+
+  pluginInit(dontCode: Core): void {
   }
 }

@@ -1,6 +1,7 @@
 import { DontCodeCore } from '../../dontcode';
 import * as DontCode from '../../globals';
 import PluginConfig = DontCode.PluginConfig;
+import {Core} from "../../globals";
 
 describe('Preview Manager', () => {
   it('should work', () => {
@@ -216,6 +217,9 @@ class SimplePluginTest implements DontCode.Plugin {
       ],
     };
   }
+
+  pluginInit(dontCode: Core): void {
+  }
 }
 
 class BasicPluginTest implements DontCode.Plugin {
@@ -239,6 +243,9 @@ class BasicPluginTest implements DontCode.Plugin {
         },
       ],
     };
+  }
+
+  pluginInit(dontCode: Core): void {
   }
 }
 
@@ -265,6 +272,9 @@ class ValuesPluginTest implements DontCode.Plugin {
       ],
     };
   }
+
+  pluginInit(dontCode: Core): void {
+  }
 }
 
 class OtherValuesPluginTest implements DontCode.Plugin {
@@ -289,6 +299,9 @@ class OtherValuesPluginTest implements DontCode.Plugin {
         },
       ],
     };
+  }
+
+  pluginInit(dontCode: Core): void {
   }
 }
 
@@ -324,6 +337,9 @@ class SubTypeValuesPluginTest implements DontCode.Plugin {
       ],
     };
   }
+
+  pluginInit(dontCode: Core): void {
+  }
 }
 
 class NoValuesPluginTest implements DontCode.Plugin {
@@ -347,6 +363,9 @@ class NoValuesPluginTest implements DontCode.Plugin {
         },
       ],
     };
+  }
+
+  pluginInit(dontCode: Core): void {
   }
 }
 
@@ -391,5 +410,8 @@ class GlobalHandlerPluginTest implements DontCode.Plugin {
         },
       ],
     };
+  }
+
+  pluginInit(dontCode: Core): void {
   }
 }

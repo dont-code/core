@@ -20,6 +20,11 @@ export var dtcde: Core = (self as any).dontCodeCore;
 
 export interface Plugin {
   getConfiguration(): PluginConfig;
+  /**
+   * Once all plugins have been loaded, each one pluginInit's is being called.
+   * @param dontCode
+   */
+  pluginInit (dontCode: Core): void;
 }
 
 /**
