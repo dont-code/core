@@ -7,6 +7,7 @@ import { DontCodeModelManager } from './model/dont-code-model-manager';
 export interface Core {
   getSchemaUri(): string;
   registerPlugin(plugin: Plugin): void;
+  initPlugins (): void;
   getSchemaManager(): DontCodeSchemaManager;
   getModelManager(): DontCodeModelManager;
   getPreviewManager(): DontCodePreviewManager;
