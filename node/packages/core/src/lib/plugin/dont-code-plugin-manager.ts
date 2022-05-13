@@ -36,7 +36,7 @@ export class DontCodePluginManager {
               if( schemaItem.isArray()) {
                 if ((definition.location.id==null) || (definition.location.id==='*')) {
                   // We must create a subelement
-                  ptr = ptr.subItemPointer(core.getModelManager().generateNextKeyForPosition(ptr.position));
+                  ptr = ptr.subItemPointer(core.getModelManager().generateNextKeyForPosition(ptr.position, true));
                 } else {
                   ptr = ptr.subItemPointer(definition.location.id);
                 }

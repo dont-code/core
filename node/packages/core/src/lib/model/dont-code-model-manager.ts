@@ -517,8 +517,8 @@ export class DontCodeModelManager {
    * Calculates a key that can be inserted at the given position in the content
    * @param pos
    */
-  generateNextKeyForPosition(pos:string):string {
-    const array=this.findAtPosition(pos, false);
+  generateNextKeyForPosition(pos:string, create=false):string {
+    const array=this.findAtPosition(pos, create);
     if(array==null)
       throw new Error("No element at position "+pos);
     return DontCodeModelManager.generateNextKey(array);
