@@ -3,7 +3,6 @@ import * as DontCode from '../globals';
 import {DontCodePreviewManager} from './preview/dont-code-preview-manager';
 import {Change, ChangeType} from "../change/change";
 import PluginConfig = DontCode.PluginConfig;
-import {DontCodeModelManager} from "../model/dont-code-model-manager";
 
 export class DontCodePluginManager {
   protected plugins: Map<string, PluginInfo> = new Map();
