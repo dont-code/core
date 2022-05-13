@@ -75,29 +75,34 @@ export interface PluginConfig {
   }>;
   'preview-handlers'?: Array<ChangeHandlerConfig>;
   'global-handlers'?: Array<ChangeHandlerConfig>;
+  'definition-updates'?: Array<DefinitionUpdateConfig>
 }
 
 export interface ChangeConfig {
-  location: {
-    parent: string;
-    id: string;
-    after?: string;
-  };
+  location: LocationConfig;
   update?: any;
   props?: any;
   replace?: boolean;
 }
 
 export interface ChangeHandlerConfig {
-  location: {
-    parent: string;
-    id?: string;
-    values?: any;
-  };
+  location: LocationConfig;
   class: {
     source: string;
     name: string;
   };
+}
+
+export interface LocationConfig {
+  parent: string;
+  id?: string;
+  after?: string;
+  values?: any;
+}
+
+export interface DefinitionUpdateConfig {
+  location: LocationConfig;
+  update: any;
 }
 
 export {};

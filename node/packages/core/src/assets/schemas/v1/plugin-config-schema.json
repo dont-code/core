@@ -25,6 +25,13 @@
       "items": {
         "$ref": "#/$defs/change-handler"
       }
+    },
+    "definition-updates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/definition-update"
+      }
+
     }
   },
   "$defs": {
@@ -122,6 +129,17 @@
               "type": "string"
             }
           }
+        }
+      }
+    },
+    "definition-update": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/change-location"
+        },
+        "update": {
+          "$ref": "#/$defs/additem"
         }
       }
     }

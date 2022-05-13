@@ -1,9 +1,8 @@
-import { Change, ChangeType } from '../change/change';
-import { Subject } from 'rxjs';
-import { DontCodeSchemaItem } from './dont-code-schema-item';
-import { DontCodeSchemaManager } from './dont-code-schema-manager';
-import { JSONPath } from 'jsonpath-plus';
-import { DontCodeModelPointer } from './dont-code-schema';
+import {Change, ChangeType} from '../change/change';
+import {DontCodeSchemaItem} from './dont-code-schema-item';
+import {DontCodeSchemaManager} from './dont-code-schema-manager';
+import {JSONPath} from 'jsonpath-plus';
+import {DontCodeModelPointer} from './dont-code-schema';
 
 /**
  * Stores and constantly updates the json (as an instance of the DontCodeSchema) as it is being edited / modified through Change events
@@ -11,6 +10,9 @@ import { DontCodeModelPointer } from './dont-code-schema';
  */
 export class DontCodeModelManager {
   protected content: any;
+
+  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS="abcdefghijklmnopqrstuvxyz";
+  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS.length;
 
   constructor(protected schemaMgr: DontCodeSchemaManager) {}
 
@@ -509,6 +511,47 @@ export class DontCodeModelManager {
     }
 
     return result;
+  }
+
+  /**
+   * Calculates a key that can be inserted at the given position in the content
+   * @param pos
+   */
+  generateNextKeyForPosition(pos:string):string {
+    const array=this.findAtPosition(pos, false);
+    if(array==null)
+      throw new Error("No element at position "+pos);
+    return DontCodeModelManager.generateNextKey(array);
+  }
+
+  static generateNextKey(array:Record<string, unknown>|Set<string>):string {
+    let keys:Set<string>;
+    if (array.size != null) {
+      keys = array as Set<string>;
+    } else {
+      keys = new Set(Object.keys(array));
+    }
+    let tentative = keys.size;
+    let found = false;
+    const modulo=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH;
+    let key;
+    do {
+      // Calculate a tentative key
+      key='';
+      do {
+        const quotient = Math.trunc(tentative/modulo);
+        const rest = tentative%modulo;
+
+        key = DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS[rest].concat(key);
+        tentative=quotient-1; // -1 because we need to not take into account the first row of values as they don't have the same number of chars
+
+      } while (tentative>=0);
+
+      // Check if the key is already present
+      found = keys.has(key);
+      tentative++;
+    } while(found);
+    return key;
   }
 
   /**

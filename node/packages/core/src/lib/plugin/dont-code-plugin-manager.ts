@@ -1,7 +1,9 @@
-import { DontCodeSchemaManager } from '../model/dont-code-schema-manager';
+import {DontCodeSchemaManager} from '../model/dont-code-schema-manager';
 import * as DontCode from '../globals';
+import {DontCodePreviewManager} from './preview/dont-code-preview-manager';
+import {Change, ChangeType} from "../change/change";
 import PluginConfig = DontCode.PluginConfig;
-import { DontCodePreviewManager } from './preview/dont-code-preview-manager';
+import {DontCodeModelManager} from "../model/dont-code-model-manager";
 
 export class DontCodePluginManager {
   protected plugins: Map<string, PluginInfo> = new Map();
@@ -25,6 +27,30 @@ export class DontCodePluginManager {
     this.plugins.forEach(plugin => {
       if (plugin.initCalled===false) {
         try {
+            // Initialize the change of model
+          const defs = plugin.plugin.getConfiguration()?.["definition-updates"];
+          if (defs!=null) {
+            defs.forEach( definition => {
+              let ptr=core.getSchemaManager().generateSchemaPointer(definition.location.parent);
+              const schemaItem = core.getSchemaManager().locateItem(ptr.positionInSchema, false);
+              if( schemaItem.isArray()) {
+                if ((definition.location.id==null) || (definition.location.id==='*')) {
+                  // We must create a subelement
+                  ptr = ptr.subItemPointer(core.getModelManager().generateNextKeyForPosition(ptr.position));
+                } else {
+                  ptr = ptr.subItemPointer(definition.location.id);
+                }
+              } else {
+                if (definition.location.id!=null) {
+                  ptr = ptr.subItemPointer(definition.location.id);
+                }
+              }
+              core.getModelManager().applyChange(
+                new Change(ChangeType.ADD, ptr.position, definition.update
+                  ,ptr
+                  ,definition.location.after));
+            })
+          }
           plugin.plugin.pluginInit(core);
           plugin.initCalled=true;
         } catch (error) {
