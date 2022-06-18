@@ -1,5 +1,5 @@
 {
-  "$id": "https://dont-code.net/v1/dont-code-schema",
+  "$id": "https://dont-code.net/v1/dont-code-schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "JSON Schema v1 for dont-code",
   "type": "object",

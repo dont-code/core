@@ -105,4 +105,31 @@ export interface DefinitionUpdateConfig {
   update: any;
 }
 
+/**
+ * The typescript equivalent of repository-schema.json
+ */
+export interface RepositorySchema {
+  name:string,
+  description?:string,
+  plugins: Array<RepositoryPluginEntry>
+}
+
+export interface RepositoryPluginEntry {
+  id:string,
+  "display-name"?:string,
+  version:string,
+  info?: RepositoryPluginInfo,
+  config?: RepositoryPluginConfig
+}
+
+export interface RepositoryPluginInfo {
+  "exposed-module":string,
+  "module-name":string,
+  "remote-entry"?:string
+}
+
+export interface RepositoryPluginConfig {
+  "definition-updates"?:Array<DefinitionUpdateConfig>
+}
+
 export {};

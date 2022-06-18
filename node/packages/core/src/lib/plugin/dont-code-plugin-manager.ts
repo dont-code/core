@@ -1,7 +1,6 @@
 import {DontCodeSchemaManager} from '../model/dont-code-schema-manager';
 import * as DontCode from '../globals';
 import {DontCodePreviewManager} from './preview/dont-code-preview-manager';
-import {Change, ChangeType} from "../change/change";
 import PluginConfig = DontCode.PluginConfig;
 
 export class DontCodePluginManager {
@@ -28,28 +27,6 @@ export class DontCodePluginManager {
         try {
             // Initialize the change of model
           const defs = plugin.plugin.getConfiguration()?.["definition-updates"];
-          if (defs!=null) {
-            defs.forEach( definition => {
-              let ptr=core.getSchemaManager().generateSchemaPointer(definition.location.parent);
-              const schemaItem = core.getSchemaManager().locateItem(ptr.positionInSchema, false);
-              if( schemaItem.isArray()) {
-                if ((definition.location.id==null) || (definition.location.id==='*')) {
-                  // We must create a subelement
-                  ptr = ptr.subItemPointer(core.getModelManager().generateNextKeyForPosition(ptr.position, true));
-                } else {
-                  ptr = ptr.subItemPointer(definition.location.id);
-                }
-              } else {
-                if (definition.location.id!=null) {
-                  ptr = ptr.subItemPointer(definition.location.id);
-                }
-              }
-              core.getModelManager().applyChange(
-                new Change(ChangeType.ADD, ptr.position, definition.update
-                  ,ptr
-                  ,definition.location.after));
-            })
-          }
           plugin.plugin.pluginInit(core);
           plugin.initCalled=true;
         } catch (error) {

@@ -3,6 +3,7 @@ import {DontCodeSchemaItem} from './dont-code-schema-item';
 import {DontCodeSchemaManager} from './dont-code-schema-manager';
 import {JSONPath} from 'jsonpath-plus';
 import {DontCodeModelPointer} from './dont-code-schema';
+import {DefinitionUpdateConfig} from "../globals";
 
 /**
  * Stores and constantly updates the json (as an instance of the DontCodeSchema) as it is being edited / modified through Change events
@@ -736,6 +737,36 @@ export class DontCodeModelManager {
       if (parent[propName] !== undefined) delete parent[propName];
       parent[propName] = value;
     }
+  }
+
+  /**
+   * Adds to the model the updates of configuration defined by the plugin or by the repository
+   * @param defs
+   */
+  applyPluginConfigUpdates (defs: DefinitionUpdateConfig[] | undefined):void {
+    if (defs!=null) {
+      defs.forEach( definition => {
+        let ptr=this.schemaMgr.generateSchemaPointer(definition.location.parent);
+        const schemaItem = this.schemaMgr.locateItem(ptr.positionInSchema, false);
+        if( schemaItem.isArray()) {
+          if ((definition.location.id==null) || (definition.location.id==='*')) {
+            // We must create a subelement
+            ptr = ptr.subItemPointer(this.generateNextKeyForPosition(ptr.position, true));
+          } else {
+            ptr = ptr.subItemPointer(definition.location.id);
+          }
+        } else {
+          if (definition.location.id!=null) {
+            ptr = ptr.subItemPointer(definition.location.id);
+          }
+        }
+        this.applyChange(
+          new Change(ChangeType.ADD, ptr.position, definition.update
+            ,ptr
+            ,definition.location.after));
+      })
+    }
+
   }
 }
 
