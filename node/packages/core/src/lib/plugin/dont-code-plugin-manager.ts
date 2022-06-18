@@ -27,6 +27,7 @@ export class DontCodePluginManager {
         try {
             // Initialize the change of model
           const defs = plugin.plugin.getConfiguration()?.["definition-updates"];
+          core.getModelManager().applyPluginConfigUpdates(defs);
           plugin.plugin.pluginInit(core);
           plugin.initCalled=true;
         } catch (error) {
