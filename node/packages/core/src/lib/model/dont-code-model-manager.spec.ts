@@ -2,6 +2,7 @@ import { Subject } from 'rxjs';
 import { Change, ChangeType } from '../change/change';
 import { dtcde } from '../globals';
 import { DontCodeTestManager } from '../test/dont-code-test-manager';
+import {DontCodeModelManager} from "@dontcode/core";
 
 describe('Model Manager', () => {
   it('should find the element at any position', () => {
@@ -1583,5 +1584,31 @@ describe('Model Manager', () => {
       { type: ChangeType.ADD, position: 'creation/entities/b' },
       { type: ChangeType.ADD, position: 'creation/entities/b/name' },
     ]);
+  });
+
+  it ('should calculate correctly next item in an array', ()=> {
+    expect (DontCodeModelManager.generateNextKey(new Set (['a','b']))).toEqual('c');
+    const obj:{[s:string]:unknown}={};
+    for (let i=0;i<DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH; i++) {
+      obj[DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS[i]]=true;
+    }
+    for (let i=0;i<DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH; i++) {
+      for (let j = 0; j < DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH; j++) {
+        obj[DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS[i] + DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS[j]] = true;
+      }
+    }
+
+    let newKey = DontCodeModelManager.generateNextKey(obj);
+    expect(newKey).toHaveLength(3);
+    expect(newKey).toEqual('aaa');
+    obj[newKey]=true;
+
+    newKey = DontCodeModelManager.generateNextKey(obj);
+    expect(newKey).toEqual('aab');
+    obj[newKey]=true;
+
+    newKey = DontCodeModelManager.generateNextKey(new Set(Object.keys(obj)));
+    expect(newKey).toEqual('aac');
+
   });
 });

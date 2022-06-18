@@ -1,5 +1,5 @@
 {
-  "$id": "http://dont-code.net/v1/plugin-config-schema",
+  "$id": "https://dont-code.net/v1/plugin-config-schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "JSON Schema v1 for plugins to update the dont-code schema",
   "type": "object",
@@ -25,6 +25,13 @@
       "items": {
         "$ref": "#/$defs/change-handler"
       }
+    },
+    "definition-updates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/definition-update"
+      }
+
     }
   },
   "$defs": {
@@ -39,6 +46,20 @@
           "type": "string"
         },
         "version": {
+          "type": "string"
+        },
+        "require": {
+          "type": "array",
+          "items": {
+            "$refs": "#/$defs/required-plugin"
+          }
+        }
+      }
+    },
+    "required-plugin": {
+      "type": "object",
+      "properties": {
+        "id": {
           "type": "string"
         }
       }
@@ -122,6 +143,17 @@
               "type": "string"
             }
           }
+        }
+      }
+    },
+    "definition-update": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/change-location"
+        },
+        "update": {
+          "$ref": "#/$defs/additem"
         }
       }
     }

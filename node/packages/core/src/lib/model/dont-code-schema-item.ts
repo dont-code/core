@@ -285,24 +285,26 @@ export class DontCodeSchemaObject extends AbstractSchemaItem {
   override upsertWith(change: DontCode.ChangeConfig): boolean {
     const existsOrNot = this.getChild(change.location.id);
     if (!existsOrNot) {
-      const exists = AbstractSchemaItem.generateItem(
-        change.update,
-        change.location.id,
-        this
-      );
-      if (change.location.after) {
-        const newMap = new Map<string, DontCodeSchemaItem>();
-        this.children.forEach((value, key) => {
-          newMap.set(key, value);
-          if (key === change.location.after) {
-            newMap.set(change.location.id, exists);
-          }
-        });
-        this.children = newMap;
-      } else {
-        this.children.set(change.location.id, exists);
+      if (change.location.id!=null) {
+        const exists = AbstractSchemaItem.generateItem(
+          change.update,
+          change.location.id,
+          this
+        );
+        if (change.location.after) {
+          const newMap = new Map<string, DontCodeSchemaItem>();
+          this.children.forEach((value, key) => {
+            newMap.set(key, value);
+            if ((key === change.location.after)&&(change.location.id!=null)) {
+              newMap.set(change.location.id, exists);
+            }
+          });
+          this.children = newMap;
+        } else {
+          this.children.set(change.location.id, exists);
+        }
+        exists.updateWith(change);
       }
-      exists.updateWith(change);
     } else {
       // Make sure to load the sub-properties
       existsOrNot.updateWith(change);

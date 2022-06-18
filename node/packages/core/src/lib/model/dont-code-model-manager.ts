@@ -1,9 +1,9 @@
-import { Change, ChangeType } from '../change/change';
-import { Subject } from 'rxjs';
-import { DontCodeSchemaItem } from './dont-code-schema-item';
-import { DontCodeSchemaManager } from './dont-code-schema-manager';
-import { JSONPath } from 'jsonpath-plus';
-import { DontCodeModelPointer } from './dont-code-schema';
+import {Change, ChangeType} from '../change/change';
+import {DontCodeSchemaItem} from './dont-code-schema-item';
+import {DontCodeSchemaManager} from './dont-code-schema-manager';
+import {JSONPath} from 'jsonpath-plus';
+import {DontCodeModelPointer} from './dont-code-schema';
+import {DefinitionUpdateConfig} from "../globals";
 
 /**
  * Stores and constantly updates the json (as an instance of the DontCodeSchema) as it is being edited / modified through Change events
@@ -11,6 +11,9 @@ import { DontCodeModelPointer } from './dont-code-schema';
  */
 export class DontCodeModelManager {
   protected content: any;
+
+  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS="abcdefghijklmnopqrstuvxyz";
+  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS.length;
 
   constructor(protected schemaMgr: DontCodeSchemaManager) {}
 
@@ -512,6 +515,47 @@ export class DontCodeModelManager {
   }
 
   /**
+   * Calculates a key that can be inserted at the given position in the content
+   * @param pos
+   */
+  generateNextKeyForPosition(pos:string, create=false):string {
+    const array=this.findAtPosition(pos, create);
+    if(array==null)
+      throw new Error("No element at position "+pos);
+    return DontCodeModelManager.generateNextKey(array);
+  }
+
+  static generateNextKey(array:Record<string, unknown>|Set<string>):string {
+    let keys:Set<string>;
+    if (array.size != null) {
+      keys = array as Set<string>;
+    } else {
+      keys = new Set(Object.keys(array));
+    }
+    let tentative = keys.size;
+    let found = false;
+    const modulo=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH;
+    let key;
+    do {
+      // Calculate a tentative key
+      key='';
+      do {
+        const quotient = Math.trunc(tentative/modulo);
+        const rest = tentative%modulo;
+
+        key = DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS[rest].concat(key);
+        tentative=quotient-1; // -1 because we need to not take into account the first row of values as they don't have the same number of chars
+
+      } while (tentative>=0);
+
+      // Check if the key is already present
+      found = keys.has(key);
+      tentative++;
+    } while(found);
+    return key;
+  }
+
+  /**
    * Provides the json extract at the given position.
    * For example, findAtPosition ('creation/entities/a') will returns the description (fields...) of the first entity created with the editor
    * @param position
@@ -693,6 +737,36 @@ export class DontCodeModelManager {
       if (parent[propName] !== undefined) delete parent[propName];
       parent[propName] = value;
     }
+  }
+
+  /**
+   * Adds to the model the updates of configuration defined by the plugin or by the repository
+   * @param defs
+   */
+  applyPluginConfigUpdates (defs: DefinitionUpdateConfig[] | undefined):void {
+    if (defs!=null) {
+      defs.forEach( definition => {
+        let ptr=this.schemaMgr.generateSchemaPointer(definition.location.parent);
+        const schemaItem = this.schemaMgr.locateItem(ptr.positionInSchema, false);
+        if( schemaItem.isArray()) {
+          if ((definition.location.id==null) || (definition.location.id==='*')) {
+            // We must create a subelement
+            ptr = ptr.subItemPointer(this.generateNextKeyForPosition(ptr.position, true));
+          } else {
+            ptr = ptr.subItemPointer(definition.location.id);
+          }
+        } else {
+          if (definition.location.id!=null) {
+            ptr = ptr.subItemPointer(definition.location.id);
+          }
+        }
+        this.applyChange(
+          new Change(ChangeType.ADD, ptr.position, definition.update
+            ,ptr
+            ,definition.location.after));
+      })
+    }
+
   }
 }
 

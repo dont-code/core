@@ -1,0 +1,101 @@
+{
+  "$id": "https://dont-code.net/v1/repository-schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "JSON Schema v1 for plugin repository definition",
+  "type": "object",
+  "required": ["name", "plugins"],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/plugin"
+      }
+    }
+  },
+  "$defs": {
+    "plugin": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "display-name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "info": {
+            "$refs": "#/$defs/plugin-info"
+        },
+        "config": {
+          "$refs": "#/$defs/plugin-config"
+        }
+      }
+    },
+    "plugin-info": {
+      "type": "object",
+      "properties": {
+        "exposed-module": {
+          "type": "string"
+        },
+        "module-name": {
+          "type": "string"
+        },
+        "remote-entry": {
+          "type": "uri"
+        }
+      }
+    },
+    "plugin-config": {
+      "type": "object",
+      "properties": {
+        "definition-updates": {
+          "$refs": "definition-update"
+        }
+      }
+    },
+    "definition-update": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/change-location"
+        },
+        "update": {
+          "$ref": "#/$defs/additem"
+        }
+      }
+    },
+    "change-location": {
+      "type": "object",
+      "required": ["parent", "id"],
+      "properties": {
+        "parent": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "before": {
+          "type": "string"
+        },
+        "after": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "additem": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": true
+    }
+  }
+}

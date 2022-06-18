@@ -7,6 +7,7 @@ import { DontCodeModelManager } from './model/dont-code-model-manager';
 export interface Core {
   getSchemaUri(): string;
   registerPlugin(plugin: Plugin): void;
+  initPlugins (): void;
   getSchemaManager(): DontCodeSchemaManager;
   getModelManager(): DontCodeModelManager;
   getPreviewManager(): DontCodePreviewManager;
@@ -20,6 +21,11 @@ export var dtcde: Core = (self as any).dontCodeCore;
 
 export interface Plugin {
   getConfiguration(): PluginConfig;
+  /**
+   * Once all plugins have been loaded, each one pluginInit's is being called.
+   * @param dontCode
+   */
+  pluginInit (dontCode: Core): void;
 }
 
 /**
@@ -69,29 +75,61 @@ export interface PluginConfig {
   }>;
   'preview-handlers'?: Array<ChangeHandlerConfig>;
   'global-handlers'?: Array<ChangeHandlerConfig>;
+  'definition-updates'?: Array<DefinitionUpdateConfig>
 }
 
 export interface ChangeConfig {
-  location: {
-    parent: string;
-    id: string;
-    after?: string;
-  };
+  location: LocationConfig;
   update?: any;
   props?: any;
   replace?: boolean;
 }
 
 export interface ChangeHandlerConfig {
-  location: {
-    parent: string;
-    id?: string;
-    values?: any;
-  };
+  location: LocationConfig;
   class: {
     source: string;
     name: string;
   };
+}
+
+export interface LocationConfig {
+  parent: string;
+  id?: string;
+  after?: string;
+  values?: any;
+}
+
+export interface DefinitionUpdateConfig {
+  location: LocationConfig;
+  update: any;
+}
+
+/**
+ * The typescript equivalent of repository-schema.json
+ */
+export interface RepositorySchema {
+  name:string,
+  description?:string,
+  plugins: Array<RepositoryPluginEntry>
+}
+
+export interface RepositoryPluginEntry {
+  id:string,
+  "display-name"?:string,
+  version:string,
+  info?: RepositoryPluginInfo,
+  config?: RepositoryPluginConfig
+}
+
+export interface RepositoryPluginInfo {
+  "exposed-module":string,
+  "module-name":string,
+  "remote-entry"?:string
+}
+
+export interface RepositoryPluginConfig {
+  "definition-updates"?:Array<DefinitionUpdateConfig>
 }
 
 export {};

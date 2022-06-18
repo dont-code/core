@@ -226,6 +226,10 @@ class PluginTest implements DontCode.Plugin {
       ],
     };
   }
+
+  pluginInit(dontCode: DontCode.Core): void {
+    throw new Error('Method not implemented.');
+  }
 }
 
 const restPluginConfig = {
