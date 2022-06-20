@@ -46,9 +46,6 @@
         "exposed-module": {
           "type": "string"
         },
-        "module-name": {
-          "type": "string"
-        },
         "remote-entry": {
           "type": "uri"
         }

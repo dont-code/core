@@ -124,7 +124,6 @@ export interface RepositoryPluginEntry {
 
 export interface RepositoryPluginInfo {
   "exposed-module":string,
-  "module-name":string,
   "remote-entry"?:string
 }
 
