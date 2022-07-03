@@ -13,7 +13,7 @@ export class DontCodeCore implements DontCode.Core {
   protected modelManager: DontCodeModelManager;
 
   constructor() {
-    //console.log("Init core");
+    console.debug("Init core");
     this.schemaManager = new DontCodeSchemaManager();
     this.pluginManager = new DontCodePluginManager();
     this.previewManager = new DontCodePreviewManager();
