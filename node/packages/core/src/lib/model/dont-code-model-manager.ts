@@ -740,30 +740,37 @@ export class DontCodeModelManager {
   }
 
   /**
+   * From a DefinitionUpdateConfig given by a repository configuration, generates a Change that can be applied to the model.
+   * @param definition
+   */
+  convertToChange (definition: DefinitionUpdateConfig): Change {
+    let ptr=this.schemaMgr.generateSchemaPointer(definition.location.parent);
+    const schemaItem = this.schemaMgr.locateItem(ptr.positionInSchema, false);
+    if( schemaItem.isArray()) {
+      if ((definition.location.id==null) || (definition.location.id==='*')) {
+        // We must create a subelement
+        ptr = ptr.subItemPointer(this.generateNextKeyForPosition(ptr.position, true));
+      } else {
+        ptr = ptr.subItemPointer(definition.location.id);
+      }
+    } else {
+      if (definition.location.id!=null) {
+        ptr = ptr.subItemPointer(definition.location.id);
+      }
+    }
+    return new Change(ChangeType.ADD, ptr.position, definition.update
+        ,ptr
+        ,definition.location.after);
+
+  }
+  /**
    * Adds to the model the updates of configuration defined by the plugin or by the repository
    * @param defs
    */
   applyPluginConfigUpdates (defs: DefinitionUpdateConfig[] | undefined):void {
     if (defs!=null) {
       defs.forEach( definition => {
-        let ptr=this.schemaMgr.generateSchemaPointer(definition.location.parent);
-        const schemaItem = this.schemaMgr.locateItem(ptr.positionInSchema, false);
-        if( schemaItem.isArray()) {
-          if ((definition.location.id==null) || (definition.location.id==='*')) {
-            // We must create a subelement
-            ptr = ptr.subItemPointer(this.generateNextKeyForPosition(ptr.position, true));
-          } else {
-            ptr = ptr.subItemPointer(definition.location.id);
-          }
-        } else {
-          if (definition.location.id!=null) {
-            ptr = ptr.subItemPointer(definition.location.id);
-          }
-        }
-        this.applyChange(
-          new Change(ChangeType.ADD, ptr.position, definition.update
-            ,ptr
-            ,definition.location.after));
+        this.applyChange(this.convertToChange(definition))
       })
     }
 
