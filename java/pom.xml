@@ -6,7 +6,7 @@
 
     <groupId>net.dontcode</groupId>
     <artifactId>core</artifactId>
-    <version>0.1.4</version>
+    <version>0.2.0</version>
     <name>Dont-code core class declarations</name>
     <description>Dont-code is a no-code or low-code application platform</description>
     <url>https://dont-code.net</url>
@@ -16,12 +16,11 @@
         <source-plugin.version>3.2.1</source-plugin.version>
         <javadoc-plugin.version>3.3.0</javadoc-plugin.version>
         <gpg-plugin.version>1.6</gpg-plugin.version>
-        <maven.compiler.parameters>true</maven.compiler.parameters>
-        <maven.compiler.source>16</maven.compiler.source>
-        <maven.compiler.target>16</maven.compiler.target>
+        <maven.compiler.release>16</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+        <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+        <skipITs>true</skipITs>
         <nexus-plugin.version>1.6.8</nexus-plugin.version>
     </properties>
     <build>
