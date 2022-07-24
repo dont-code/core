@@ -6,7 +6,7 @@ package net.dontcode.core;
 public class Change {
     protected ChangeType type;
     protected String position;
-    protected Object value;
+    protected Object value;     // Can be a string or a map
     protected DontCodeModelPointer pointer;
     protected String oldPosition;
     protected String beforeKey;

@@ -84,6 +84,29 @@ public class DontCodeModelPointer {
         this.isProperty = isProperty;
     }
 
+    public static String lastElementOf(String position) {
+        if( position==null)
+            return null;
+        int slashPos = position.lastIndexOf('/');
+        if( slashPos==-1)
+            return position;
+        else {
+            return position.substring(slashPos+1);
+        }
+    }
+
+    public static String parentPositionOf(String position) {
+        if ((position==null)||(position.length()==0)) {
+            return null;
+        }
+        int slashPos = position.lastIndexOf('/');
+        if( slashPos==-1)
+            return "";
+        else {
+            return position.substring(0,slashPos);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
