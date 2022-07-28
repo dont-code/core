@@ -17,6 +17,8 @@ public class Models {
      * @return
      */
     public static Map<String, MapOrString> applyChange (Map<String, MapOrString> orig, Change toApply) {
+        if (toApply==null)
+            return orig;
         String parentPosition = DontCodeModelPointer.parentPositionOf (toApply.position);
         MapOrString curContent = Models.findAtPosition (orig, parentPosition, false);
         if (curContent==null) {
@@ -30,12 +32,12 @@ public class Models {
         return orig;
     }
 
-    protected static MapOrString findAtPosition (Map<String, MapOrString> src, String position, boolean create) {
+    public static MapOrString findAtPosition (MapOrString src, String position, boolean create) {
         if ((position==null)||(position.length()==0))
-            return new MapOrString(src);
+            return src;
 
         String[]path = position.split("/");
-        MapOrString cur = new MapOrString(src);
+        MapOrString cur = src;
         for (String elt: path) {
             if (cur.mapContainsKey(elt)) {
                 cur= cur.mapGet(elt);
@@ -48,6 +50,13 @@ public class Models {
             }
         }
         return cur;
+    }
+        public static MapOrString findAtPosition (Map<String, MapOrString> src, String position, boolean create) {
+        if ((position==null)||(position.length()==0))
+            return new MapOrString(src);
+
+        String[]path = position.split("/");
+        return findAtPosition(new MapOrString(src), position, create);
     }
 
     protected static void recursiveApplyChange (Map<String, MapOrString> orig, Change toApply, MapOrString oldContent, MapOrString newContent, String position, boolean isRoot ) {
