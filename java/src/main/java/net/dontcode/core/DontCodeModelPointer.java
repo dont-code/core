@@ -1,38 +1,39 @@
 package net.dontcode.core;
 
+import java.util.Objects;
+
 /**
  * A pointer to an element in the application configuration
  */
 public class DontCodeModelPointer {
     protected String position;
 
-    protected String schemaPosition;
+    protected String positionInSchema;
 
     protected String containerPosition;
 
-    protected String containerSchemaPosition;
+    protected String containerPositionInSchema;
 
-    protected String key;
+    protected String lastElement;
 
-    protected String itemId;
-
+    protected Boolean isProperty;
     public DontCodeModelPointer() {
     }
 
-    public DontCodeModelPointer(String position, String schemaPosition, String containerPosition, String containerSchemaPosition) {
+    public DontCodeModelPointer(String position, String positionInSchema, String containerPosition, String containerPositionInSchema) {
         this.position = position;
-        this.schemaPosition = schemaPosition;
+        this.positionInSchema = positionInSchema;
         this.containerPosition = containerPosition;
-        this.containerSchemaPosition = containerSchemaPosition;
+        this.containerPositionInSchema = containerPositionInSchema;
     }
 
-    public DontCodeModelPointer(String position, String schemaPosition, String containerPosition, String containerSchemaPosition, String key, String itemId) {
+    public DontCodeModelPointer(String position, String positionInSchema, String containerPosition, String containerPositionInSchema, String lastElement, Boolean isProperty) {
         this.position = position;
-        this.schemaPosition = schemaPosition;
+        this.positionInSchema = positionInSchema;
         this.containerPosition = containerPosition;
-        this.containerSchemaPosition = containerSchemaPosition;
-        this.key = key;
-        this.itemId = itemId;
+        this.containerPositionInSchema = containerPositionInSchema;
+        this.lastElement = lastElement;
+        this.isProperty = isProperty;
     }
 
     public String getPosition() {
@@ -43,12 +44,12 @@ public class DontCodeModelPointer {
         this.position = position;
     }
 
-    public String getSchemaPosition() {
-        return schemaPosition;
+    public String getPositionInSchema() {
+        return positionInSchema;
     }
 
-    public void setSchemaPosition(String schemaPosition) {
-        this.schemaPosition = schemaPosition;
+    public void setPositionInSchema(String positionInSchema) {
+        this.positionInSchema = positionInSchema;
     }
 
     public String getContainerPosition() {
@@ -59,28 +60,51 @@ public class DontCodeModelPointer {
         this.containerPosition = containerPosition;
     }
 
-    public String getContainerSchemaPosition() {
-        return containerSchemaPosition;
+    public String getContainerPositionInSchema() {
+        return containerPositionInSchema;
     }
 
-    public void setContainerSchemaPosition(String containerSchemaPosition) {
-        this.containerSchemaPosition = containerSchemaPosition;
+    public void setContainerPositionInSchema(String containerPositionInSchema) {
+        this.containerPositionInSchema = containerPositionInSchema;
     }
 
-    public String getKey() {
-        return key;
+    public String getLastElement() {
+        return lastElement;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setLastElement(String lastElement) {
+        this.lastElement = lastElement;
     }
 
-    public String getItemId() {
-        return itemId;
+    public Boolean getIsProperty () {
+        return this.isProperty;
     }
 
-    public void setItemId(String itemId) {
-        this.itemId = itemId;
+    public void setIsProperty (Boolean isProperty) {
+        this.isProperty = isProperty;
+    }
+
+    public static String lastElementOf(String position) {
+        if( position==null)
+            return null;
+        int slashPos = position.lastIndexOf('/');
+        if( slashPos==-1)
+            return position;
+        else {
+            return position.substring(slashPos+1);
+        }
+    }
+
+    public static String parentPositionOf(String position) {
+        if ((position==null)||(position.length()==0)) {
+            return null;
+        }
+        int slashPos = position.lastIndexOf('/');
+        if( slashPos==-1)
+            return "";
+        else {
+            return position.substring(0,slashPos);
+        }
     }
 
     @Override
@@ -90,25 +114,26 @@ public class DontCodeModelPointer {
 
         DontCodeModelPointer that = (DontCodeModelPointer) o;
 
-        if (position != null ? !position.equals(that.position) : that.position != null) return false;
-        if (schemaPosition != null ? !schemaPosition.equals(that.schemaPosition) : that.schemaPosition != null)
+        if (!Objects.equals(position, that.position)) return false;
+        if (!Objects.equals(positionInSchema, that.positionInSchema))
             return false;
-        if (containerPosition != null ? !containerPosition.equals(that.containerPosition) : that.containerPosition != null)
+        if (!Objects.equals(containerPosition, that.containerPosition))
             return false;
-        if (containerSchemaPosition != null ? !containerSchemaPosition.equals(that.containerSchemaPosition) : that.containerSchemaPosition != null)
+        if (!Objects.equals(containerPositionInSchema, that.containerPositionInSchema))
             return false;
-        if (key != null ? !key.equals(that.key) : that.key != null) return false;
-        return itemId != null ? itemId.equals(that.itemId) : that.itemId == null;
+        if (!Objects.equals( lastElement, that.lastElement))
+            return false;
+        return Objects.equals(isProperty, that.isProperty);
     }
 
     @Override
     public int hashCode() {
         int result = position != null ? position.hashCode() : 0;
-        result = 31 * result + (schemaPosition != null ? schemaPosition.hashCode() : 0);
+        result = 31 * result + (positionInSchema != null ? positionInSchema.hashCode() : 0);
         result = 31 * result + (containerPosition != null ? containerPosition.hashCode() : 0);
-        result = 31 * result + (containerSchemaPosition != null ? containerSchemaPosition.hashCode() : 0);
-        result = 31 * result + (key != null ? key.hashCode() : 0);
-        result = 31 * result + (itemId != null ? itemId.hashCode() : 0);
+        result = 31 * result + (containerPositionInSchema != null ? containerPositionInSchema.hashCode() : 0);
+        result = 31 * result + (lastElement != null ? lastElement.hashCode() : 0);
+        result = 31 * result + (isProperty != null ? isProperty.hashCode() : 0);
         return result;
     }
 }
