@@ -1,6 +1,6 @@
 {
   "name": "@dontcode/core",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "private": false,
   "peerDependencies": {
     "rxjs": "^7.5.5",
