@@ -6,7 +6,7 @@
 
     <groupId>net.dontcode</groupId>
     <artifactId>core</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2-SNAPSHOT</version>
     <name>Dont-code Core</name>
     <description>Dont-code is a no-code or low-code application platform</description>
     <url>https://dont-code.net</url>

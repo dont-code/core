@@ -42,9 +42,9 @@ public class ModelTest {
 
     @Test
     public void itShouldSupportSimpleValueChanges () throws JsonProcessingException {
-        Map<String, MapOrString> merged = new HashMap<>();
+        MapOrString merged = new MapOrString();
         // Test creation of a simple property including its parent
-        Map<String, MapOrString> result = Models.applyChange(
+        MapOrString result = Models.applyChange(
                 merged,
                 Utils.createTestChange(Change.ChangeType.ADD,
                         "creation",
@@ -55,7 +55,7 @@ public class ModelTest {
                         "name"
                 )
         );
-        checkModels (merged, """
+        checkModels(merged, """
                 {
                 "creation": {
                     "name": "TestName"
@@ -63,7 +63,7 @@ public class ModelTest {
                 }"""
         );
 
-        Assertions.assertTrue(merged==result);
+        Assertions.assertTrue(merged == result);
 
         // Test creation of a simple property
         Models.applyChange(
@@ -77,7 +77,7 @@ public class ModelTest {
                         "TestApp",
                         "type"
                 )
-            );
+        );
         checkModels(merged, """
                 {
                 "creation": {
@@ -90,16 +90,16 @@ public class ModelTest {
         Models.applyChange(
                 merged,
                 Utils.createTestChange(
-                       Change.ChangeType.DELETE,
+                        Change.ChangeType.DELETE,
                         "creation",
                         null,
                         null,
                         null,
                         null,
                         "type"
-                    )
-                );
-        checkModels(merged,"""
+                )
+        );
+        checkModels(merged, """
                 {
                   "creation": {
                         "name": "TestName"
@@ -117,10 +117,10 @@ public class ModelTest {
                         null,
                         "appli",
                         "type"
-                        )
-                );
+                )
+        );
 
-        checkModels(merged,"""
+        checkModels(merged, """
                 {
                 "creation": {
                     "name": "TestName",
@@ -142,17 +142,17 @@ public class ModelTest {
                 )
         );
         checkModels(merged, """
-                {
-                "creation": {
-                    "name": "TestName",
-                    "type": "appli",
-                    "entities": {
-                        "a": {
-                            "name":"TestEntity"
+                    {
+                    "creation": {
+                        "name": "TestName",
+                        "type": "appli",
+                        "entities": {
+                            "a": {
+                                "name":"TestEntity"
+                            }
                         }
                     }
-                }
-            }""");
+                }""");
         // Test move of a simple property generates creation of new parent and update of old parent
         Models.applyChange(
                 merged,
@@ -165,20 +165,20 @@ public class ModelTest {
                         "b",
                         "name"
                 )
-            );
+        );
         checkModels(merged, """
-                {
-                "creation": {
-                    "name": "TestName",
-                    "type": "appli",
-                    "entities": {
-                        "a": {},
-                        "b": {
-                            "name": "TestEntity"
+                    {
+                    "creation": {
+                        "name": "TestName",
+                        "type": "appli",
+                        "entities": {
+                            "a": {},
+                            "b": {
+                                "name": "TestEntity"
+                            }
                         }
                     }
-                }
-            }""");
+                }""");
 
         // Test move of a simple property generates an update of both parents
         Models.applyChange(
@@ -192,27 +192,26 @@ public class ModelTest {
                         "a",
                         "name"
                 )
-            );
+        );
         checkModels(merged, """
-            {
-            "creation": {
-                "name": "TestName",
-                "type": "appli",
-                "entities": {
-                    "a": {
-                        "name": "TestEntity"
-                        },
-                    "b": {}
+                {
+                "creation": {
+                    "name": "TestName",
+                    "type": "appli",
+                    "entities": {
+                        "a": {
+                            "name": "TestEntity"
+                            },
+                        "b": {}
+                        }
                     }
-                }
-            }""");
-
+                }""");
     }
 
     @Test
     public void itShouldSupportArrayChangesByPosition () throws JsonProcessingException {
         // Test you can add an complete object as an element of to be created array
-        Map<String, MapOrString> merged = new HashMap<>();
+        MapOrString merged = new MapOrString();
 
         Models.applyChange(
                 merged,
@@ -415,7 +414,7 @@ public class ModelTest {
                     }
                 }""");
         // Test the element has been inserted at the correct position
-        Assertions.assertArrayEquals(new String[]{"a", "c", "b"}, merged.get("creation").mapGet("entities").getMap().keySet().toArray());
+        Assertions.assertArrayEquals(new String[]{"a", "c", "b"}, merged.find("creation/entities").getMap().keySet().toArray());
 
         // Check one can DELETE an element in an array
         Models.applyChange(
@@ -542,7 +541,7 @@ public class ModelTest {
 
     @Test
     public void itShouldSupportArrayChangesBySubValue () throws JsonProcessingException {
-        Map<String, MapOrString> merged = new HashMap<>();
+        MapOrString merged = new MapOrString();
         Models.applyChange(merged,
                 Utils.createJsonTestChange(
                         Change.ChangeType.RESET,
@@ -763,7 +762,7 @@ public class ModelTest {
 
     @Test
     public void itShouldSupportAdditionalTests () throws JsonProcessingException {
-        Map<String, MapOrString> merged = new HashMap<>();
+        MapOrString merged = new MapOrString();
 
         Models.applyChange(
                 merged,
@@ -1117,7 +1116,7 @@ public class ModelTest {
 
     @Test
     public void itShouldDeleteContentCorrectly () throws JsonProcessingException {
-        Map<String, MapOrString> merged = new HashMap<>();
+        MapOrString merged = new MapOrString();
         Models.applyChange(merged, Utils.createJsonTestChange(Change.ChangeType.RESET,
                 "", null, null,null,
                 """
@@ -1219,7 +1218,7 @@ public class ModelTest {
 
     @Test
     public void itShouldMoveContentCorrectlyFromCommands () throws JsonProcessingException {
-        Map<String, MapOrString> merged = new HashMap<>();
+        MapOrString merged = new MapOrString();
         Models.applyChange(merged, Utils.createJsonTestChange(Change.ChangeType.RESET,
                 "", null, null,null,
                 """
@@ -1244,7 +1243,7 @@ public class ModelTest {
                     }
                 }""", null));
 
-        Assertions.assertArrayEquals(new String[]{"a", "b", "c"}, merged.get("creation").mapGet("entities").getMap().keySet().toArray());
+        Assertions.assertArrayEquals(new String[]{"a", "b", "c"}, merged.find("creation/entities").getMap().keySet().toArray());
         // from a,b,c to b,a,c
         Models.applyChange(
                 merged,
@@ -1258,7 +1257,7 @@ public class ModelTest {
                         null
                 )
         );
-        Assertions.assertArrayEquals(new String[]{"b", "a", "c"}, merged.get("creation").mapGet("entities").getMap().keySet().toArray());
+        Assertions.assertArrayEquals(new String[]{"b", "a", "c"}, merged.find("creation/entities").getMap().keySet().toArray());
         // from b,a,c to b,c,a
         Models.applyChange(
                 merged,
@@ -1272,7 +1271,7 @@ public class ModelTest {
                         null
                 )
         );
-        Assertions.assertArrayEquals(new String[]{"b", "c", "a"}, merged.get("creation").mapGet("entities").getMap().keySet().toArray());
+        Assertions.assertArrayEquals(new String[]{"b", "c", "a"}, merged.find("creation/entities").getMap().keySet().toArray());
         // from b,c,a to c,a,b
         Models.applyChange(
                 merged,
@@ -1285,17 +1284,17 @@ public class ModelTest {
                         "b",null
                 )
         );
-        Assertions.assertArrayEquals(new String[]{"c", "a", "b"}, merged.get("creation").mapGet("entities").getMap().keySet().toArray());
+        Assertions.assertArrayEquals(new String[]{"c", "a", "b"}, merged.find("creation/entities").getMap().keySet().toArray());
     }
 
     @Test
     public void itShouldResetContentCorrectly () throws JsonProcessingException {
-        Map<String, MapOrString> merged = new HashMap<>();
+        MapOrString merged = new MapOrString();
         Models.applyChange(merged, Utils.createJsonTestChange(Change.ChangeType.RESET,
                 "creation", null, null,null,
                 null, null)
         );
-        Assertions.assertTrue(merged.get("creation").isNull());
+        Assertions.assertTrue(merged.find("creation").isNull());
 
         Models.applyChange(merged, Utils.createJsonTestChange(Change.ChangeType.RESET, "creation", null,null,null, """
                 { "type": "application", "name": "Name" }""", null));
@@ -1319,7 +1318,7 @@ public class ModelTest {
                 }""");
 
 
-        merged.clear();
+        merged = new MapOrString();
         Models.applyChange(
                 merged,
                 Utils.createJsonTestChange(Change.ChangeType.RESET, "", null,null,null, """
@@ -1353,7 +1352,11 @@ public class ModelTest {
                 }""");
     }
 
-    protected void checkModels(Map<String, MapOrString> merged, String jsonToCheck) throws JsonProcessingException {
-        Assertions.assertEquals(Utils.fromJsonToMap(jsonToCheck), Utils.convertToMap( merged) );
+    protected void checkModels(Map<String, Object> merged, String jsonToCheck) throws JsonProcessingException {
+        Assertions.assertEquals(Utils.fromJsonToMap(jsonToCheck),  merged );
+    }
+
+    protected void checkModels( MapOrString merged, String jsonToCheck) throws JsonProcessingException {
+        Assertions.assertEquals(Utils.fromJsonToMap(jsonToCheck), merged.getMap() );
     }
 }
