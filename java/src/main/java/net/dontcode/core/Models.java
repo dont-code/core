@@ -27,7 +27,8 @@ public class Models {
                 curContent= Models.findAtPosition (orig, parentPosition, true);
             }
         }
-        recursiveApplyChange (orig, toApply, curContent, MapOrString.fromObject(toApply.value), DontCodeModelPointer.lastElementOf(toApply.position), true);
+        if ((toApply.value!=null) || (toApply.type== Change.ChangeType.MOVE)||(toApply.type== Change.ChangeType.DELETE))
+            recursiveApplyChange (orig, toApply, curContent, MapOrString.fromObject(toApply.value), DontCodeModelPointer.lastElementOf(toApply.position), true);
         return orig;
     }
 
