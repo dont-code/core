@@ -1,9 +1,5 @@
-import { Observable } from 'rxjs';
-import {
-  DontCodeStoreCriteria,
-  UploadedDocumentInfo,
-} from './dont-code-store-manager';
-import { DontCodeSourceType } from '../globals';
+import {Observable} from 'rxjs';
+import {DontCodeStoreCriteria, UploadedDocumentInfo} from './dont-code-store-manager';
 
 /**
  * The standard interface for any store provider
@@ -30,9 +26,4 @@ export interface DontCodeStoreProvider {
     toStore: File[],
     position?: string
   ): Observable<UploadedDocumentInfo>;
-}
-
-export interface DontCodeStoreProviderWithConfig extends DontCodeStoreProvider {
-  // Returns an instance of this DontCodeStoreProvider that supports the config.
-  withConfig(config: DontCodeSourceType): DontCodeStoreProvider;
 }
