@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dontcode.core.Change;
 import net.dontcode.core.DontCodeModelPointer;
-import net.dontcode.core.MapOrString;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,13 +15,13 @@ public class Utils {
         return map;
     }
 
-    public static Map<String, MapOrString> fromJsonToMapOrString (String json) throws JsonProcessingException {
+    public static Map<String, Object> fromJsonToMapOrString (String json) throws JsonProcessingException {
         if( json==null)
             return new LinkedHashMap<>();
         // convert JSON string to Java Map
         Map<String, Object> map = new ObjectMapper().readValue(json, LinkedHashMap.class);
 
-        return convertToMapOrString(map);
+        return map;
     }
 
     public static Change createJsonTestChange (Change.ChangeType type, String containerSchema, String containerItemId, String schema, String itemId, String value, String property) throws JsonProcessingException {
@@ -74,46 +73,5 @@ public class Utils {
       )
     );
 
-    }
-
-    public static Map<String, Object> convertToMap(Map<String, MapOrString> from) {
-        Map<String, Object> ret = new LinkedHashMap<>();
-        recursiveConvertToMap (ret, from);
-        return ret;
-    }
-
-    protected static void recursiveConvertToMap (Map<String, Object> ret, Map<String, MapOrString> from) {
-        from.entrySet().forEach(stringMapOrStringEntry -> {
-            if(stringMapOrStringEntry.getValue()!=null) {
-                if (stringMapOrStringEntry.getValue().isString()) {
-                    ret.put(stringMapOrStringEntry.getKey(), stringMapOrStringEntry.getValue().getString());
-                } else {
-                    Map<String, Object> newOne=new LinkedHashMap<>();
-                    recursiveConvertToMap(newOne, stringMapOrStringEntry.getValue().getMap());
-                    ret.put(stringMapOrStringEntry.getKey(), newOne);
-                }
-            }
-        });
-    }
-
-
-    public static Map<String, MapOrString> convertToMapOrString(Map<String, Object> from) {
-        Map<String, MapOrString> ret = new LinkedHashMap<>();
-        recursiveConvertToMapOrString (ret, from);
-        return ret;
-    }
-
-    protected static void recursiveConvertToMapOrString (Map<String, MapOrString> ret, Map<String, Object> from) {
-        from.entrySet().forEach(stringOrMapEntry -> {
-            if(stringOrMapEntry.getValue()!=null) {
-                if (stringOrMapEntry.getValue() instanceof String) {
-                    ret.put(stringOrMapEntry.getKey(), new MapOrString((String)stringOrMapEntry.getValue()));
-                } else {
-                    MapOrString newOne=new MapOrString();
-                    recursiveConvertToMapOrString(newOne.getMap(), (Map<String, Object>) stringOrMapEntry.getValue());
-                    ret.put(stringOrMapEntry.getKey(), newOne);
-                }
-            }
-        });
     }
 }

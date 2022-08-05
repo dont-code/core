@@ -1,7 +1,6 @@
-import { Subject } from 'rxjs';
-import { Change, ChangeType } from '../change/change';
-import { dtcde } from '../globals';
-import { DontCodeTestManager } from '../test/dont-code-test-manager';
+import {Change, ChangeType} from '../change/change';
+import {dtcde} from '../globals';
+import {DontCodeTestManager} from '../test/dont-code-test-manager';
 import {DontCodeModelManager} from "@dontcode/core";
 
 describe('Model Manager', () => {
