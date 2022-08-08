@@ -6,8 +6,12 @@ name: Build Development
 on:
   push:
     branches: [ Development ]
+    paths:
+      - 'node/**'
   pull_request:
     branches: [ Development ]
+    paths:
+      - 'node/**'
 
 defaults:
   run:

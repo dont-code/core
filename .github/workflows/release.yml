@@ -7,6 +7,8 @@ on:
   workflow_dispatch:
   push:
     branches: [ master ]
+    paths:
+      - 'node/**'
 
 defaults:
   run:
@@ -38,10 +40,10 @@ jobs:
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Install
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email noreply@github.com
-          git commit -m "Before merge" --allow-empty
-          git merge origin/Development --autostash
+#          git config user.name "GitHub Actions"
+#          git config user.email noreply@github.com
+#          git commit -m "Before merge" --allow-empty
+#          git merge origin/Development --autostash
           npm install -g nx
           npm ci
       - name: Build
@@ -56,11 +58,11 @@ jobs:
           path: node/libs/core
       - name: Unit tests
         run: nx run core:test
-      - name: Push
-        run: |
-          git commit -a -m "New release ${{steps.package-version.outputs.current-version}}" --allow-empty
-          git push
-      - name: Publish
-        run: npm publish dist/packages/core --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#      - name: Push
+#        run: |
+#          git commit -a -m "New release ${{steps.package-version.outputs.current-version}}" --allow-empty
+#          git push
+#      - name: Publish
+#        run: npm publish dist/packages/core --access public
+#        env:
+#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
