@@ -1,7 +1,7 @@
 {
   "npmScope": "dontcode",
   "affected": {
-    "defaultBase": "master"
+    "defaultBase": "main"
   },
   "cli": {
   "defaultCollection": "@nrwl/web"

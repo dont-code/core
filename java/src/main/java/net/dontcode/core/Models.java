@@ -12,7 +12,7 @@ import java.util.Set;
 public class Models {
     /**
      * Merge the change into the model and returns the updated model.
-     * Does the same as the typescript function applyChange https://github.com/dont-code/core/blob/master/node/packages/core/src/lib/model/dont-code-model-manager.ts
+     * Does the same as the typescript function applyChange https://github.com/dont-code/core/blob/main/node/packages/core/src/lib/model/dont-code-model-manager.ts
      * @param orig
      * @param toApply
      * @return
