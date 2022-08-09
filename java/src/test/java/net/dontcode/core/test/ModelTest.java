@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Duplicates the tests of https://github.com/dont-code/core/blob/master/node/packages/core/src/lib/model/dont-code-model-manager.spec.ts
+ * Duplicates the tests of https://github.com/dont-code/core/blob/main/node/packages/core/src/lib/model/dont-code-model-manager.spec.ts
  */
 public class ModelTest {
 
