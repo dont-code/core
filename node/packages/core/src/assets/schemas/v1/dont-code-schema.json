@@ -23,6 +23,12 @@
         "sharing": {
           "$ref": "#/$defs/sharing"
         },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report"
+          }
+        },
         "sources": {
           "type": "array",
           "items": {
@@ -108,6 +114,90 @@
         }
       }
     },
+    "report": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "for": {
+          "type": "string",
+          "format": "$.creation.entities[*]"
+        },
+        "groupedBy": {
+          "$ref": "#/$defs/report-group"
+        },
+        "sortedBy": {
+          "$ref": "#/$defs/report-sort"
+        },
+        "as": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report-display"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-group": {
+      "type": "object",
+      "properties": {
+        "by": {
+          "type": "string",
+          "format": ".fields[*]"
+        },
+        "label": {
+          "type": "string"
+        },
+        "display": {
+          "$ref": "#/$defs/report-group-aggregate"
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-group-aggregate": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": ["Count","Sum", "Average","Minimum","Maximum"]
+        },
+        "of": {
+          "type": "string",
+          "format": ".@parent.fields[*]"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-sort": {
+      "type": "object",
+      "properties": {
+        "by": {
+          "type": "string",
+          "format": ".fields[*]"
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-display": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["Table", "Bar", "Line", "Pie"]
+        },
+        "of": {
+          "type": "string",
+          "format": ".@parent.fields[*]"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+
     "screen": {
       "type": "object",
       "properties": {

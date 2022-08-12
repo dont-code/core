@@ -30,6 +30,54 @@ export class DontCodeModel {
   static readonly APP_SHARING_WITH_NODE = 'with';
   static readonly APP_SHARING_WITH =
     DontCodeModel.APP_SHARING + '/' + DontCodeModel.APP_SHARING_WITH_NODE;
+  static readonly APP_REPORTS_NODE = 'reports';
+  static readonly APP_REPORTS =
+    DontCodeModel.ROOT + '/' + DontCodeModel.APP_REPORTS_NODE;
+  static readonly APP_REPORTS_TITLE_NODE = 'title';
+  static readonly APP_REPORTS_TITLE =
+    DontCodeModel.APP_REPORTS + '/' + DontCodeModel.APP_REPORTS_TITLE_NODE;
+  static readonly APP_REPORTS_FOR_NODE = 'for';
+  static readonly APP_REPORTS_FOR =
+    DontCodeModel.APP_REPORTS + '/' + DontCodeModel.APP_REPORTS_FOR_NODE;
+  static readonly APP_REPORTS_GROUP_NODE = 'groupedBy';
+  static readonly APP_REPORTS_GROUP =
+    DontCodeModel.APP_REPORTS + '/' + DontCodeModel.APP_REPORTS_GROUP_NODE;
+  static readonly APP_REPORTS_SORT_NODE = 'sortedBy';
+  static readonly APP_REPORTS_SORT =
+    DontCodeModel.APP_REPORTS + '/' + DontCodeModel.APP_REPORTS_SORT_NODE;
+  static readonly APP_REPORTS_DISPLAY_NODE = 'as';
+  static readonly APP_REPORTS_DISPLAY =
+    DontCodeModel.APP_REPORTS + '/' + DontCodeModel.APP_REPORTS_DISPLAY_NODE;
+  static readonly APP_REPORTS_GROUP_LABEL_NODE = 'label';
+  static readonly APP_REPORTS_GROUP_LABEL =
+    DontCodeModel.APP_REPORTS_GROUP + '/' + DontCodeModel.APP_REPORTS_GROUP_LABEL_NODE;
+  static readonly APP_REPORTS_GROUP_BY_NODE = 'by';
+  static readonly APP_REPORTS_GROUP_BY =
+    DontCodeModel.APP_REPORTS_GROUP + '/' + DontCodeModel.APP_REPORTS_GROUP_BY_NODE;
+  static readonly APP_REPORTS_GROUP_AGGREGATE_NODE = 'display';
+  static readonly APP_REPORTS_GROUP_AGGREGATE =
+    DontCodeModel.APP_REPORTS_GROUP + '/' + DontCodeModel.APP_REPORTS_GROUP_AGGREGATE_NODE;
+  static readonly APP_REPORTS_GROUP_AGGREGATE_LABEL_NODE = 'label';
+  static readonly APP_REPORTS_GROUP_AGGREGATE_LABEL =
+    DontCodeModel.APP_REPORTS_GROUP_AGGREGATE + '/' + DontCodeModel.APP_REPORTS_GROUP_AGGREGATE_LABEL_NODE;
+  static readonly APP_REPORTS_GROUP_AGGREGATE_OPERATION_NODE = 'operation';
+  static readonly APP_REPORTS_GROUP_AGGREGATE_OPERATION =
+    DontCodeModel.APP_REPORTS_GROUP_AGGREGATE + '/' + DontCodeModel.APP_REPORTS_GROUP_AGGREGATE_OPERATION_NODE;
+  static readonly APP_REPORTS_GROUP_AGGREGATE_OF_NODE = 'of';
+  static readonly APP_REPORTS_GROUP_AGGREGATE_OF =
+    DontCodeModel.APP_REPORTS_GROUP_AGGREGATE + '/' + DontCodeModel.APP_REPORTS_GROUP_AGGREGATE_OF_NODE;
+  static readonly APP_REPORTS_SORT_BY_NODE = 'by';
+  static readonly APP_REPORTS_SORT_BY =
+    DontCodeModel.APP_REPORTS_SORT + '/' + DontCodeModel.APP_REPORTS_SORT_BY_NODE;
+  static readonly APP_REPORTS_DISPLAY_TITLE_NODE = 'title';
+  static readonly APP_REPORTS_DISPLAY_TITLE =
+    DontCodeModel.APP_REPORTS_DISPLAY + '/' + DontCodeModel.APP_REPORTS_DISPLAY_TITLE_NODE;
+  static readonly APP_REPORTS_DISPLAY_TYPE_NODE = 'type';
+  static readonly APP_REPORTS_DISPLAY_TYPE =
+    DontCodeModel.APP_REPORTS_DISPLAY + '/' + DontCodeModel.APP_REPORTS_DISPLAY_TYPE_NODE;
+  static readonly APP_REPORTS_DISPLAY_OF_NODE = 'of';
+  static readonly APP_REPORTS_DISPLAY_OF =
+    DontCodeModel.APP_REPORTS_DISPLAY + '/' + DontCodeModel.APP_REPORTS_DISPLAY_OF_NODE;
   static readonly APP_SOURCES_NODE = 'sources';
   static readonly APP_SOURCES =
     DontCodeModel.ROOT + '/' + DontCodeModel.APP_SOURCES_NODE;
