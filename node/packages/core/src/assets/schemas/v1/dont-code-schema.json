@@ -51,7 +51,7 @@
       "properties": {
         "from": {
           "type": "string",
-          "format": "$.creation.sources[*]"
+          "format": "$.creation.sources.name"
         },
         "name": {
           "type": "string"
@@ -122,7 +122,7 @@
         },
         "for": {
           "type": "string",
-          "format": "$.creation.entities[*]"
+          "format": "$.creation.entities.name"
         },
         "groupedBy": {
           "$ref": "#/$defs/report-group"
@@ -144,7 +144,7 @@
       "properties": {
         "by": {
           "type": "string",
-          "format": ".fields[*]"
+          "format": ".fields.name"
         },
         "label": {
           "type": "string"
@@ -159,11 +159,11 @@
       "type": "object",
       "properties": {
         "operation": {
-          "enum": ["Count","Sum", "Average","Minimum","Maximum"]
+          "enum": ["Count", "Sum", "Average", "Minimum", "Maximum"]
         },
         "of": {
           "type": "string",
-          "format": ".@parent.fields[*]"
+          "format": ".@parent.fields.name"
         },
         "label": {
           "type": "string"
@@ -176,7 +176,7 @@
       "properties": {
         "by": {
           "type": "string",
-          "format": ".fields[*]"
+          "format": ".fields.name"
         }
       },
       "additionalProperties": false
@@ -189,7 +189,7 @@
         },
         "of": {
           "type": "string",
-          "format": ".@parent.fields[*]"
+          "format": ".@parent.fields.name"
         },
         "title": {
           "type": "string"
@@ -224,7 +224,7 @@
         },
         "entity": {
           "type": "string",
-          "format": "#/creation/entities"
+          "format": "$.creation.entities.name"
         }
       },
       "additionalProperties": false

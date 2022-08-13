@@ -60,7 +60,7 @@ export class DontCodeSchema {
         "properties": {
           "from": {
             "type": "string",
-            "format": "$.creation.sources[*]"
+            "format": "$.creation.sources.name"
           },
           "name": {
             "type": "string"
@@ -131,7 +131,7 @@ export class DontCodeSchema {
           },
           "for": {
             "type": "string",
-            "format": "$.creation.entities[*]"
+            "format": "$.creation.entities.name"
           },
           "groupedBy": {
             "$ref": "#/$defs/report-group"
@@ -153,7 +153,7 @@ export class DontCodeSchema {
         "properties": {
           "by": {
             "type": "string",
-            "format": ".fields[*]"
+            "format": ".fields.name"
           },
           "label": {
             "type": "string"
@@ -172,7 +172,7 @@ export class DontCodeSchema {
           },
           "of": {
             "type": "string",
-            "format": ".@parent.fields[*]"
+            "format": ".@parent.fields.name"
           },
           "label": {
             "type": "string"
@@ -185,7 +185,7 @@ export class DontCodeSchema {
         "properties": {
           "by": {
             "type": "string",
-            "format": ".fields[*]"
+            "format": ".fields.name"
           }
         },
         "additionalProperties": false
@@ -198,7 +198,7 @@ export class DontCodeSchema {
           },
           "of": {
             "type": "string",
-            "format": ".@parent.fields[*]"
+            "format": ".@parent.fields.name"
           },
           "title": {
             "type": "string"
@@ -233,7 +233,7 @@ export class DontCodeSchema {
           },
           "entity": {
             "type": "string",
-            "format": "#/creation/entities"
+            "format": "$.creation.entities.name"
           }
         },
         "additionalProperties": false
