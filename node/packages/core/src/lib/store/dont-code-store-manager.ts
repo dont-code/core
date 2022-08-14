@@ -25,7 +25,7 @@ export class DontCodeStoreManager {
       const srcDefinition = this.modelMgr.findTargetOfProperty(
         DontCodeModel.APP_ENTITIES_FROM_NODE,
         position
-      ) as DontCodeSourceType;
+      )?.value as DontCodeSourceType;
       if (srcDefinition) {
         ret = this.providerByType.get(srcDefinition.type);
       }

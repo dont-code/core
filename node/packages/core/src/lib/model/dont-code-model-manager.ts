@@ -603,7 +603,6 @@ export class DontCodeModelManager {
    * Enable querying the model for any value, following jsonPath model
    * To use when potentially you expect multiple values
    * @param query: the query as a jsonPath
-   * @param if the jsonPath contains a placeholder, it's value is given here
    * @param position: in case the jsonPath is relative
    */
   queryModelToArray(query: string, position?: string): Array<any> {
@@ -627,33 +626,53 @@ export class DontCodeModelManager {
    * @param query: the query as a  jsonPath
    * @param position: in case the jsonPath is relative
    */
-  queryModelToSingle(query: string, position?: string): any {
+  queryModelToSingle(query: string, position?: string): ModelQuerySingleResult {
     let root = this.content;
     if (position) {
       root = this.findAtPosition(position, false);
     }
-    const result = JSONPath({
+    let result = JSONPath({
       path: query,
       json: root,
-      resultType: 'value',
+      resultType: 'all',
       wrap: false,
     });
     if (Array.isArray(result)) {
-      if (result.length <= 1) return result[0];
+      if (result.length <= 1) result = result[0];
       else
         throw new Error(
-          'Mulitple results returned by queryModelToSingle with path ' + query
+          'Multiple results returned by queryModelToSingle with path ' + query
         );
     }
-    return result;
+      // In Dont-code, on the contrary of Json Pointer, you don't start a pointer by /
+    if (result?.pointer?.startsWith('/')) {
+      result.pointer=result.pointer.substring(1);
+    }
+    delete result.path;
+    delete result.parent;
+    delete result.parentProperty;
+    return result as ModelQuerySingleResult;
   }
 
+  /**
+   * Returns the list of values that are possible target of a given property path. With this the Builder User Interface can display to the user a combo-box will all targets
+   * For example, with the following Dont-code model:
+   * "from": {
+   *           "type": "string",
+   *           "format": "$.creation.sources.name"
+   *         }
+   *
+   * findAllPossibleTargetsOrProperty ("from", ...) will returns all sources names.
+   * @param property
+   * @param position
+   * @param schemaItem
+   */
   findAllPossibleTargetsOfProperty(
     property: string,
     position: string,
     schemaItem?: DontCodeSchemaItem
   ): Array<any> {
-    if (!schemaItem) {
+    if (schemaItem==null) {
       const ptr = this.schemaMgr.generateSchemaPointer(position);
       schemaItem = this.schemaMgr.locateItem(
         ptr.subPropertyPointer(property).positionInSchema,
@@ -671,14 +690,32 @@ export class DontCodeModelManager {
     }
   }
 
+  /**
+   * Returns the exact element that matches the target of a given property path.
+   *
+   * For example, with the following Dont-code model:
+   * "from": {
+   *           "type": "string",
+   *           "format": "$.creation.sources.name"
+   *         }
+   *
+   * and an instantiated model like this:
+   * {
+   *   "from": "EntityName"
+   * }
+   * findAllPossibleTargetsOrProperty ("from", ...) will return only the source named "EntityName".
+   * @param property
+   * @param position
+   * @param schemaItem
+   */
   findTargetOfProperty(
     property: string,
     position: string,
     schemaItem?: DontCodeSchemaItem
-  ): any {
+  ): ModelQuerySingleResult|null {
     const src = this.findAtPosition(position, false);
     if (src && src[property]) {
-      if (!schemaItem) {
+      if (schemaItem==null) {
         const ptr = this.schemaMgr.generateSchemaPointer(position);
         schemaItem = this.schemaMgr.locateItem(
           ptr.subPropertyPointer(property).positionInSchema,
@@ -703,7 +740,7 @@ export class DontCodeModelManager {
         );
       }
     }
-    return undefined;
+    return null;
   }
 
   /**
@@ -807,4 +844,9 @@ class AtomicChange {
     this.subChanges.push(newChange);
     return newChange;
   }
+}
+
+export class ModelQuerySingleResult {
+  value?:any;
+  pointer!:string;
 }
