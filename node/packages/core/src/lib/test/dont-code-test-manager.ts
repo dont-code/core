@@ -1,5 +1,9 @@
 import { Change, ChangeType } from '../change/change';
 import { DontCodeModelPointer } from '../model/dont-code-schema';
+import {dtcde} from "../globals";
+import {DontCodeStoreProvider} from "../store/dont-code-store-provider";
+import {DontCodeStoreCriteria, UploadedDocumentInfo} from "../store/dont-code-store-manager";
+import {from, Observable, Subject, take, takeUntil, throwError, timer} from "rxjs";
 
 export class DontCodeTestManager {
   public static createDeleteChange(
@@ -62,6 +66,62 @@ export class DontCodeTestManager {
     );
   }
 
+  /**
+   * To help testing with pre-loaded data, you can add a storeprovider that will return the content of the file in the url
+   * whenever called for the position;
+   * @param position
+   * @param toFetchAsset
+   */
+/*  public static addDummyProviderFromAsset (position:string, toFetchAsset: string): Promise<void> {
+    return fetch(toFetchAsset).then(response => response.json()).then (content => {
+        DontCodeTestManager.addDummyProviderFromContent( position, content);
+    });
+  }
+*/
+
+  /**
+   * To help testing with pre-loaded data, you can add a storeprovider that will return the content of the file in the url
+   * whenever called for the position;
+   * @param position
+   * @param toFetchAsset
+   */
+  public static addDummyProviderFromContent (position:string, toReturn: any): void {
+    dtcde.getStoreManager().setProvider(new DummyStoreProvider (toReturn), position);
+  }
+
+  /**
+   * Wait until the tester function returns true. Ideal for ensuring tests wait an async result.
+   * It will call done () if tester was true, or done("Timeout") if tester has always returned false
+   * @param tester
+   * @param Jest done() method equivalent
+   * @param interval
+   * @param maxTry
+   */
+  public static waitUntilTrue ( tester: () => boolean, done: (err?:string) => void, interval?:number, maxTry?:number ): void {
+    interval = interval??50;
+    maxTry=maxTry??50;
+
+    const stop = new Subject();
+    let stopped = false;
+
+    timer(interval, interval).pipe(takeUntil(stop), take(maxTry)).subscribe({
+      next: () => {
+        if (tester()) {
+          if( !stopped) {
+            stopped=true;
+            stop.next(true);
+            done();
+          }
+        }
+      },
+      complete: () => {
+        if (!stopped)
+          done("Timeout");
+      }
+    });
+
+  }
+
   public static createAnyChange(
     type: ChangeType,
     containerSchema: string,
@@ -107,4 +167,48 @@ export class DontCodeTestManager {
       )
     );
   }
+}
+
+
+/**
+ * Helper that emulates a StoreProvider with predefined values
+ */
+class DummyStoreProvider implements DontCodeStoreProvider {
+
+  content:any;
+
+  constructor(content: any) {
+    this.content = content;
+  }
+
+  canStoreDocument(position?: string): boolean {
+    return false;
+  }
+
+  deleteEntity(position: string, key: any): Promise<boolean> {
+    return Promise.reject("Not implemened by Dummy tester");
+  }
+
+  loadEntity(position: string, key: any): Promise<any> {
+    if (this.content[key]!=null)
+      return Promise.resolve(this.content[key]);
+    return Promise.resolve(undefined);
+  }
+
+  searchEntities(position: string, ...criteria: DontCodeStoreCriteria[]): Observable<Array<any>> {
+    if (Array.isArray(this.content)) {
+      return from([this.content]);
+    } else {
+      return from ([[this.content]]);
+    }
+  }
+
+  storeDocuments(toStore: File[], position?: string): Observable<UploadedDocumentInfo> {
+    return throwError(() => new Error ("Not implemented by Dummy tester"));
+  }
+
+  storeEntity(position: string, entity: any): Promise<any> {
+    return Promise.reject("Not implemented by Dummy tester");
+  }
+
 }

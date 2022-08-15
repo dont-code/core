@@ -119,7 +119,7 @@ describe('Model Manager', () => {
 
     const queryResult2 = service.queryModelToSingle(
       '$.creation.entities[?(@.name==="Entity2")]'
-    );
+    )?.value;
     expect(queryResult2).toHaveProperty('fields');
 
     const entity1 = service.findAtPosition('creation/entities/aaaa');
@@ -134,7 +134,7 @@ describe('Model Manager', () => {
 
     let source = service.findTargetOfProperty('from', 'creation/entities/aaaa');
     expect(source).toBeTruthy();
-    expect(source.type).toEqual('Rest');
+    expect(source?.value.type).toEqual('Rest');
 
     source = service.findTargetOfProperty('from', 'creation/entities/aaac');
     expect(source).toBeFalsy();

@@ -8,151 +8,241 @@ export class DontCodeSchema {
    * This is a copy of dont-code-schema.json, please don't forget to update
    */
   static defaultv1 = {
-    $id: 'https://dont-code.net/dont-code-schema/v1',
-    $schema: 'https://json-schema.org/draft/2020-12/schema',
-    description: 'JSON Schema v1 for dont-code',
-    type: 'object',
-    required: ['creation'],
-    properties: {
-      creation: {
-        type: 'object',
-        properties: {
-          type: {
-            enum: ['Application'],
+    "$id": "https://dont-code.net/v1/dont-code-schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "JSON Schema v1 for dont-code",
+    "type": "object",
+    "required": ["creation"],
+    "properties": {
+      "creation": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["Application"]
           },
-          name: {
-            type: 'string',
+          "name": {
+            "type": "string"
           },
-          entities: {
-            type: 'array',
-            items: {
-              $ref: '#/$defs/entity',
-            },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/entity"
+            }
           },
-          sharing: {
-            $ref: '#/$defs/sharing',
+          "sharing": {
+            "$ref": "#/$defs/sharing"
           },
-          sources: {
-            type: 'array',
-            items: {
-              $ref: '#/$defs/source',
-            },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/report"
+            }
           },
-          screens: {
-            type: 'array',
-            items: {
-              $ref: '#/$defs/screen',
-            },
+        "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/source"
+            }
           },
+          "screens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/screen"
+            }
+          }
         },
-        additionalProperties: false,
-      },
+        "additionalProperties": false
+      }
     },
-    $defs: {
-      entity: {
-        type: 'object',
-        properties: {
-          from: {
-            type: 'string',
-            format: '$.creation.sources.name',
+    "$defs": {
+      "entity": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "$.creation.sources.name"
           },
-          name: {
-            type: 'string',
+          "name": {
+            "type": "string"
           },
-          fields: {
-            type: 'array',
-            items: {
-              $ref: '#/$defs/field',
-            },
-          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/field"
+            }
+          }
         },
-        additionalProperties: false,
+        "additionalProperties": false
       },
-      field: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
+      "field": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
           },
-          type: {
-            enum: [
-              'Text',
-              'Number',
-              'Boolean',
+          "type": {
+            "enum": [
+              "Text",
+              "Number",
+              "Boolean",
               {
-                Time: {
-                  enum: ['Date', 'Date & Time', 'Time'],
-                },
+                "Time": {
+                  "enum": ["Date", "Date & Time", "Time"]
+                }
               },
               {
-                Money: {
-                  enum: ['Dollar', 'Euro', 'Other currency'],
+                "Money": {
+                  "enum": ["Dollar", "Euro", "Other currency"]
                 },
-                Web: {
-                  enum: ['Website (url)', 'Image'],
-                },
-              },
-            ],
-          },
+                "Web": {
+                  "enum": ["Website (url)", "Image"]
+                }
+              }
+            ]
+          }
         },
-        additionalProperties: false,
+        "additionalProperties": false
       },
-      sharing: {
-        type: 'object',
-        properties: {
-          with: {
-            enum: ['No-one'],
-          },
+      "sharing": {
+        "type": "object",
+        "properties": {
+          "with": {
+            "enum": ["No-one"]
+          }
         },
-        additionalProperties: false,
+        "additionalProperties": false
       },
-      source: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
+      "source": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
           },
-          type: {
-            enum: ['Unknown'],
+          "type": {
+            "enum": ["Unknown"]
+          }
+        }
+      },
+      "report": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
           },
+          "for": {
+            "type": "string",
+            "format": "$.creation.entities.name"
+          },
+          "groupedBy": {
+            "$ref": "#/$defs/report-group"
+          },
+          "sortedBy": {
+            "$ref": "#/$defs/report-sort"
+          },
+          "as": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/report-display"
+            }
+          }
         },
+        "additionalProperties": false
       },
-      screen: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
+      "report-group": {
+        "type": "object",
+        "properties": {
+          "by": {
+            "type": "string",
+            "format": ".fields.name"
           },
-          layout: {
-            enum: ['Flow', 'Grid'],
+          "label": {
+            "type": "string"
           },
-          components: {
-            type: 'array',
-            items: {
-              $ref: '#/$defs/component',
-            },
-          },
+          "display": {
+            "$ref": "#/$defs/report-group-aggregate"
+          }
         },
-        additionalProperties: false,
+        "additionalProperties": false
       },
-      component: {
-        type: 'object',
-        properties: {
-          type: {
-            enum: ['List', 'Edit', 'View'],
+      "report-group-aggregate": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "enum": ["Count", "Sum", "Average", "Minimum", "Maximum"]
           },
-          entity: {
-            type: 'string',
-            format: '#/creation/entities',
+          "of": {
+            "type": "string",
+            "format": ".@parent.fields.name"
           },
+          "label": {
+            "type": "string"
+          }
         },
-        additionalProperties: false,
+        "additionalProperties": false
       },
-    },
-  };
+      "report-sort": {
+        "type": "object",
+        "properties": {
+          "by": {
+            "type": "string",
+            "format": ".fields.name"
+          }
+        },
+        "additionalProperties": false
+      },
+      "report-display": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["Table", "Bar", "Line", "Pie"]
+          },
+          "of": {
+            "type": "string",
+            "format": ".@parent.fields.name"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+
+      "screen": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "layout": {
+            "enum": ["Flow", "Grid"]
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/component"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "component": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "enum": ["List", "Edit", "View"]
+          },
+          "entity": {
+            "type": "string",
+            "format": "$.creation.entities.name"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
 }
 
-/**
+  /**
  * Store all information needed to point to a single element in a model.
  */
 export class DontCodeModelPointer {

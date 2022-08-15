@@ -23,6 +23,12 @@
         "sharing": {
           "$ref": "#/$defs/sharing"
         },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report"
+          }
+        },
         "sources": {
           "type": "array",
           "items": {
@@ -45,7 +51,7 @@
       "properties": {
         "from": {
           "type": "string",
-          "format": "$.creation.sources[*]"
+          "format": "$.creation.sources.name"
         },
         "name": {
           "type": "string"
@@ -108,6 +114,90 @@
         }
       }
     },
+    "report": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "for": {
+          "type": "string",
+          "format": "$.creation.entities.name"
+        },
+        "groupedBy": {
+          "$ref": "#/$defs/report-group"
+        },
+        "sortedBy": {
+          "$ref": "#/$defs/report-sort"
+        },
+        "as": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report-display"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-group": {
+      "type": "object",
+      "properties": {
+        "by": {
+          "type": "string",
+          "format": ".fields.name"
+        },
+        "label": {
+          "type": "string"
+        },
+        "display": {
+          "$ref": "#/$defs/report-group-aggregate"
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-group-aggregate": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": ["Count", "Sum", "Average", "Minimum", "Maximum"]
+        },
+        "of": {
+          "type": "string",
+          "format": ".@parent.fields.name"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-sort": {
+      "type": "object",
+      "properties": {
+        "by": {
+          "type": "string",
+          "format": ".fields.name"
+        }
+      },
+      "additionalProperties": false
+    },
+    "report-display": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["Table", "Bar", "Line", "Pie"]
+        },
+        "of": {
+          "type": "string",
+          "format": ".@parent.fields.name"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+
     "screen": {
       "type": "object",
       "properties": {
@@ -134,7 +224,7 @@
         },
         "entity": {
           "type": "string",
-          "format": "#/creation/entities"
+          "format": "$.creation.entities.name"
         }
       },
       "additionalProperties": false
