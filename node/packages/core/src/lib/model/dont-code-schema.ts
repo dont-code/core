@@ -452,7 +452,36 @@ export class DontCodeModelPointer {
     return newPointer;
   }
 
-  /**
+    /**
+     * Returns the parent pointer or an exception if it's the root
+     * @param subItem
+     */
+    safeParentPointer(optionalSchemaMgr?: DontCodeSchemaManager): DontCodeModelPointer {
+      const ret = this.parentPointer(optionalSchemaMgr);
+      if( ret===undefined)
+        throw new Error("No parent position for pointer "+this.position);
+      return ret;
+    }
+
+    /**
+     * Returns the parent pointer or undefined if it's the root
+     * @param subItem
+     */
+    parentPointer(optionalSchemaMgr?: DontCodeSchemaManager): DontCodeModelPointer|undefined {
+      if( (this.containerPosition==null) || (this.containerPositionInSchema==null))
+        return undefined;
+      const newPointer = new DontCodeModelPointer(
+        this.containerPosition,
+        this.containerPositionInSchema
+      );
+      if( optionalSchemaMgr!=null) {
+        newPointer.fillMissingElements(optionalSchemaMgr);
+      }
+      return newPointer;
+    }
+
+
+    /**
    * Safely returns the parent position
    * @param position
    */
@@ -466,7 +495,7 @@ export class DontCodeModelPointer {
   }
 
   /**
-   * Safely returns the parent position and last element
+   * Safely splits between the parent position and last element
    * @param position
    */
   public static splitPosition(

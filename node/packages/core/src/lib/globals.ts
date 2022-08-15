@@ -36,16 +36,13 @@ export interface DontCodeSchemaType {
     type: string;
     name: string;
     entities?: Array<DontCodeEntityType>;
+    sharing?: DontCodeSharingType;
+    reports?: Array<DontCodeReportType>;
     sources?: Array<DontCodeSourceType>;
     screens?: Array<{
       name: string;
     }>;
   };
-}
-
-export interface DontCodeFieldType {
-  name: string;
-  type: string;
 }
 
 export interface DontCodeEntityType {
@@ -54,9 +51,36 @@ export interface DontCodeEntityType {
   fields?: Array<DontCodeFieldType>;
 }
 
+export interface DontCodeFieldType {
+  name: string;
+  type: string;
+}
+
+export interface DontCodeSharingType {
+  with: string;
+}
+
+export interface DontCodeReportType {
+  title: string;
+  for: string;
+  groupedBy: any;
+  sortedBy: any;
+  as?: Array<DontCodeReportDisplayType>;
+}
+
+export interface DontCodeReportDisplayType {
+  type: string;
+  of: string;
+  title: string;
+}
+
 export interface DontCodeSourceType {
   name: string;
   type: string;
+}
+
+export interface DontCodeSharingType {
+
 }
 
 /**

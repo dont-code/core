@@ -812,6 +812,63 @@ export class DontCodeModelManager {
     }
 
   }
+
+  /**
+   * Try to guess which field is most likely to represent the name of an object (ususally a field with name "name", or "title")
+   * @param position
+   * @param modelAsJson
+   */
+  guessPropertyRepresentingName (position:string|null, modelAsJson:any): string|null {
+    if( modelAsJson==null) {
+      if (position==null)
+        throw new Error ("Either position or model must be provided");
+      modelAsJson = this.findAtPosition(position, false);
+      if (modelAsJson==null) {
+        throw new Error ("Position "+position+" does not exist in model");
+      }
+    }
+    if ((modelAsJson.fields != null) && (Array.isArray(modelAsJson.fields)))
+      modelAsJson=modelAsJson.fields;
+
+    const curScore:{score:number, field:any} = {score:-1, field:null};
+
+    for (const field in modelAsJson) {
+        if (DontCodeModelManager.scoreNameFieldFromProperty(modelAsJson[field].name, curScore))
+          break;
+    }
+
+    if (curScore.score>0) {
+      return curScore.field;
+    } else
+      return null;
+
+  }
+
+  protected static scoreNameFieldFromProperty (name:string, score:{score:number, field:any}): boolean {
+    if( name==null)
+      return false;
+    const propName=name.toLowerCase();
+    // Finds if the element is the id field
+    if( propName === "name") {
+      score.field=name;  // Don't need to process Id
+      score.score = 100;
+      return true;
+    } else {
+      if ((propName == "title")||(propName=="lastname")) {
+        if (score.score<80) {
+          score.score=80;
+          score.field=name;
+        }
+      } else if (propName.includes("name")||propName.includes("title")) {
+        if (score.score<50) {
+          score.score = 50;
+          score.field=name;
+        }
+      }
+      return false;
+    }
+  }
+
 }
 
 class AtomicChange {
