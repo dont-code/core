@@ -1,5 +1,8 @@
 package net.dontcode.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,6 +13,8 @@ import java.util.Set;
  *
  */
 public class Models {
+
+    private static Logger log = LoggerFactory.getLogger(Models.class);
     /**
      * Merge the change into the model and returns the updated model.
      * Does the same as the typescript function applyChange https://github.com/dont-code/core/blob/main/node/packages/core/src/lib/model/dont-code-model-manager.ts
@@ -27,8 +32,16 @@ public class Models {
                 curContent= Models.findAtPosition (orig, parentPosition, true);
             }
         }
+
+        if ((toApply.type== Change.ChangeType.MOVE) && (toApply.oldPosition==null) && (toApply.value==null)) {
+            log.warn("Cannot apply MOVE Change without value or oldPosition for {}", toApply.position);
+            return orig;
+        }
         if ((toApply.value!=null) || (toApply.type== Change.ChangeType.MOVE)||(toApply.type== Change.ChangeType.DELETE))
             recursiveApplyChange (orig, toApply, curContent, MapOrString.fromObject(toApply.value), DontCodeModelPointer.lastElementOf(toApply.position), true);
+        else {
+            log.warn("Missing a value to non MOVE or DELETE change for {}", toApply.position);
+        }
         return orig;
     }
 
