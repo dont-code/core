@@ -1,0 +1,324 @@
+{
+  "1": {
+    "position": "creation",
+    "type": "RESET"
+  },
+  "2": {
+    "position": "/",
+    "type": "RESET",
+    "value": {
+      "creation": {
+        "type": "Application",
+        "name": "Comparatif sans gluten ni lactose",
+        "entities": {
+          "a": {
+            "name": "Produits",
+            "fields": {
+              "b": {
+                "name": "Type",
+                "type": "Text"
+              },
+              "a": {
+                "name": "Marque",
+                "type": "Text"
+              },
+              "g": {
+                "name": "Photo",
+                "type": "Image"
+              },
+              "c": {
+                "name": "Commentaire",
+                "type": "Text"
+              },
+              "f": {
+                "name": "Note",
+                "type": "Rating"
+              },
+              "d": {
+                "name": "Auchan",
+                "type": "Euro"
+              },
+              "e": {
+                "name": "Carrefour",
+                "type": "Euro"
+              },
+              "h": {
+                "name": "Webecologie",
+                "type": "Euro"
+              },
+              "i": {
+                "name": "Onatera",
+                "type": "Euro"
+              },
+              "j": {
+                "name": "Greenweez",
+                "type": "Euro"
+              }
+            }
+          },
+          "sharing": {
+            "with": "Dont-code users"
+          }
+        }
+      }
+    }
+  },
+  "3": {
+    "position": "/",
+    "type": "RESET",
+    "value": {
+      "creation": {
+        "type": "Application",
+        "name": "Prix Complements Alimentaires",
+        "entities": {
+          "a": {
+            "name": "Complement",
+            "fields": {
+              "a": {
+                "name": "Produit",
+                "type": "Text"
+              },
+              "b": {
+                "name": "Marque",
+                "type": "Text"
+              },
+              "c": {
+                "name": "Photo",
+                "type": "Image"
+              },
+              "f": {
+                "name": "Conseille",
+                "type": "Boolean"
+              },
+              "g": {
+                "name": "Commentaires",
+                "type": "Text"
+              },
+              "d": {
+                "name": "Enseigne",
+                "type": "Text"
+              },
+              "e": {
+                "name": "Prix",
+                "type": "Euro"
+              }
+            }
+          }
+        },
+        "sharing": {
+          "with": "Dont-code users"
+        }
+      }
+    }
+  },
+  "4": {
+    "position": "creation/entities/a/fields/e",
+    "type": "MOVE"
+  },
+  "5": {
+    "position": "creation/entities/a/fields/e",
+    "type": "MOVE"
+  },
+  "6": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "7": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "8": {
+    "position": "creation/entities/a/fields/f",
+    "type": "MOVE"
+  },
+  "9": {
+    "position": "creation/entities/a/fields/f",
+    "type": "MOVE"
+  },
+  "10": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "11": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "12": {
+    "position": "creation/entities/a/fields/e",
+    "type": "MOVE"
+  },
+  "13": {
+    "position": "creation/entities/a/fields/f",
+    "type": "MOVE"
+  },
+  "14": {
+    "position": "creation/entities/a/fields/h/name",
+    "type": "UPDATE",
+    "value": "Prix E.P"
+  },
+  "15": {
+    "position": "creation/entities/a/fields/h/type",
+    "type": "UPDATE",
+    "value": "Euro"
+  },
+  "16": {
+    "position": "creation/entities/a/fields/i/name",
+    "type": "UPDATE",
+    "value": "Prix W.E."
+  },
+  "17": {
+    "position": "creation/entities/a/fields/h/name",
+    "type": "UPDATE",
+    "value": "Prix E.P."
+  },
+  "18": {
+    "position": "creation/entities/a/fields/i/type",
+    "type": "UPDATE",
+    "value": "Euro"
+  },
+  "19": {
+    "position": "creation/entities/a/fields/i/type",
+    "type": "UPDATE",
+    "value": "Euro"
+  },
+  "20": {
+    "position": "creation/entities/a/fields/j/name",
+    "type": "UPDATE",
+    "value": "Prix N.P."
+  },
+  "21": {
+    "position": "creation/entities/a/fields/j/type",
+    "type": "UPDATE",
+    "value": "Euro"
+  },
+  "22": {
+    "position": "creation/entities/a/fields/k/name",
+    "type": "UPDATE",
+    "value": "Prix G.W."
+  },
+  "23": {
+    "position": "creation/entities/a/fields/k/type",
+    "type": "UPDATE",
+    "value": "Euro"
+  },
+  "24": {
+    "position": "creation/entities/a/fields/k/type",
+    "type": "UPDATE",
+    "value": "Euro"
+  },
+  "25": {
+    "position": "creation/entities/a/fields/l/name",
+    "type": "UPDATE",
+    "value": "Prix Autres"
+  },
+  "26": {
+    "position": "creation/entities/a/fields/f/name",
+    "type": "UPDATE",
+    "value": "Conseillé"
+  },
+  "27": {
+    "position": "creation/entities/a/fields/l/type",
+    "type": "UPDATE",
+    "value": "Euro"
+  },
+  "28": {
+    "position": "creation/entities/a/fields/e",
+    "type": "DELETE"
+  },
+  "29": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "30": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "31": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "32": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "33": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "34": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "35": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "36": {
+    "position": "creation/entities/a/fields/d",
+    "type": "MOVE"
+  },
+  "37": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "38": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "39": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "40": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "41": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "42": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "43": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "44": {
+    "position": "creation/entities/a/fields/c",
+    "type": "MOVE"
+  },
+  "45": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  },
+  "46": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  },
+  "47": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  },
+  "48": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  },
+  "49": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  },
+  "50": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  },
+  "51": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  },
+  "52": {
+    "position": "creation/entities/a/fields/g",
+    "type": "MOVE"
+  }
+}

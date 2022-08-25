@@ -1,6 +1,7 @@
 package net.dontcode.core.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dontcode.core.Change;
 import net.dontcode.core.DontCodeModelPointer;
 import net.dontcode.core.MapOrString;
@@ -1374,6 +1375,24 @@ public class ModelTest {
             Models.applyChange(targetContent, newChange);
         }
         Assertions.assertEquals(Models.findAtPosition(targetContent, "creation/entities/b/fields/a/name", false).getString(), "dsa");
+    }
+
+    @Test
+    public void itShouldLoadCorrectlyAVeryComplexSession () throws URISyntaxException, IOException {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("sessions/very-complex-session.json");
+        String testContent = Files.readString(Path.of (url.toURI()));
+
+        MapOrString jsonContent =  new MapOrString(Utils.fromJsonToMap(testContent));
+        MapOrString targetContent = new MapOrString();
+
+        for (var key:jsonContent.getMap().keySet()) {
+            var curContent = jsonContent.mapGetMap(key).get();
+            Change newChange = new Change(Change.ChangeType.valueOf(curContent.get("type").toString()),
+                    (String) curContent.get("position"), curContent.get("value"));
+            Models.applyChange(targetContent, newChange);
+        }
+        String result = new ObjectMapper().writeValueAsString(targetContent);
+        Assertions.assertNotNull(result);
     }
 
     protected void checkModels(Map<String, Object> merged, String jsonToCheck) throws JsonProcessingException {
