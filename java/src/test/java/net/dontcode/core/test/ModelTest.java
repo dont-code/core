@@ -8,8 +8,15 @@ import net.dontcode.core.Models;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+
+import static net.dontcode.core.test.Utils.fromJsonToMap;
 
 /**
  * Duplicates the tests of https://github.com/dont-code/core/blob/main/node/packages/core/src/lib/model/dont-code-model-manager.spec.ts
@@ -1352,11 +1359,28 @@ public class ModelTest {
                 }""");
     }
 
+    @Test
+    public void itShouldLoadCorrectlyAComplexSession () throws URISyntaxException, IOException {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("sessions/complex-session.json");
+        String testContent = Files.readString(Path.of (url.toURI()));
+
+        MapOrString jsonContent =  new MapOrString(Utils.fromJsonToMap(testContent));
+        MapOrString targetContent = new MapOrString();
+
+        for (var key:jsonContent.getMap().keySet()) {
+            var curContent = jsonContent.mapGetMap(key).get();
+            Change newChange = new Change(Change.ChangeType.valueOf(curContent.get("type").toString()),
+                    (String) curContent.get("position"), curContent.get("value"));
+            Models.applyChange(targetContent, newChange);
+        }
+        Assertions.assertEquals(Models.findAtPosition(targetContent, "creation/entities/b/fields/a/name", false).getString(), "dsa");
+    }
+
     protected void checkModels(Map<String, Object> merged, String jsonToCheck) throws JsonProcessingException {
-        Assertions.assertEquals(Utils.fromJsonToMap(jsonToCheck),  merged );
+        Assertions.assertEquals(fromJsonToMap(jsonToCheck),  merged );
     }
 
     protected void checkModels( MapOrString merged, String jsonToCheck) throws JsonProcessingException {
-        Assertions.assertEquals(Utils.fromJsonToMap(jsonToCheck), merged.getMap() );
+        Assertions.assertEquals(fromJsonToMap(jsonToCheck), merged.getMap() );
     }
 }

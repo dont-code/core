@@ -1,0 +1,34 @@
+{
+  "1": {
+    "position": "creation",
+    "type": "RESET"
+  },
+  "2": {
+    "position": "creation/entities/a",
+    "type": "DELETE"
+  },
+  "3": {
+    "position": "creation/entities/b/fields/b",
+    "type": "MOVE"
+  },
+  "4": {
+    "position": "creation/entities/b/fields/a/name",
+    "type": "UPDATE",
+    "value": "dsa"
+  },
+  "5": {
+    "position": "creation/entities/b/fields/a/type",
+    "type": "UPDATE",
+    "value": "Text"
+  },
+  "6": {
+    "position": "creation/entities/b/from",
+    "type": "UPDATE",
+    "value": "dasda"
+  },
+  "7": {
+    "position": "creation/sharing/with",
+    "type": "UPDATE",
+    "value": "No-one"
+  }
+}

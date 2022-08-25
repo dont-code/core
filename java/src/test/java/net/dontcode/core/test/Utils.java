@@ -10,22 +10,15 @@ import java.util.Map;
 
 public class Utils {
     public static Map<String, Object> fromJsonToMap (String json) throws JsonProcessingException {
-        // convert JSON string to Java Map
-        Map<String, Object> map = new ObjectMapper().readValue(json, LinkedHashMap.class);
-        return map;
-    }
-
-    public static Map<String, Object> fromJsonToMapOrString (String json) throws JsonProcessingException {
         if( json==null)
             return new LinkedHashMap<>();
         // convert JSON string to Java Map
         Map<String, Object> map = new ObjectMapper().readValue(json, LinkedHashMap.class);
-
         return map;
     }
 
     public static Change createJsonTestChange (Change.ChangeType type, String containerSchema, String containerItemId, String schema, String itemId, String value, String property) throws JsonProcessingException {
-        return createTestChange(type,containerSchema, containerItemId,schema,itemId, Utils.fromJsonToMapOrString(value), property);
+        return createTestChange(type,containerSchema, containerItemId,schema,itemId, Utils.fromJsonToMap(value), property);
     }
 
     public static Change createMoveChange (String oldPosition, String beforeIdOrProperty, String containerSchema, String containerItemId, String schema, String itemId, String property) {
