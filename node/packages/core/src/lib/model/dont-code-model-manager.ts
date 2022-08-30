@@ -833,7 +833,7 @@ export class DontCodeModelManager {
     const curScore:{score:number, field:any} = {score:-1, field:null};
 
     for (const field in modelAsJson) {
-        if (DontCodeModelManager.scoreNameFieldFromProperty(modelAsJson[field].name, curScore))
+        if (DontCodeModelManager.scoreNameFieldFromProperty(modelAsJson[field].name, modelAsJson[field].type, curScore))
           break;
     }
 
@@ -844,7 +844,7 @@ export class DontCodeModelManager {
 
   }
 
-  protected static scoreNameFieldFromProperty (name:string, score:{score:number, field:any}): boolean {
+  protected static scoreNameFieldFromProperty (name:string, type:string, score:{score:number, field:any}): boolean {
     if( name==null)
       return false;
     const propName=name.toLowerCase();
@@ -859,9 +859,25 @@ export class DontCodeModelManager {
           score.score=80;
           score.field=name;
         }
-      } else if (propName.includes("name")||propName.includes("title")) {
+      }
+      else if (propName == "label") {
+          if (score.score<70) {
+            score.score=70;
+            score.field=name;
+          }
+        } else if (propName.includes("name")||propName.includes("title")) {
         if (score.score<50) {
           score.score = 50;
+          score.field=name;
+        }
+      } else if (propName.includes("label")) {
+        if (score.score<40) {
+          score.score = 40;
+          score.field=name;
+        }
+      } else if (type=="Text") {
+        if( score.score<20) {
+          score.score=20;
           score.field=name;
         }
       }
@@ -869,6 +885,90 @@ export class DontCodeModelManager {
     }
   }
 
+  /**
+   * Extract the value of any data in parameter. It can handle complex data and flattens it into something that you can calculate or act upon (number or string)
+   * @param obj
+   * @param metaData: Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @protected
+   */
+  public extractValue (obj:any, metaData:DataTransformationInfo, position?:string, schemaItem?:DontCodeSchemaItem) : any {
+    if( obj==null)
+      return obj;
+    if (!metaData.parsed) {
+      metaData.parsed=true;
+      if (typeof obj !== 'object' ) {
+        if (obj != null) {
+          metaData.direct=true;
+        } else {
+          metaData.parsed=false;
+          return obj;
+        }
+      } else {
+        if (Array.isArray(obj)) {
+          metaData.array = true;
+          // eslint-disable-next-line no-restricted-syntax
+          console.debug("Getting an array as a value for a graph ", obj);
+          if ((obj as Array<any>).length > 0) {
+            obj = (obj as Array<any>)[0];
+          } else {
+            metaData.parsed = false;
+            return obj;
+          }
+        }
+        if (obj instanceof Date) {
+          metaData.direct = true;
+          return obj;
+        } else {
+          // It's an unknown object
+          if (obj.value !== undefined) {
+            metaData.subValue = 'value';
+          } else if (obj.amount !== undefined) {
+            metaData.subValue = 'amount';
+          } else {
+            let firstKey = null;
+            for (const key in obj) {
+              if (firstKey == null) firstKey = key;
+              if ((obj[key] != null) && (typeof (obj[key]) !== 'object')) {
+                metaData.subValue = key;
+              }
+            }
+            if (metaData.subValue == null) {
+              metaData.subValue = firstKey;
+            }
+            console.warn("Guessed value key of "+metaData.subValue+' for object.', obj);
+
+          }
+        }
+      }
+    }
+
+    // We already know what to do
+    if (metaData.direct) {
+      return obj;
+    } else {
+      if (metaData.array) {
+        if ((obj as Array<any>).length > 0) {
+          obj = (obj as Array<any>)[0];
+        } else return obj;
+      }
+      if (metaData.subValue!=null) {
+        return obj[metaData.subValue];
+      }else {
+        return obj;
+      }
+    }
+  }
+
+}
+
+/**
+ * Keep track of information about how to extract value of data
+ */
+export class DataTransformationInfo {
+  parsed = false;
+  array=false;
+  direct = false;
+  subValue:string|null=null;
 }
 
 class AtomicChange {

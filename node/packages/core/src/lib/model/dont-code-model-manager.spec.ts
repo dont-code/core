@@ -1,7 +1,7 @@
 import {Change, ChangeType} from '../change/change';
 import {dtcde} from '../globals';
 import {DontCodeTestManager} from '../test/dont-code-test-manager';
-import {DontCodeModelManager} from "@dontcode/core";
+import {DataTransformationInfo, DontCodeModelManager, MoneyAmount} from "@dontcode/core";
 
 describe('Model Manager', () => {
   it('should find the element at any position', () => {
@@ -1610,4 +1610,95 @@ describe('Model Manager', () => {
     expect(newKey).toEqual('aac');
 
   });
+
+  it('should extract simple values correctly', () => {
+    const service = dtcde.getModelManager();
+
+    let dataInfo= new DataTransformationInfo();
+    let result = service.extractValue(234
+    , dataInfo);
+
+    expect(result).toEqual(234);
+    expect(dataInfo.parsed).toBeTruthy();
+    expect(dataInfo.direct).toBeTruthy();
+
+    result = service.extractValue(
+      343, dataInfo);
+
+    expect(result).toEqual(343);
+
+  });
+
+  it('should extract date values correctly', () => {
+    const service = dtcde.getModelManager();
+
+    let dataInfo= new DataTransformationInfo();
+    const date= new Date();
+
+    let result = service.extractValue(
+      date, dataInfo);
+
+    expect(result).toEqual(date);
+    expect(dataInfo.parsed).toBeTruthy();
+    expect(dataInfo.direct).toBeTruthy();
+
+    date.setFullYear(date.getFullYear()-10);
+    result = service.extractValue(
+      date, dataInfo);
+
+    expect(result).toEqual(date);
+
+  });
+
+  it('should extract values with null', () => {
+    const service = dtcde.getModelManager();
+
+    const dataInfo= new DataTransformationInfo();
+    let result = service.extractValue({
+        value: null,
+        label: 'Label'
+    }, dataInfo);
+
+    expect(result).toBeNull();
+    expect (dataInfo.parsed).toBeTruthy();
+
+    result = service.extractValue({
+      value: 343,
+      label: 'label2'
+    }, dataInfo);
+
+    expect (dataInfo.parsed).toBeTruthy();
+    expect (dataInfo.direct).toBeFalsy();
+    expect (dataInfo.subValue).toEqual("value");
+    expect(result).toEqual(343);
+
+  });
+
+  it('should extract amount ', () => {
+    const service = dtcde.getModelManager();
+
+    const dataInfo= new DataTransformationInfo();
+    const cost = new MoneyAmount();
+    cost.amount=234.56;
+    cost.currencyCode="EUR";
+    let result = service.extractValue(
+      cost
+    , dataInfo);
+
+    expect (dataInfo.parsed).toBeTruthy();
+    expect (dataInfo.direct).toBeFalsy();
+    expect (dataInfo.subValue).toEqual("amount");
+    expect (result).toEqual(cost.amount);
+
+    cost.amount=567.23;
+    cost.currencyCode="USD";
+
+    result = service.extractValue(
+      cost
+    , dataInfo);
+
+    expect(result).toEqual(cost.amount);
+
+  });
+
 });
