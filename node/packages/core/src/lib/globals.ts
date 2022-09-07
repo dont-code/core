@@ -71,6 +71,7 @@ export interface DontCodeReportType {
 export interface DontCodeReportDisplayType {
   type: string;
   of: string;
+  by:string;
   title: string;
 }
 
@@ -79,6 +80,7 @@ export interface DontCodeSourceType {
   type: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DontCodeSharingType {
 
 }
