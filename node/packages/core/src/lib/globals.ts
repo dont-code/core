@@ -71,7 +71,7 @@ export interface DontCodeReportType {
 export interface DontCodeReportDisplayType {
   type: string;
   of: string;
-  by:string;
+  by?:string;
   title: string;
 }
 
