@@ -200,6 +200,10 @@ export class DontCodeSchema {
             "type": "string",
             "format": ".@parent.fields.name"
           },
+          "by": {
+            "type": "string",
+            "format": ".@parent.fields.name"
+          },
           "title": {
             "type": "string"
           }

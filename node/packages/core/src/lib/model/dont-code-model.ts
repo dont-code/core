@@ -78,6 +78,9 @@ export class DontCodeModel {
   static readonly APP_REPORTS_DISPLAY_OF_NODE = 'of';
   static readonly APP_REPORTS_DISPLAY_OF =
     DontCodeModel.APP_REPORTS_DISPLAY + '/' + DontCodeModel.APP_REPORTS_DISPLAY_OF_NODE;
+  static readonly APP_REPORTS_DISPLAY_BY_NODE = 'by';
+  static readonly APP_REPORTS_DISPLAY_BY =
+    DontCodeModel.APP_REPORTS_DISPLAY + '/' + DontCodeModel.APP_REPORTS_DISPLAY_BY_NODE;
   static readonly APP_SOURCES_NODE = 'sources';
   static readonly APP_SOURCES =
     DontCodeModel.ROOT + '/' + DontCodeModel.APP_SOURCES_NODE;
