@@ -43,6 +43,11 @@ export interface DontCodeSchemaItem {
    */
   isPossibleDynamicProperty(code: string): DontCodeSchemaProperty | undefined;
 
+  /**
+   * Returns all the children and the dynamic properties that could appear depending on the data
+   */
+  getChildrenAndPossibleProperties (): IterableIterator<[string, DontCodeSchemaItem]>;
+
   getRelativeId(): string | undefined;
   setRelativeId(relativeId: string | undefined): void;
 
@@ -231,6 +236,53 @@ export abstract class AbstractSchemaItem implements DontCodeSchemaItem {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Returns all properties that can be used by this SchemaItem depending on the values entered
+   */
+  getAllPossibleDynamicProperties ():IterableIterator<[string, DontCodeSchemaItem]> {
+    const children = this.getChildren();
+    const ret = new Map<string, DontCodeSchemaItem>();
+    for (const child of children) {
+      const childProps = child[1].allProperties();
+      for (const childProp of childProps) {
+        for (const childChildProp of childProp[1].getChildren()) {
+          if (ret.has(childChildProp[0])) {
+            console.warn("Dynamic Property "+childChildProp[0]+" is being defined by multiple children.");
+          }
+          ret.set(childChildProp[0], childChildProp[1]);
+        }
+      }
+    }
+    return ret.entries();
+  }
+
+  /**
+   * Returns the list of children and all possible dynamic properties that can be created depending on the values entered
+   */
+  getChildrenAndPossibleProperties(): IterableIterator<[string, DontCodeSchemaItem]> {
+    return concatIterable(this.getChildren(), this.getAllPossibleDynamicProperties());
+  }
+
+}
+
+/**
+ * Generator function to combine multiple iterators into one
+ * @param iterators
+ */
+export function* concatIterable<T>(...iterators: IterableIterator<T>[]) {
+  for (let i of iterators) {
+      i = i[Symbol.iterator]();
+
+    let f: IteratorResult<T> | Promise<IteratorResult<T>>;
+    while (true) {
+      f = i.next();
+      if (f.done) {
+        break;
+      }
+      yield f.value;
+    }
   }
 }
 
