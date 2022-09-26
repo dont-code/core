@@ -3,6 +3,7 @@ import { DontCodeSchemaManager } from './model/dont-code-schema-manager';
 import { DontCodePreviewManager } from './plugin/preview/dont-code-preview-manager';
 import { DontCodeStoreManager } from './store/dont-code-store-manager';
 import { DontCodeModelManager } from './model/dont-code-model-manager';
+import {Action} from "rxjs/internal/scheduler/Action";
 
 export interface Core {
   getSchemaUri(): string;
@@ -101,6 +102,7 @@ export interface PluginConfig {
   }>;
   'preview-handlers'?: Array<ChangeHandlerConfig>;
   'global-handlers'?: Array<ChangeHandlerConfig>;
+  'action-handlers'?: Array<ActionHandlerConfig>;
   'definition-updates'?: Array<DefinitionUpdateConfig>
 }
 
@@ -130,6 +132,34 @@ export interface DefinitionUpdateConfig {
   location: LocationConfig;
   update: any;
 }
+
+export interface ChangeHandlerConfig {
+  location: LocationConfig;
+  class: ClassDefinitionConfig;
+}
+
+export interface ClassDefinitionConfig {
+  source: string;
+  name: string;
+}
+
+export interface ActionHandlerConfig {
+  location: LocationConfig;
+  'action-context': string;
+  actions: Array<ActionConfig>;
+  class: ClassDefinitionConfig
+}
+
+export interface ActionConfig {
+  type:string;
+  'display-name':string;
+  icon: IconDefinitionConfig;
+}
+
+export interface IconDefinitionConfig {
+  url?:string;
+}
+
 
 /**
  * The typescript equivalent of repository-schema.json
