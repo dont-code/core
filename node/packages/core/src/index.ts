@@ -10,6 +10,7 @@ export * from './lib/model/money-amount';
 export * from './lib/plugin/dont-code-plugin-manager';
 export * from './lib/plugin/command-provider-interface';
 export * from './lib/plugin/preview-handler';
+export * from './lib/plugin/action-handler';
 export * from './lib/plugin/plugin-module-interface';
 export * from './lib/plugin/preview/dont-code-preview-manager';
 export * from './lib/test/dont-code-test-manager';

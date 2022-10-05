@@ -1,9 +1,15 @@
-import { ChangeHandlerConfig, PluginConfig } from '../../globals';
+import {ActionHandlerConfig, ChangeHandlerConfig, PluginConfig} from '../../globals';
 import { Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
+import {ActionHandler} from "../action-handler";
 
+/**
+ * Manages handlers that provides UI, calculation or action for data associated with an element.
+ * It decodes "preview-handlers", "global-handlers", "action-handlers" from plugin-config.
+ */
 export class DontCodePreviewManager {
   protected handlersPerLocations: Map<string, ChangeHandlerConfig[]>;
   protected globalHandlersPerLocations: Map<string, ChangeHandlerConfig[]>;
+  protected actionHandlersPerLocation: Map<{ position:string, context:string }, ActionHandlerConfig[]>;
 
   protected globalHandlers: ReplaySubject<ChangeHandlerConfig> =
     new ReplaySubject();
@@ -11,6 +17,7 @@ export class DontCodePreviewManager {
   constructor() {
     this.handlersPerLocations = new Map<string, ChangeHandlerConfig[]>();
     this.globalHandlersPerLocations = new Map<string, ChangeHandlerConfig[]>();
+    this.actionHandlersPerLocation = new Map();
   }
 
   registerHandlers(config: PluginConfig): void {
@@ -42,6 +49,17 @@ export class DontCodePreviewManager {
         this.globalHandlers.next(value);
       });
     }
+    if (config['action-handlers']) {
+      for (const value of config['action-handlers']) {
+        let array = this.actionHandlersPerLocation.get({position:value.location.parent, context:value["action-context"]});
+        if (!array) {
+          array = new Array<ActionHandlerConfig>();
+          this.actionHandlersPerLocation.set({position:value.location.parent, context:value["action-context"]}, array);
+        }
+        array.push(value);
+
+      }
+    }
   }
 
   getGlobalHandlers(): Map<string, Array<ChangeHandlerConfig>> {
@@ -54,7 +72,7 @@ export class DontCodePreviewManager {
 
   retrieveHandlerConfig(
     position: string,
-    jsonContent?: any
+    modelContent?: any
   ): ChangeHandlerConfig | null {
     const found = this.handlersPerLocations.get(position);
     let ret: ChangeHandlerConfig | null = null;
@@ -63,10 +81,10 @@ export class DontCodePreviewManager {
     if (found) {
       found.forEach((configuration) => {
         if (configuration.location.values) {
-          if (jsonContent) {
-            let jsonValue = jsonContent as string;
+          if (modelContent) {
+            let jsonValue = modelContent as string;
             if (configuration.location.id)
-              jsonValue = jsonContent[configuration.location.id];
+              jsonValue = modelContent[configuration.location.id];
 
             this.extractValuesAsArray(configuration.location.values).forEach(
               (targetValue) => {
@@ -89,13 +107,13 @@ export class DontCodePreviewManager {
       });
     } else {
       // Try to see if the parent position is handled
-      if (typeof jsonContent === 'string' && position.lastIndexOf('/') > 0) {
+      if (typeof modelContent === 'string' && position.lastIndexOf('/') > 0) {
         if (position.endsWith('/'))
           position = position.substring(0, position.length - 1);
 
         const key = position.substring(position.lastIndexOf('/') + 1);
         const parentValue: { [index: string]: string } = {};
-        parentValue[key] = jsonContent;
+        parentValue[key] = modelContent;
         return this.retrieveHandlerConfig(
           position.substring(0, position.lastIndexOf('/')),
           parentValue
@@ -111,6 +129,20 @@ export class DontCodePreviewManager {
       );
     }
     return ret;
+  }
+
+  /**
+   * Returns all the action handlers for a given position in the model and for a given context.
+   * @param position
+   * @param context
+   * @param modelContent
+   */
+  retrieveActionHandlers(    position: string, context:string, modelContent?: any ): ActionHandlerConfig[] {
+    const ret= this.actionHandlersPerLocation.get({position, context});
+    if( ret==null)
+      return [];
+    else
+      return ret;
   }
 
   private extractValuesAsArray(values: any): Array<string> {

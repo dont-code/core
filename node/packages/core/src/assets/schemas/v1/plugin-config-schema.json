@@ -26,6 +26,12 @@
         "$ref": "#/$defs/change-handler"
       }
     },
+    "action-handlers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/action-handler"
+      }
+    },
     "definition-updates": {
       "type": "array",
       "items": {
@@ -134,15 +140,57 @@
           "$ref": "#/$defs/change-location"
         },
         "class": {
-          "type": "object",
-          "properties": {
-            "source": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            }
+          "$ref": "#/$defs/class-definition"
+        }
+      }
+    },
+    "action-handler": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/change-location"
+        },
+        "action-context": {
+          "$refs": "#/$defs/action-context"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$refs": "#/$defs/action"
           }
+        },
+        "class": {
+          "$ref": "#/$defs/class-definition"
+        }
+      }
+    },
+    "action-context": {
+      "type": "string",
+      "enum": ["list", "edit", "view"]
+    },
+    "action": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["extract", "update", "calculate"]
+        },
+        "display-name": {
+          "type": "string"
+        },
+        "icon": {
+          "$refs": "#/$defs/icon-definition"
+        }
+      }
+    },
+    "class-definition": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
         }
       }
     },
@@ -154,6 +202,14 @@
         },
         "update": {
           "$ref": "#/$defs/additem"
+        }
+      }
+    },
+    "icon-definition": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
         }
       }
     }
