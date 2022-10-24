@@ -199,24 +199,26 @@ export class DontCodeChangeManager {
     }
 
     const affected = this.listenerCachePerPosition.get(change.position);
-    affected?.forEach((subject) => {
-      let canCall = true;
-      const positions = alreadyCalled.get(subject);
-      if (positions) {
-        // Don't call twice the same listener for the same or parent position
-        for (const position of positions) {
-          if (change.position.startsWith(position)) {
-            canCall = false;
+    if (affected!=null) {
+      for (const subject of affected) {
+        let canCall = true;
+        const positions = alreadyCalled.get(subject);
+        if (positions) {
+          // Don't call twice the same listener for the same or parent position
+          for (const position of positions) {
+            if (change.position.startsWith(position)) {
+              canCall = false;
+            }
           }
+        } else {
+          alreadyCalled.set(subject, new Array<string>());
         }
-      } else {
-        alreadyCalled.set(subject, new Array<string>());
+        if (canCall) {
+          subject.next(change);
+          alreadyCalled.get(subject)?.push(change.position);
+        }
       }
-      if (canCall) {
-        subject.next(change);
-        alreadyCalled.get(subject)?.push(change.position);
-      }
-    });
+    }
   }
 
   /**

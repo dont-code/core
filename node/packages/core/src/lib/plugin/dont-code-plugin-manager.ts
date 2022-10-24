@@ -11,14 +11,19 @@ export class DontCodePluginManager {
     schemaManager: DontCodeSchemaManager,
     previewManager: DontCodePreviewManager
   ) {
+    // Ensure registering plugins only once.
     const config: PluginConfig = plugin.getConfiguration();
     const fullId = config.plugin.id + '-v' + config.plugin.version;
 
-    console.debug ("Setting up", fullId);
-    schemaManager.registerChanges(config);
-    previewManager.registerHandlers(config);
+    if( this.plugins.get(fullId)==null) {
+      console.debug ("Setting up", fullId);
+      schemaManager.registerChanges(config);
+      previewManager.registerHandlers(config);
 
-    this.plugins.set(fullId, new PluginInfo (plugin));
+      this.plugins.set(fullId, new PluginInfo (plugin));
+    } else {
+      console.debug("Plugin "+fullId+" already registered, skipping it");
+    }
   }
 
   initPlugins (core:DontCode.Core): void {
