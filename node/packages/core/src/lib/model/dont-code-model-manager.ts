@@ -800,18 +800,6 @@ export class DontCodeModelManager {
         ,definition.location.after);
 
   }
-  /**
-   * Adds to the model the updates of configuration defined by the plugin or by the repository
-   * @param defs
-   */
-  applyPluginConfigUpdates (defs: DefinitionUpdateConfig[] | undefined):void {
-    if (defs!=null) {
-      defs.forEach( definition => {
-        this.applyChange(this.convertToChange(definition))
-      })
-    }
-
-  }
 
   /**
    * Try to guess which field is most likely to represent the name of an object (ususally a field with name "name", or "title")

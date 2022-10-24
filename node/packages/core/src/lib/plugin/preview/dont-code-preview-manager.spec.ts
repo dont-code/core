@@ -1,17 +1,17 @@
 import { DontCodeCore } from '../../dontcode';
 import * as DontCode from '../../globals';
 import PluginConfig = DontCode.PluginConfig;
-import {Core} from "../../globals";
+import {Core, dtcde} from "../../globals";
 
 describe('Preview Manager', () => {
   it('should work', () => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
     expect(test).toBeDefined();
     expect(test.getPreviewManager()).toBeDefined();
   });
 
   it('should manage simple plugin configuration', () => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
 
     test.registerPlugin(new SimplePluginTest());
     const simpleConfig = test
@@ -22,7 +22,7 @@ describe('Preview Manager', () => {
   });
 
   it('should manage basic plugin overriding configuration', () => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
 
     test.registerPlugin(new BasicPluginTest());
     const entityConfig = test
@@ -45,7 +45,7 @@ describe('Preview Manager', () => {
   });
 
   it('should manage plugin configurations with values', () => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
 
     test.registerPlugin(new ValuesPluginTest());
     let valuesConfig = test
@@ -71,7 +71,7 @@ describe('Preview Manager', () => {
   });
 
   it('should find the right plugin depending on values', () => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
 
     test.registerPlugin(new ValuesPluginTest());
     test.registerPlugin(new OtherValuesPluginTest());
@@ -93,7 +93,7 @@ describe('Preview Manager', () => {
   });
 
   it('should manage mixed config with values or not', () => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
 
     test.registerPlugin(new ValuesPluginTest());
     test.registerPlugin(new OtherValuesPluginTest());
@@ -115,7 +115,7 @@ describe('Preview Manager', () => {
   });
 
   it('should manage subtype of fields', () => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
 
     test.registerPlugin(new ValuesPluginTest());
     test.registerPlugin(new SubTypeValuesPluginTest());
@@ -145,7 +145,7 @@ describe('Preview Manager', () => {
   });
 
   it('should manage global handlers', (done) => {
-    const test = new DontCodeCore();
+    const test = dtcde.reset();
 
     test.registerPlugin(new GlobalHandlerPluginTest());
     const gHandlers = test.getPreviewManager().getGlobalHandlers();
@@ -219,6 +219,7 @@ class SimplePluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Empty
   }
 }
 
@@ -246,6 +247,7 @@ class BasicPluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Empty
   }
 }
 
@@ -274,6 +276,7 @@ class ValuesPluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Empty
   }
 }
 
@@ -302,6 +305,7 @@ class OtherValuesPluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Empty
   }
 }
 
@@ -339,6 +343,7 @@ class SubTypeValuesPluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Empty
   }
 }
 
@@ -366,6 +371,7 @@ class NoValuesPluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Empty
   }
 }
 
@@ -413,5 +419,6 @@ class GlobalHandlerPluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Empty
   }
 }

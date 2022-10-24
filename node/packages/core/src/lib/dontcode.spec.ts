@@ -1,17 +1,17 @@
 import { DontCodeCore } from './dontcode';
 import * as DontCode from './globals';
 import PluginConfig = DontCode.PluginConfig;
-import {Core} from "./globals";
+import {Core, dtcde} from "./globals";
 
 describe('dontcode', () => {
   it('should work', () => {
-    const test = new DontCodeCore();
+    const test =dtcde;
     expect(test).toBeDefined();
     expect(test.getSchemaManager()).toBeDefined();
   });
 
   it("should includes plugin's schema change", () => {
-    const test = new DontCodeCore();
+    const test = dtcde;
 
     test.registerPlugin(new PluginTest());
   });
