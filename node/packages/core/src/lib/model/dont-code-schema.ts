@@ -97,6 +97,10 @@ export class DontCodeSchema {
                 "Web": {
                   "enum": ["Website (url)", "Image"]
                 }
+              }, {
+                "Special": {
+                  "enum": ["Reference"]
+                }
               }
             ]
           }

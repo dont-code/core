@@ -7,25 +7,29 @@ import { DontCodeModelManager } from './model/dont-code-model-manager';
 import {DontCodeChangeManager} from "./change/dont-code-change-manager";
 
 export class DontCodeCore implements DontCode.Core {
-  protected schemaManager!: DontCodeSchemaManager;
-  protected pluginManager!: DontCodePluginManager;
-  protected previewManager!: DontCodePreviewManager;
-  protected storeManager!: DontCodeStoreManager;
-  protected modelManager!: DontCodeModelManager;
-  protected changeManager!: DontCodeChangeManager;
+  protected schemaManager: DontCodeSchemaManager;
+  protected pluginManager: DontCodePluginManager;
+  protected previewManager: DontCodePreviewManager;
+  protected storeManager: DontCodeStoreManager;
+  protected modelManager: DontCodeModelManager;
+  protected changeManager: DontCodeChangeManager;
 
   constructor() {
     console.debug("Init core");
-    this.reset();
-  }
-
-  reset(): DontCode.Core {
     this.schemaManager = new DontCodeSchemaManager();
     this.pluginManager = new DontCodePluginManager();
     this.previewManager = new DontCodePreviewManager();
     this.modelManager = new DontCodeModelManager(this.schemaManager);
     this.changeManager = new DontCodeChangeManager(this.schemaManager, this.modelManager);
-    this.storeManager = new DontCodeStoreManager(this.modelManager);
+    this.storeManager = new DontCodeStoreManager(this.modelManager);  }
+
+  reset(): DontCode.Core {
+    this.schemaManager.reset();
+    this.pluginManager.reset();
+    this.previewManager.reset();
+    this.modelManager.reset();
+    this.changeManager.reset();
+    this.storeManager.reset();
     return this;
   }
 

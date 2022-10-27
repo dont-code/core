@@ -15,7 +15,13 @@ export class DontCodeModelManager {
   static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS="abcdefghijklmnopqrstuvxyz";
   static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS.length;
 
-  constructor(protected schemaMgr: DontCodeSchemaManager) {}
+  constructor(protected schemaMgr: DontCodeSchemaManager) {
+    this.reset();
+  }
+
+  reset() {
+    this.content = undefined;
+  }
 
   /**
    * Returns the complete json stored

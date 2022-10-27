@@ -41,6 +41,10 @@ export class DontCodePluginManager {
       }
     });
   }
+
+  reset() {
+    this.plugins.clear();
+  }
 }
 
 class PluginInfo {

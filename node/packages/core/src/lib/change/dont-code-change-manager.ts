@@ -11,7 +11,7 @@ import {DontCodeModelPointer} from "../model/dont-code-schema";
  */
 export class DontCodeChangeManager {
 
-  protected receivedChanges = new Subject<Change>();
+  protected receivedChanges!:Subject<Change>;
 
   protected listeners = new Map<
     { position: string; property?: string },
@@ -24,7 +24,17 @@ export class DontCodeChangeManager {
 
   constructor(protected schemaManager:DontCodeSchemaManager,
               protected modelManager:DontCodeModelManager) {
+    this.reset();
   }
+
+  reset() {
+    if (this.receivedChanges!=null)
+      this.receivedChanges.complete();
+    this.receivedChanges = new Subject<Change>();
+    this.listeners.clear();
+    this.listenerCachePerPosition.clear();
+  }
+
   /**
    * Check if the change affects the given position
    * @param pos
