@@ -7,17 +7,20 @@ import {ActionHandler} from "../action-handler";
  * It decodes "preview-handlers", "global-handlers", "action-handlers" from plugin-config.
  */
 export class DontCodePreviewManager {
-  protected handlersPerLocations: Map<string, ChangeHandlerConfig[]>;
-  protected globalHandlersPerLocations: Map<string, ChangeHandlerConfig[]>;
-  protected actionHandlersPerLocation: Map<{ position:string, context:string }, ActionHandlerConfig[]>;
-
-  protected globalHandlers: ReplaySubject<ChangeHandlerConfig> =
-    new ReplaySubject();
+  protected handlersPerLocations!: Map<string, ChangeHandlerConfig[]>;
+  protected globalHandlersPerLocations!: Map<string, ChangeHandlerConfig[]>;
+  protected actionHandlersPerLocation!: Map<{ position:string, context:string }, ActionHandlerConfig[]>;
+  protected globalHandlers!: ReplaySubject<ChangeHandlerConfig>;
 
   constructor() {
+    this.reset();
+  }
+
+  reset() {
     this.handlersPerLocations = new Map<string, ChangeHandlerConfig[]>();
     this.globalHandlersPerLocations = new Map<string, ChangeHandlerConfig[]>();
     this.actionHandlersPerLocation = new Map();
+    this.globalHandlers = new ReplaySubject();
   }
 
   registerHandlers(config: PluginConfig): void {

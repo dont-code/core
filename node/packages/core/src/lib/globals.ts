@@ -3,7 +3,7 @@ import { DontCodeSchemaManager } from './model/dont-code-schema-manager';
 import { DontCodePreviewManager } from './plugin/preview/dont-code-preview-manager';
 import { DontCodeStoreManager } from './store/dont-code-store-manager';
 import { DontCodeModelManager } from './model/dont-code-model-manager';
-import {Action} from "rxjs/internal/scheduler/Action";
+import {DontCodeChangeManager} from "./change/dont-code-change-manager";
 
 export interface Core {
   getSchemaUri(): string;
@@ -11,8 +11,10 @@ export interface Core {
   initPlugins (): void;
   getSchemaManager(): DontCodeSchemaManager;
   getModelManager(): DontCodeModelManager;
+  getChangeManager(): DontCodeChangeManager;
   getPreviewManager(): DontCodePreviewManager;
   getStoreManager(): DontCodeStoreManager;
+  reset(): Core;
 }
 
 if (!(self as any).dontCodeCore)

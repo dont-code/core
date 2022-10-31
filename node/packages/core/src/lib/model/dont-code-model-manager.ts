@@ -15,7 +15,13 @@ export class DontCodeModelManager {
   static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS="abcdefghijklmnopqrstuvxyz";
   static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS.length;
 
-  constructor(protected schemaMgr: DontCodeSchemaManager) {}
+  constructor(protected schemaMgr: DontCodeSchemaManager) {
+    this.reset();
+  }
+
+  reset() {
+    this.content = undefined;
+  }
 
   /**
    * Returns the complete json stored
@@ -798,18 +804,6 @@ export class DontCodeModelManager {
     return new Change(ChangeType.ADD, ptr.position, definition.update
         ,ptr
         ,definition.location.after);
-
-  }
-  /**
-   * Adds to the model the updates of configuration defined by the plugin or by the repository
-   * @param defs
-   */
-  applyPluginConfigUpdates (defs: DefinitionUpdateConfig[] | undefined):void {
-    if (defs!=null) {
-      defs.forEach( definition => {
-        this.applyChange(this.convertToChange(definition))
-      })
-    }
 
   }
 

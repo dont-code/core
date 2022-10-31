@@ -14,6 +14,12 @@ export class DontCodeStoreManager {
     provider?: DontCodeStoreProvider
   ) {
     this._default = provider;
+    this.reset();
+  }
+
+  reset() {
+    this.providerByPosition.clear();
+    this.providerByType.clear();
   }
 
   getProvider(position?: string): DontCodeStoreProvider | undefined {
@@ -117,6 +123,7 @@ export class DontCodeStoreManager {
   ): Observable<UploadedDocumentInfo> {
     return this.getProviderSafe(position).storeDocuments(toStore, position);
   }
+
 }
 
 export type UploadedDocumentInfo = {

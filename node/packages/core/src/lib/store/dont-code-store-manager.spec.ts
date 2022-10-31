@@ -81,14 +81,18 @@ class DummyStoreProvider implements DontCodeStoreProvider {
     position: string,
     ...criteria: DontCodeStoreCriteria[]
   ): Observable<Array<any>> {
-    return of();
+    return of([]);
   }
 
   storeDocuments(
     toStore: File[],
     position?: string
   ): Observable<UploadedDocumentInfo> {
-    return of();
+    return of({
+      documentId:'areere',
+      documentName: 'atgegtrgtr',
+      isUrl: false
+    });
   }
 
   storeEntity(position: string, entity: any): Promise<any> {

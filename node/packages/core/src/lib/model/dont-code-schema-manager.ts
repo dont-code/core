@@ -12,12 +12,11 @@ import { PluginConfig } from '../globals';
  * That means plugins can add or modify new fields or entities thus changing the way applications are edited and described.
  */
 export class DontCodeSchemaManager {
-  protected currentSchema: DontCodeSchemaRoot;
+  protected currentSchema!: DontCodeSchemaRoot;
   protected readSchema: any;
 
   constructor() {
-    this.readSchema = DontCodeSchema.defaultv1;
-    this.currentSchema = this.convertSchemaToMap(this.readSchema);
+    this.reset();
   }
   /**
    * Returns the current schema
@@ -208,5 +207,10 @@ export class DontCodeSchemaManager {
     } else {
       return parent.subItemPointer(propOrItemName);
     }
+  }
+
+  reset() {
+    this.readSchema = DontCodeSchema.defaultv1;
+    this.currentSchema = this.convertSchemaToMap(this.readSchema);
   }
 }
