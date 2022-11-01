@@ -654,9 +654,12 @@ export class DontCodeModelManager {
     if (result?.pointer?.startsWith('/')) {
       result.pointer=result.pointer.substring(1);
     }
-    delete result.path;
-    delete result.parent;
-    delete result.parentProperty;
+
+    if( result!=null) {
+      delete result.path;
+      delete result.parent;
+      delete result.parentProperty;
+    }
     return result as ModelQuerySingleResult;
   }
 
