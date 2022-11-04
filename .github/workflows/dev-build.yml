@@ -8,12 +8,12 @@ on:
     branches: [ Development ]
     paths:
       - 'node/**'
-      - '.github/workflows'
+      - '.github/workflows/**'
   pull_request:
     branches: [ Development ]
     paths:
       - 'node/**'
-      - '.github/workflows'
+      - '.github/workflows/**'
 
 jobs:
   build:
@@ -38,7 +38,15 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm version prerelease
+          cache: 'npm'
+          cache-dependency-path: core/node/package-lock.json
+      - name: Version
+        if: ${{ success() && ( matrix.browser == 'chromium' )}}
+        run: |
+          PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          npm version $PACKAGE_VERSION
+          npm version prerelease
         working-directory: 'core/node/packages/core'
       - name: Install
         run: |
@@ -47,11 +55,11 @@ jobs:
         working-directory: 'core/node'
       - name: Build
         run: |
-          nx run core:build:production
+          nx run core:build:development
           nx run core:test
         working-directory: 'core/node'
       - name: Publish
-        if: ${{ success() }}
+        if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
           npm publish core/node/dist/packages/core --access public --tag next
         env:
