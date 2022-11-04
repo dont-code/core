@@ -10,9 +10,6 @@ on:
     paths:
       - 'node/**'
       - '.github/workflows/**'
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build:
@@ -56,6 +53,7 @@ jobs:
         run: |
           nx run core:build:production
           nx run core:test
+        working-directory: 'core/node'
       - name: Publish
         if: ${{ success() }}
         run: |
