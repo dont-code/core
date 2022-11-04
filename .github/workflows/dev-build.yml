@@ -40,7 +40,7 @@ jobs:
       - name: Version
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
-          echo "PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*'" >> $GITHUB_ENV
+          echo "PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')" >> $GITHUB_ENV
           npm version ${{env.PACKAGE_VERSION}}
           npm version prerelease
         working-directory: 'core/node/packages/core'
