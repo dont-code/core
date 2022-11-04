@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        browser: [chromium, chrome]
+        browser: [chromium, chrome, firefox]
 
     steps:
       - name: Checkout
@@ -38,8 +38,6 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm version prerelease
-        working-directory: 'core/node/packages/core'
       - name: Install
         run: |
           npm install -g nx
@@ -50,8 +48,10 @@ jobs:
           nx run core:build:production
           nx run core:test
         working-directory: 'core/node'
+      - run: npm version prerelease -m "New dev release %s"
+        working-directory: 'core/node/packages/core'
       - name: Publish
-        if: ${{ success() }}
+        if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
           npm publish core/node/dist/packages/core --access public --tag next
         env:
