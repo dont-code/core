@@ -40,11 +40,9 @@ jobs:
       - name: Version
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email noreply@github.com
-          echo "PACKAGE_VERSION=$(npm version prerelease)" >> $GITHUB_ENV
-          git add package.json
-          git commit -m "New dev release ${{env.PACKAGE_VERSION}}"
+          echo "PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*'" >> $GITHUB_ENV
+          npm version ${{env.PACKAGE_VERSION}}
+          npm version prerelease
         working-directory: 'core/node/packages/core'
       - name: Install
         run: |
@@ -56,11 +54,6 @@ jobs:
           nx run core:build:production
           nx run core:test
         working-directory: 'core/node'
-      - name: Push
-        if: ${{ success() && ( matrix.browser == 'chromium' )}}
-        run: |
-          git push
-        working-directory: 'core/node/packages/core'
       - name: Publish
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
