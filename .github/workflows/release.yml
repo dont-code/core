@@ -60,3 +60,17 @@ jobs:
           npm publish core/node/dist/packages/core --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: ReVersion
+        run: |
+          npm version prerelease
+        working-directory: 'core/node/packages/core'
+      - name: ReBuild
+        run: |
+          nx run core:build:development
+        working-directory: 'core/node'
+      - name: RePublish
+        if: ${{ success() && ( matrix.browser == 'chromium' ) }}
+        run: |
+          npm publish core/node/dist/packages/core --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
