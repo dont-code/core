@@ -43,7 +43,7 @@ jobs:
       - name: Version
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
-          set PACKAGE_VERSION $(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')
+          PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           echo $PACKAGE_VERSION
           npm version $PACKAGE_VERSION
