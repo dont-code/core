@@ -38,6 +38,11 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
+      - name: Version
+        if: ${{ success() && ( matrix.browser == 'chromium' )}}
+        run: |
+          npm version prerelease -m "New dev release %s"
+        working-directory: 'core/node/packages/core'
       - name: Install
         run: |
           npm install -g nx
@@ -48,8 +53,13 @@ jobs:
           nx run core:build:production
           nx run core:test
         working-directory: 'core/node'
-      - run: npm version prerelease -m "New dev release %s"
-        working-directory: 'core/node/packages/core'
+      - name: Version
+        if: ${{ success() && ( matrix.browser == 'chromium' )}}
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+          git push
+        working-directory: 'core'
       - name: Publish
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
