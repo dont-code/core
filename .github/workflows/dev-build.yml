@@ -30,7 +30,6 @@ jobs:
         with:
           repository: dont-code/core
           path: core
-          fetch-depth: 0
           ref: 'Development'
           token: ${{secrets.DONTCODE_ACTIONS_TOKEN}}
       - name: Setup
