@@ -30,6 +30,7 @@ jobs:
         with:
           repository: dont-code/core
           path: core
+          fetch-depth: 0
           ref: 'Development'
           token: ${{secrets.DONTCODE_ACTIONS_TOKEN}}
       - name: Setup
@@ -37,6 +38,8 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: core/node/package-lock.json
       - name: Version
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
@@ -51,7 +54,7 @@ jobs:
         working-directory: 'core/node'
       - name: Build
         run: |
-          nx run core:build:production
+          nx run core:build:development
           nx run core:test
         working-directory: 'core/node'
       - name: Publish

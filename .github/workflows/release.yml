@@ -1,7 +1,7 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Release
+name: Build and Deploy Patch release
 
 on:
   workflow_dispatch:
@@ -9,10 +9,10 @@ on:
     branches: [ main ]
     paths:
       - 'node/**'
-
-defaults:
-  run:
-    working-directory: node
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -21,44 +21,43 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        browser: [chromium, chrome, firefox]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
+          repository: dont-code/core
+          path: core
           fetch-depth: 0
-          ref: main
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+          ref: 'main'
+          token: ${{secrets.DONTCODE_ACTIONS_TOKEN}}
+      - name: Setup
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - name: Cache Node.js modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
-          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          cache: 'npm'
+          cache-dependency-path: core/node/package-lock.json
+      - name: Version
+        if: ${{ success() && ( matrix.browser == 'chromium' )}}
+        run: |
+          echo "PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')" >> $GITHUB_ENV
+          npm version ${{env.PACKAGE_VERSION}}
+          npm version patch
+        working-directory: 'core/node/packages/core'
       - name: Install
         run: |
           npm install -g nx
-          npm ci
+          npm install --force
+        working-directory: 'core/node'
       - name: Build
-        run: npm version patch
-        working-directory: node/packages/core
-      - name: Build
-        run: nx run core:build
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@master
-        with:
-          path: node/libs/core
-      - name: Unit tests
-        run: nx run core:test
-#      - name: Push
-#        run: |
-#          git commit -a -m "New release ${{steps.package-version.outputs.current-version}}" --allow-empty
-#          git push
-#      - name: Publish
-#        run: npm publish dist/packages/core --access public
-#        env:
-#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          nx run core:build:production
+          nx run core:test
+      - name: Publish
+        if: ${{ success() }}
+        run: |
+          npm publish core/node/dist/packages/core --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
