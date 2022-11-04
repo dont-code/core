@@ -13,10 +13,6 @@ on:
     paths:
       - 'node/**'
 
-defaults:
-  run:
-    working-directory: node
-
 jobs:
   build:
 
@@ -24,31 +20,36 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        browser: [chromium, chrome]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          ref: Development
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+          repository: dont-code/core
+          path: core
+          fetch-depth: 0
+          ref: 'Development'
+          token: ${{secrets.DONTCODE_ACTIONS_TOKEN}}
+      - name: Setup build environment
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - name: Cache Node.js modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
-          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
-      - name: Npm install
+      - run: npm version prerelease
+        working-directory: 'core/node/packages/core'
+      - name: Install
         run: |
           npm install -g nx
-          npm ci
-      - name: building
-        run: nx run core:build
-#      - uses: actions/upload-artifact@v1
-#        with:
-#          name: distribution
-#          path: node/dist/libs/core
-      - name: Unit tests
-        run: nx run core:test
+          npm install --force
+        working-directory: 'core/node'
+      - name: Build
+        run: |
+          nx run core:build:production
+          nx run core:test
+      - name: Publish
+        if: ${{ success() }}
+        run: |
+          npm publish core/node/dist/packages/core --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
