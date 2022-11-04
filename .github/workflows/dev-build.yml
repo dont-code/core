@@ -43,6 +43,7 @@ jobs:
           cat package.json
           npm version prerelease -m "New dev release %s"
           cat package.json
+          git add package.json
           git status
         working-directory: 'core/node/packages/core'
       - name: Install
