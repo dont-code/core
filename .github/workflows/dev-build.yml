@@ -41,9 +41,10 @@ jobs:
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
           cat package.json
-          npm version prerelease -m "New dev release %s"
+          npm version prerelease
           cat package.json
           git add package.json
+          git commit -m "New dev release" 
           git status
         working-directory: 'core/node/packages/core'
       - name: Install
@@ -56,7 +57,7 @@ jobs:
           nx run core:build:production
           nx run core:test
         working-directory: 'core/node'
-      - name: Version
+      - name: Push
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
           git config user.name "GitHub Actions"
