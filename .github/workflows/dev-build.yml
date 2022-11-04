@@ -8,12 +8,12 @@ on:
     branches: [ Development ]
     paths:
       - 'node/**'
-      - '.github/workflows'
+      - '.github/workflows/**'
   pull_request:
     branches: [ Development ]
     paths:
       - 'node/**'
-      - '.github/workflows'
+      - '.github/workflows/**'
 
 jobs:
   build:
