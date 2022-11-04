@@ -42,6 +42,7 @@ jobs:
         if: ${{ success() && ( matrix.browser == 'chromium' )}}
         run: |
           npm version prerelease -m "New dev release %s"
+          cat package.json
         working-directory: 'core/node/packages/core'
       - name: Install
         run: |
