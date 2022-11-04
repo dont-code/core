@@ -42,12 +42,9 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
-          cat package.json
-          npm version prerelease -m "New dev release %s"
-          cat package.json
+          echo "PACKAGE_VERSION=$(npm version prerelease)" >> $GITHUB_ENV
           git add package.json
-          git commit -m "New dev release" 
-          git status
+          git commit -m "New dev release ${{env.PACKAGE_VERSION}}"
         working-directory: 'core/node/packages/core'
       - name: Install
         run: |
