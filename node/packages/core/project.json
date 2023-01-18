@@ -1,10 +1,11 @@
 {
-  "root": "packages/core",
+  "name": "core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/core/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/web:rollup",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/core",
@@ -14,11 +15,11 @@
         "compiler": "babel",
         "globals": [
           {
-            "moduleId":"rxjs",
+            "moduleId": "rxjs",
             "global": "rxjs"
           },
           {
-            "moduleId":"jsonpath-plus",
+            "moduleId": "jsonpath-plus",
             "global": "jsonpath-plus"
           }
         ],
@@ -36,8 +37,7 @@
         ]
       },
       "configurations": {
-        "production": {
-        },
+        "production": {},
         "development": {
           "rollupConfig": "tools/getRollupOptions.js"
         }
@@ -53,9 +53,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/core"],
+      "outputs": ["{workspaceRoot}/coverage/packages/core"],
       "options": {
-        "jestConfig": "packages/core/jest.config.js",
+        "jestConfig": "packages/core/jest.config.ts",
         "passWithNoTests": true
       }
     }

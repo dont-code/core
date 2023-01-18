@@ -2,5 +2,6 @@
   "version": 2,
   "projects": {
     "core": "packages/core"
-  }
+  },
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json"
 }
