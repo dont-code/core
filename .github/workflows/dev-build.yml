@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: The version of the release, if needed
+        description: The version of the pre-release, if needed (x.y.z-pr)
         required: false
         type: string
   push:

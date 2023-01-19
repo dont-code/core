@@ -5,6 +5,11 @@ name: Build and Deploy Patch release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: The version of the release, if needed (x.y.z)
+        required: false
+        type: string
   push:
     branches: [ main ]
     paths:
@@ -37,12 +42,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: core/node/package-lock.json
       - name: Version
-        if: ${{ success() && ( matrix.browser == 'chromium' )}}
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( github.event.inputs.version == '') }}
         run: |
-          PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=latest: ).*')
+          PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           npm version $PACKAGE_VERSION
           npm version patch
+        working-directory: 'core/node/packages/core'
+      - name: Version
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( github.event.inputs.version != '') }}
+        run: |
+          PACKAGE_VERSION=${{inputs.version}}
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          npm version $PACKAGE_VERSION
         working-directory: 'core/node/packages/core'
       - name: Install
         run: |
