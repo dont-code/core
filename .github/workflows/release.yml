@@ -47,7 +47,7 @@ jobs:
           PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           npm version $PACKAGE_VERSION
-          npm version prerelease
+          npm version patch
         working-directory: 'core/node/packages/core'
       - name: Version
         if: ${{ success() && ( matrix.browser == 'chromium' ) && ( github.event.inputs.version != '') }}
