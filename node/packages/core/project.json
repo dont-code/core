@@ -37,7 +37,9 @@
         ]
       },
       "configurations": {
-        "production": {},
+        "production": {
+          "rollupConfig": "tools/getRollupOptions.js"
+        },
         "development": {
           "rollupConfig": "tools/getRollupOptions.js"
         }
