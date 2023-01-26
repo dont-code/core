@@ -6,7 +6,7 @@ function getRollupOptions(/** @type {import('rollup').RollupOptions} */ options)
       o.sourcemap = true;
     });
   } else {
-    //console.log("Config before:", options.output);
+    /*console.log("Config before:", options.output);
     options.output = [{
       ...options.output,
       format:"umd",
@@ -20,8 +20,8 @@ function getRollupOptions(/** @type {import('rollup').RollupOptions} */ options)
         sourcemap: true,
         entryFileNames: '[name].mjs',
         chunkFileNames: '[name].mjs',
-      }];
-
+      }];*/
+      options.output.sourcemap=true;
   }
 //  console.log("Config after:", options.output);
 
