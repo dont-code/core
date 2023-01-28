@@ -10,11 +10,10 @@ on:
         description: The version of the release, if needed (x.y.z)
         required: false
         type: string
-  push:
-    branches: [ main ]
-    paths:
-      - 'node/**'
-      - '.github/workflows/**'
+      next:
+        description: Is it a next release ?
+        required: true
+        type: boolean
 
 jobs:
   build:
@@ -42,15 +41,24 @@ jobs:
           cache: 'npm'
           cache-dependency-path: core/node/package-lock.json
       - name: Version
-        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( github.event.inputs.version == '') }}
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version == '') }}
         run: |
-          PACKAGE_VERSION=$(npm dist-tag ls @dontcode/core | grep -Po '(?<=next: ).*')
+          PACKAGE_VERSION=$(npm view @dontcode/core versions --json | jq -r '.[-1]')
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           npm version $PACKAGE_VERSION
+        working-directory: 'core/node/packages/core'
+      - name: Version Next
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version == '') && ( inputs.next == true) }}
+        run: |
           npm version patch
         working-directory: 'core/node/packages/core'
-      - name: Version
-        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( github.event.inputs.version != '') }}
+      - name: Version Patch
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version == '') && ( inputs.next == false) }}
+        run: |
+          npm version patch
+        working-directory: 'core/node/packages/core'
+      - name: Version Set
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version != '') }}
         run: |
           PACKAGE_VERSION=${{inputs.version}}
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
@@ -61,28 +69,20 @@ jobs:
           npm install -g nx
           npm install --force
         working-directory: 'core/node'
-      - name: Build
+      - name: Build and Test
         run: |
           nx run core:build:production
           nx run core:test
         working-directory: 'core/node'
       - name: Publish
-        if: ${{ success() && ( matrix.browser == 'chromium' ) }}
-        run: |
-          npm publish core/node/dist/packages/core --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: ReVersion
-        run: |
-          npm version prerelease
-        working-directory: 'core/node/packages/core'
-      - name: ReBuild
-        run: |
-          nx run core:build:development
-        working-directory: 'core/node'
-      - name: RePublish
-        if: ${{ success() && ( matrix.browser == 'chromium' ) }}
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.next == true) }}
         run: |
           npm publish core/node/dist/packages/core --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish
+        if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.next == false) }}
+        run: |
+          npm publish core/node/dist/packages/core --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
