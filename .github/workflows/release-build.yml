@@ -1,13 +1,19 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Build Development
+name: Build Release
 
 on:
   workflow_dispatch:
 
   push:
-    branches: [ Development ]
+    branches: [ main ]
+    paths:
+      - 'node/**'
+      - '.github/workflows/**'
+
+  pull_request:
+    branches: [ main ]
     paths:
       - 'node/**'
       - '.github/workflows/**'
@@ -28,7 +34,7 @@ jobs:
           repository: dont-code/core
           path: core
           fetch-depth: 0
-          ref: 'Development'
+          ref: 'main'
           token: ${{secrets.DONTCODE_ACTIONS_TOKEN}}
       - name: Setup
         uses: actions/setup-node@v3
@@ -44,6 +50,6 @@ jobs:
         working-directory: 'core/node'
       - name: Build
         run: |
-          nx run core:build:development
+          nx run core:build:production
           nx run core:test
         working-directory: 'core/node'
