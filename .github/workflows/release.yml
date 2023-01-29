@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: The version of the release, if needed (x.y.z)
+        description: The version of the release, if needed (x.y.z-p)
         required: false
         type: string
       next:
