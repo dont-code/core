@@ -3,8 +3,8 @@
   "version": "0.0.1-2",
   "license": "MIT",
   "scripts": {
-    "local-publish-all": "cd packages/core && npm version prerelease && cd ../.. && nx run core:build:development && cd packages/core && npm publish",
-    "local-publish": "cd packages/${npm_config_dir} && npm version prerelease && cd ../.. && nx run ${npm_config_dir}:build:development && cd packages/core && npm publish",
+    "local-publish-all": "cd packages/core && npm version prerelease && cd ../.. && nx run core:build:development && cd dist/packages/core && npm publish",
+    "local-publish": "cd packages/${npm_config_dir} && npm version prerelease && cd ../.. && nx run ${npm_config_dir}:build:development && cd dist/packages/core && npm publish",
     "push-all": "cd packages/core && npm version prerelease && cd ../.. && nx run core:build:development && cd dist/packages/core && yalc push",
     "push": "cd packages/${npm_config_dir} && npm version prerelease && cd ../.. && nx run ${npm_config_dir}:build:development && cd dist/packages/${npm_config_dir} && yalc push"
   },
