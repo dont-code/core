@@ -45,7 +45,7 @@ jobs:
         run: |
           PACKAGE_VERSION=$(npm view @dontcode/core versions --json | jq -r '.[-1]')
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
-          npm version $PACKAGE_VERSION
+          npm version $PACKAGE_VERSION --allow-same-version
         working-directory: 'core/node/packages/core'
       - name: Version Next
         if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version == '') && ( inputs.next == true) }}
