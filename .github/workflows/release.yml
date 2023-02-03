@@ -50,12 +50,12 @@ jobs:
       - name: Version Next
         if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version == '') && ( inputs.next == true) }}
         run: |
-          npm version prerelease
+          npm version patch
         working-directory: 'core/node/packages/core'
       - name: Version Patch
         if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version == '') && ( inputs.next == false) }}
         run: |
-          npm version patch
+          npm version minor
         working-directory: 'core/node/packages/core'
       - name: Version Set
         if: ${{ success() && ( matrix.browser == 'chromium' ) && ( inputs.version != '') }}
