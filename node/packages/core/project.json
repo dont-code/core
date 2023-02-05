@@ -21,8 +21,7 @@
           "rxjs",
           "jsonpath-plus"
         ],
-        "updateBuildableProjectDepsInPackageJson": true,
-        "buildableProjectDepsInPackageJsonType": "peerDependencies",
+        "updateBuildableProjectDepsInPackageJson": false,
         "assets": [
           {
             "glob": "**/*",

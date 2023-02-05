@@ -12,12 +12,6 @@ on:
       - 'node/**'
       - '.github/workflows/**'
 
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'node/**'
-      - '.github/workflows/**'
-
 jobs:
   build:
 
