@@ -365,6 +365,7 @@ export class DontCodeModelManager {
       );
       const subPosition = subPointer.position;
       alreadyChecked.add(oldSubProperty);
+      // eslint-disable-next-line no-prototype-builtins
       if (newContent.hasOwnProperty(oldSubProperty)) {
         this.applyChangeRecursive(
           src,
@@ -815,7 +816,7 @@ export class DontCodeModelManager {
    * @param position
    * @param modelAsJson
    */
-  guessPropertyRepresentingName (position:string|null, modelAsJson:any): string|null {
+  guessNamePropertyOfElement (position:string|null, modelAsJson:any): string|null {
     if( modelAsJson==null) {
       if (position==null)
         throw new Error ("Either position or model must be provided");
@@ -830,7 +831,7 @@ export class DontCodeModelManager {
     const curScore:{score:number, field:any} = {score:-1, field:null};
 
     for (const field in modelAsJson) {
-        if (DontCodeModelManager.scoreNameFieldFromProperty(modelAsJson[field].name, modelAsJson[field].type, curScore))
+        if (DontCodeModelManager.scoreFieldAsName(modelAsJson[field].name, modelAsJson[field].type, curScore))
           break;
     }
 
@@ -841,46 +842,77 @@ export class DontCodeModelManager {
 
   }
 
-  protected static scoreNameFieldFromProperty (name:string, type:string, score:{score:number, field:any}): boolean {
+  public static guessNamePropertyOfObject (obj:any): string|null {
+    const score:{score:number, field:any}={score:-1, field:null};
+    for (const prop in obj) {
+      DontCodeModelManager.scoreFieldAsName(prop, 'Text', score);
+    }
+    if( score.score>0)
+      return score.field;
+    else
+      return null;
+  }
+
+  public static guessNamePropertyFromList (...list:string[]): string|null {
+    const score:{score:number, field:any}={score:-1, field:null};
+    for (const prop of list) {
+      DontCodeModelManager.scoreFieldAsName(prop, 'Text', score);
+    }
+    if( score.score>0)
+      return score.field;
+    else
+      return null;
+  }
+
+  /**
+   * Checks the probability the name given (and type) is field name that represents the name of the element.
+   * @param name
+   * @param type
+   * @param score
+   * @protected
+   */
+  protected static scoreFieldAsName (name:string, type:string, score:{score:number, field:any}): boolean {
     if( name==null)
       return false;
     const propName=name.toLowerCase();
-    // Finds if the element is the id field
-    if( propName === "name") {
-      score.field=name;  // Don't need to process Id
-      score.score = 100;
-      return true;
-    } else {
-      if ((propName == "title")||(propName=="lastname")) {
-        if (score.score<80) {
-          score.score=80;
-          score.field=name;
+    for (const key in this.NAME_PROPERTY_NAMES) {
+      if (propName === key) {
+        const foundScore=this.NAME_PROPERTY_NAMES.get(key)??0;
+        if (score.score<foundScore) {
+          score.score=foundScore;
+          score.field=propName;
+          if (score.score==100)
+            return true;
+        }
+      } else if (propName.includes(key)) {
+        const foundScore=(this.NAME_PROPERTY_NAMES.get(key)??0)/2;
+        if (score.score<foundScore) {
+          score.score = foundScore;
+          score.field = propName;
         }
       }
-      else if (propName == "label") {
-          if (score.score<70) {
-            score.score=70;
-            score.field=name;
-          }
-        } else if (propName.includes("name")||propName.includes("title")) {
-        if (score.score<50) {
-          score.score = 50;
-          score.field=name;
-        }
-      } else if (propName.includes("label")) {
-        if (score.score<40) {
-          score.score = 40;
-          score.field=name;
-        }
-      } else if (type=="Text") {
+    }
+
+    if (type=="Text") {
         if( score.score<20) {
           score.score=20;
           score.field=name;
         }
       }
-      return false;
-    }
+
+    if( score.score>0) return true;
+    else return false;
   }
+
+  protected static readonly NAME_PROPERTY_NAMES = new Map<string,number> ([
+    ['name', 100],
+    ['nom', 100],
+    ['title', 80],
+    ['titre', 80],
+    ['lastname', 80],
+    ['label', 70],
+    ['libellé', 70]
+  ])
 
   /**
    * Extract the value of any data in parameter. It can handle complex data and flattens it into something that you can calculate or act upon (number or string)
