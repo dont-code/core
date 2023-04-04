@@ -875,9 +875,9 @@ export class DontCodeModelManager {
     if( name==null)
       return false;
     const propName=name.toLowerCase();
-    for (const key in this.NAME_PROPERTY_NAMES) {
+    for (const [key,value] of this.NAME_PROPERTY_NAMES) {
       if (propName === key) {
-        const foundScore=this.NAME_PROPERTY_NAMES.get(key)??0;
+        const foundScore=value??0;
         if (score.score<foundScore) {
           score.score=foundScore;
           score.field=propName;
@@ -885,7 +885,7 @@ export class DontCodeModelManager {
             return true;
         }
       } else if (propName.includes(key)) {
-        const foundScore=(this.NAME_PROPERTY_NAMES.get(key)??0)/2;
+        const foundScore=(value??0)/2;
         if (score.score<foundScore) {
           score.score = foundScore;
           score.field = propName;
