@@ -880,7 +880,7 @@ export class DontCodeModelManager {
         const foundScore=value??0;
         if (score.score<foundScore) {
           score.score=foundScore;
-          score.field=propName;
+          score.field=name;
           if (score.score==100)
             return true;
         }
@@ -888,7 +888,7 @@ export class DontCodeModelManager {
         const foundScore=(value??0)/2;
         if (score.score<foundScore) {
           score.score = foundScore;
-          score.field = propName;
+          score.field = name;
         }
       }
     }
