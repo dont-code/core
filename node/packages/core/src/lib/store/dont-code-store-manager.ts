@@ -5,13 +5,13 @@ import {DontCodeSourceType} from '../globals';
 import {DontCodeModel} from '../model/dont-code-model';
 
 export class DontCodeStoreManager {
-  private _default?: DontCodeStoreProvider;
-  private providerByPosition = new Map<string, DontCodeStoreProvider>();
-  private providerByType = new Map<string, DontCodeStoreProvider>();
+  private _default?: DontCodeStoreProvider<never>;
+  private providerByPosition = new Map<string, DontCodeStoreProvider<never>>();
+  private providerByType = new Map<string, DontCodeStoreProvider<never>>();
 
   constructor(
     protected modelMgr: DontCodeModelManager,
-    provider?: DontCodeStoreProvider
+    provider?: DontCodeStoreProvider<never>
   ) {
     this._default = provider;
     this.reset();
@@ -22,7 +22,7 @@ export class DontCodeStoreManager {
     this.providerByType.clear();
   }
 
-  getProvider(position?: string): DontCodeStoreProvider | undefined {
+  getProvider<T>(position?: string): DontCodeStoreProvider<T> | undefined {
     if (position == null) {
       return this._default;
     } else {
@@ -42,8 +42,8 @@ export class DontCodeStoreManager {
     }
   }
 
-  getProviderSafe(position?: string): DontCodeStoreProvider {
-    const ret = this.getProvider(position);
+  getProviderSafe<T>(position?: string): DontCodeStoreProvider<T> {
+    const ret = this.getProvider<T>(position);
     if (ret == null) {
       throw new Error('Trying to get an undefined or null provider');
     } else {
@@ -51,15 +51,15 @@ export class DontCodeStoreManager {
     }
   }
 
-  getDefaultProvider(): DontCodeStoreProvider | undefined {
+  getDefaultProvider<T>(): DontCodeStoreProvider<T> | undefined {
     return this.getProvider();
   }
 
-  getDefaultProviderSafe(): DontCodeStoreProvider {
+  getDefaultProviderSafe<T>(): DontCodeStoreProvider<T> {
     return this.getProviderSafe();
   }
 
-  setProvider(value: DontCodeStoreProvider, position?: string): void {
+  setProvider(value: DontCodeStoreProvider<never>, position?: string): void {
     if (position == null) this._default = value;
     else {
       this.providerByPosition.set(position, value);
@@ -67,13 +67,13 @@ export class DontCodeStoreManager {
   }
 
   setProviderForSourceType(
-    value: DontCodeStoreProvider,
+    value: DontCodeStoreProvider<never>,
     srcType: string
   ): void {
     this.providerByType.set(srcType, value);
   }
 
-  setDefaultProvider(value: DontCodeStoreProvider): void {
+  setDefaultProvider(value: DontCodeStoreProvider<never>): void {
     this.setProvider(value);
   }
 
@@ -155,4 +155,57 @@ export class DontCodeStoreCriteria {
       this.operator = operator;
     }
   }
+}
+
+export class DontCodeStoreSort {
+
+  constructor(public name: string, public direction?:DontCodeStoreSortDirection, public subSort?:DontCodeStoreSort) {
+    if (direction==null)   this.direction=DontCodeStoreSortDirection.NONE;
+  }
+}
+
+export class DontCodeStoreGroupby {
+  constructor(public name:string, public aggregates?:DontCodeStoreAggregate[]) {
+  }
+
+  public atLeastOneGroupIsRequested (): boolean {
+    if( this.aggregates!=null) {
+      for (const groupedValue of this.aggregates) {
+        if (groupedValue.calculation!=DontCodeStoreCalculus.NONE)
+          return true;
+      }
+    }
+    return false;
+  }
+
+  getRequiredListOfFields(): Set<string> {
+    const ret = new Set<string>();
+    if( this.aggregates!=null) {
+      for (const aggregate of this.aggregates) {
+        if (aggregate.calculation!=DontCodeStoreCalculus.NONE) {
+          ret.add(aggregate.name);
+        }
+      }
+    }
+    return ret;
+  }
+}
+
+export class DontCodeStoreAggregate {
+  constructor(public name:string, public calculation?:DontCodeStoreCalculus) {
+    if (calculation==null) this.calculation=DontCodeStoreCalculus.NONE;
+  }
+}
+
+export enum DontCodeStoreCalculus {
+  NONE=0,
+  SUM=1,
+  AVERAGE=2,
+  COUNT=3
+}
+
+export enum DontCodeStoreSortDirection {
+  ASCENDING=1,
+  DESCENDING=2,
+  NONE=0
 }
