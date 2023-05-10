@@ -1,7 +1,7 @@
-import { Change, ChangeType } from '../change/change';
-import { DontCodeModelPointer } from '../model/dont-code-schema';
-import {dtcde} from "../globals";
-import {DontCodeStoreProvider} from "../store/dont-code-store-provider";
+import {Change, ChangeType} from '../change/change';
+import {DontCodeModelPointer} from '../model/dont-code-schema';
+import {dtcde} from "../dontcode";
+import {AbstractDontCodeStoreProvider} from "../store/dont-code-store-provider";
 import {DontCodeStoreCriteria, UploadedDocumentInfo} from "../store/dont-code-store-manager";
 import {from, Observable, Subject, take, takeUntil, throwError, timer} from "rxjs";
 
@@ -86,7 +86,7 @@ export class DontCodeTestManager {
    * @param toFetchAsset
    */
   public static addDummyProviderFromContent (position:string, toReturn: any): void {
-    dtcde.getStoreManager().setProvider(new DummyStoreProvider (toReturn), position);
+    dtcde.getStoreManager().setProvider(new DummyStoreProvider<never> (toReturn), position);
   }
 
   /**
@@ -173,11 +173,12 @@ export class DontCodeTestManager {
 /**
  * Helper that emulates a StoreProvider with predefined values
  */
-class DummyStoreProvider implements DontCodeStoreProvider {
+class DummyStoreProvider<T> extends AbstractDontCodeStoreProvider<T> {
 
   content:any;
 
   constructor(content: any) {
+    super();
     this.content = content;
   }
 
@@ -189,13 +190,13 @@ class DummyStoreProvider implements DontCodeStoreProvider {
     return Promise.reject("Not implemened by Dummy tester");
   }
 
-  loadEntity(position: string, key: any): Promise<any> {
+  loadEntity(position: string, key: any): Promise<T> {
     if (this.content[key]!=null)
       return Promise.resolve(this.content[key]);
-    return Promise.resolve(undefined);
+    return Promise.reject('Not found');
   }
 
-  searchEntities(position: string, ...criteria: DontCodeStoreCriteria[]): Observable<Array<any>> {
+  searchEntities(position: string, ...criteria: DontCodeStoreCriteria[]): Observable<Array<T>> {
     if (Array.isArray(this.content)) {
       return from([this.content]);
     } else {
@@ -207,7 +208,7 @@ class DummyStoreProvider implements DontCodeStoreProvider {
     return throwError(() => new Error ("Not implemented by Dummy tester"));
   }
 
-  storeEntity(position: string, entity: any): Promise<any> {
+  storeEntity(position: string, entity: T): Promise<T> {
     return Promise.reject("Not implemented by Dummy tester");
   }
 

@@ -1,8 +1,6 @@
-import { DontCodeCore } from '../dontcode';
-import * as DontCode from '../globals';
-import PluginConfig = DontCode.PluginConfig;
-import {Core, dtcde} from "../globals";
-import {DontCodePluginManager} from "@dontcode/core";
+import { dtcde } from '../dontcode';
+import {Core, Plugin, PluginConfig} from '../globals';
+import { DontCodePluginManager } from './dont-code-plugin-manager';
 
 describe('Plugin Manager', () => {
   it('should work', () => {
@@ -58,7 +56,7 @@ describe('Plugin Manager', () => {
 });
 
 
-class PluginWithSingleDefinition implements DontCode.Plugin {
+class PluginWithSingleDefinition implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -85,7 +83,7 @@ class PluginWithSingleDefinition implements DontCode.Plugin {
   }
 }
 
-class PluginWithDefinitions implements DontCode.Plugin {
+class PluginWithDefinitions implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {

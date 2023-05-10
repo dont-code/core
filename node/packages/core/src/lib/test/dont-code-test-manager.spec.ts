@@ -1,4 +1,5 @@
-import {DontCodeTestManager, dtcde} from '@dontcode/core';
+import { DontCodeTestManager } from './dont-code-test-manager';
+import { dtcde } from '../dontcode';
 import {firstValueFrom} from "rxjs";
 
 describe('Test Manager', () => {
@@ -36,10 +37,9 @@ describe('Test Manager', () => {
     if (ret != null) {
       firstValueFrom(ret).then(result => {
         expect(result).toHaveLength(2);
-        if (result != null) {
-          expect(result[1]?.name).toEqual("Dummy2");
-          expect(result[1]?.value).toStrictEqual(1656);
-        }
+        const anyResult=result[1] as any;
+        expect(anyResult?.name).toEqual("Dummy2");
+        expect(anyResult?.value).toStrictEqual(1656);
         done();
       })
     }

@@ -146,7 +146,7 @@
     "report-group": {
       "type": "object",
       "properties": {
-        "by": {
+        "of": {
           "type": "string",
           "format": ".fields.name"
         },
@@ -181,6 +181,9 @@
         "by": {
           "type": "string",
           "format": ".fields.name"
+        },
+        "direction": {
+          "enum": [ "None", "Ascending", "Descending" ]
         }
       },
       "additionalProperties": false

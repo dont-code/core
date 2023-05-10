@@ -1,4 +1,3 @@
-import { DontCodeCore } from './dontcode';
 import { DontCodeSchemaManager } from './model/dont-code-schema-manager';
 import { DontCodePreviewManager } from './plugin/preview/dont-code-preview-manager';
 import { DontCodeStoreManager } from './store/dont-code-store-manager';
@@ -16,11 +15,6 @@ export interface Core {
   getStoreManager(): DontCodeStoreManager;
   reset(): Core;
 }
-
-if (!(self as any).dontCodeCore)
-  (self as any).dontCodeCore = new DontCodeCore();
-// eslint-disable-next-line no-var
-export var dtcde: Core = (self as any).dontCodeCore;
 
 export interface Plugin {
   getConfiguration(): PluginConfig;
@@ -66,9 +60,40 @@ export interface DontCodeSharingType {
 export interface DontCodeReportType {
   title: string;
   for: string;
-  groupedBy: any;
-  sortedBy: any;
+  groupedBy: DontCodeReportGroupType;
+  sortedBy: DontCodeReportSortType;
   as?: Array<DontCodeReportDisplayType>;
+}
+
+export interface DontCodeReportGroupType {
+  of: string,
+  display:Array<DontCodeReportGroupAggregateType>;
+  label?:string,
+}
+
+export interface DontCodeReportGroupAggregateType {
+  operation: DontCodeGroupOperationType;
+  of:string,
+  label?:string
+}
+
+export enum DontCodeGroupOperationType {
+  Count= "Count",
+  Sum="Sum",
+  Average="Average",
+  Minimum="Minimum",
+  Maximum="Maximum"
+}
+
+export interface DontCodeReportSortType {
+  by:string,
+  direction: DontCodeSortDirectionType
+}
+
+export enum DontCodeSortDirectionType {
+  None = "None",
+  Ascending = "Ascending",
+  Descending = "Descending"
 }
 
 export interface DontCodeReportDisplayType {

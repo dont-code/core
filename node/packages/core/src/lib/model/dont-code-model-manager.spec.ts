@@ -1,7 +1,8 @@
 import {Change, ChangeType} from '../change/change';
-import {dtcde} from '../globals';
+import {dtcde} from '../dontcode';
 import {DontCodeTestManager} from '../test/dont-code-test-manager';
-import {DataTransformationInfo, DontCodeModelManager, MoneyAmount} from "@dontcode/core";
+import { DataTransformationInfo, DontCodeModelManager } from './dont-code-model-manager';
+import { MoneyAmount } from './money-amount';
 
 describe('Model Manager', () => {
   it('should find the element at any position', () => {
@@ -1614,7 +1615,7 @@ describe('Model Manager', () => {
   it('should extract simple values correctly', () => {
     const service = dtcde.getModelManager();
 
-    let dataInfo= new DataTransformationInfo();
+    const dataInfo= new DataTransformationInfo();
     let result = service.extractValue(234
     , dataInfo);
 
@@ -1632,7 +1633,7 @@ describe('Model Manager', () => {
   it('should extract date values correctly', () => {
     const service = dtcde.getModelManager();
 
-    let dataInfo= new DataTransformationInfo();
+    const dataInfo= new DataTransformationInfo();
     const date= new Date();
 
     let result = service.extractValue(

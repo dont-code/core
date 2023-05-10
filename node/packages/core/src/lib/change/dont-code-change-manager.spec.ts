@@ -1,6 +1,7 @@
 import {Change, ChangeType} from '../change/change';
-import {dtcde} from '../globals';
-import {DontCodeChangeManager, DontCodeModel} from "@dontcode/core";
+import {dtcde} from '../dontcode';
+import {DontCodeChangeManager} from '../change/dont-code-change-manager';
+import {DontCodeModel} from '../model/dont-code-model';
 import {Subscription} from "rxjs";
 
 describe('Change Manager', () => {

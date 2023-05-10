@@ -5,6 +5,7 @@ import { DontCodePreviewManager } from './plugin/preview/dont-code-preview-manag
 import { DontCodeStoreManager } from './store/dont-code-store-manager';
 import { DontCodeModelManager } from './model/dont-code-model-manager';
 import {DontCodeChangeManager} from "./change/dont-code-change-manager";
+import {Core} from "./globals";
 
 export class DontCodeCore implements DontCode.Core {
   protected schemaManager: DontCodeSchemaManager;
@@ -73,3 +74,8 @@ export class DontCodeCore implements DontCode.Core {
   }
 
 }
+
+if (!(self as any).dontCodeCore)
+  (self as any).dontCodeCore = new DontCodeCore();
+// eslint-disable-next-line no-var
+export var dtcde: Core = (self as any).dontCodeCore;

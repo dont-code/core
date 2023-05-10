@@ -1,8 +1,14 @@
 import {Observable} from 'rxjs';
 import {DontCodeStoreProvider,} from './dont-code-store-provider';
 import {DontCodeModelManager} from '../model/dont-code-model-manager';
-import {DontCodeSourceType} from '../globals';
+import {
+  DontCodeReportGroupAggregateType,
+  DontCodeGroupOperationType, DontCodeReportGroupType,
+  DontCodeSortDirectionType, DontCodeReportSortType,
+  DontCodeSourceType
+} from '../globals';
 import {DontCodeModel} from '../model/dont-code-model';
+import {DontCodeStorePreparedEntities} from "./store-provider-helper";
 
 export class DontCodeStoreManager {
   private _default?: DontCodeStoreProvider<never>;
@@ -111,6 +117,16 @@ export class DontCodeStoreManager {
     return this.getProviderSafe(position).searchEntities(position, ...criteria);
   }
 
+  searchAndPrepareEntities(
+    position: string,
+    sort?:DontCodeStoreSort,
+    groupBy?:DontCodeStoreGroupby,
+    ...criteria: DontCodeStoreCriteria[]
+  ): Observable<DontCodeStorePreparedEntities<any>> {
+    return this.getProviderSafe(position).searchAndPrepareEntities(position, sort, groupBy, ...criteria);
+  }
+
+
   canStoreDocument(position?: string): boolean {
     const res = this.getProvider(position)?.canStoreDocument(position);
     if (res) return res;
@@ -157,55 +173,41 @@ export class DontCodeStoreCriteria {
   }
 }
 
-export class DontCodeStoreSort {
+export class DontCodeStoreSort implements DontCodeReportSortType {
 
-  constructor(public name: string, public direction?:DontCodeStoreSortDirection, public subSort?:DontCodeStoreSort) {
-    if (direction==null)   this.direction=DontCodeStoreSortDirection.NONE;
+  direction: DontCodeSortDirectionType;
+
+  constructor(public by: string, direction?:DontCodeSortDirectionType, public subSort?:DontCodeStoreSort) {
+    if (direction==null)   this.direction=DontCodeSortDirectionType.None;
+    else this.direction=direction;
   }
 }
 
-export class DontCodeStoreGroupby {
-  constructor(public name:string, public aggregates?:DontCodeStoreAggregate[]) {
+export class DontCodeStoreGroupby implements DontCodeReportGroupType {
+  display:DontCodeStoreAggregate[];
+  constructor(public of:string, display?:DontCodeStoreAggregate[]) {
+    if (display==null) this.display=[];
+    else this.display=display;
   }
 
   public atLeastOneGroupIsRequested (): boolean {
-    if( this.aggregates!=null) {
-      for (const groupedValue of this.aggregates) {
-        if (groupedValue.calculation!=DontCodeStoreCalculus.NONE)
-          return true;
-      }
-    }
+    if( (this.display!=null) && (this.display.length>0))
+      return true;
     return false;
   }
 
   getRequiredListOfFields(): Set<string> {
     const ret = new Set<string>();
-    if( this.aggregates!=null) {
-      for (const aggregate of this.aggregates) {
-        if (aggregate.calculation!=DontCodeStoreCalculus.NONE) {
-          ret.add(aggregate.name);
-        }
+    if( this.display!=null) {
+      for (const aggregate of this.display) {
+        ret.add(aggregate.of);
       }
     }
     return ret;
   }
 }
 
-export class DontCodeStoreAggregate {
-  constructor(public name:string, public calculation?:DontCodeStoreCalculus) {
-    if (calculation==null) this.calculation=DontCodeStoreCalculus.NONE;
+export class DontCodeStoreAggregate implements DontCodeReportGroupAggregateType{
+  constructor(public of:string, public operation:DontCodeGroupOperationType) {
   }
-}
-
-export enum DontCodeStoreCalculus {
-  NONE=0,
-  SUM=1,
-  AVERAGE=2,
-  COUNT=3
-}
-
-export enum DontCodeStoreSortDirection {
-  ASCENDING=1,
-  DESCENDING=2,
-  NONE=0
 }

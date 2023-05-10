@@ -1,6 +1,5 @@
 import {
   DontCodeStoreAggregate,
-  DontCodeStoreCalculus,
   DontCodeStoreCriteria,
   DontCodeStoreCriteriaOperator,
   DontCodeStoreGroupby,
@@ -9,6 +8,7 @@ import {
 import {DataTransformationInfo, DontCodeModelManager} from "../model/dont-code-model-manager";
 import {DontCodeSchemaItem} from "../model/dont-code-schema-item";
 import {DontCodeModelPointer} from "../model/dont-code-schema";
+import {DontCodeGroupOperationType} from "../globals";
 
 /**
  * Helps handle metadata information about loaded items
@@ -206,7 +206,7 @@ export class StoreProviderHelper {
   static calculateGroupedByValues<T>(values: T[], groupBy: DontCodeStoreGroupby, modelMgr?: DontCodeModelManager, position?: DontCodeModelPointer, item?:DontCodeSchemaItem):DontCodeStoreGroupedByEntities|undefined {
     const counters=new Map<keyof T, Counters> ();
     let ret: DontCodeStoreGroupedByEntities|undefined;
-    if ((groupBy!=null) && (groupBy.aggregates!=null)) {
+    if ((groupBy!=null) && (groupBy.display!=null)) {
       const fieldsRequired = groupBy.getRequiredListOfFields() as Set<keyof T>;
       for (const field of fieldsRequired) {
         const counter=new Counters();
@@ -240,19 +240,25 @@ export class StoreProviderHelper {
       if (counters.size>0) {
         ret = new DontCodeStoreGroupedByEntities(groupBy, []);
 
-        for (const aggregate of groupBy.aggregates) {
+        for (const aggregate of groupBy.display) {
           let value;
-          const counter=counters.get(aggregate.name as keyof T);
+          const counter=counters.get(aggregate.of as keyof T);
           if( counter!=null) {
-            switch (aggregate.calculation) {
-              case DontCodeStoreCalculus.COUNT:
+            switch (aggregate.operation) {
+              case DontCodeGroupOperationType.Count:
                 value=counter.count;
                 break;
-              case DontCodeStoreCalculus.SUM:
+              case DontCodeGroupOperationType.Sum:
                 value=counter.sum;
                 break;
-              case DontCodeStoreCalculus.AVERAGE:
+              case DontCodeGroupOperationType.Average:
                 value=counter.sum / counter.count;
+                break;
+              case DontCodeGroupOperationType.Minimum:
+                value=counter.minimum;
+                break;
+              case DontCodeGroupOperationType.Maximum:
+                value=counter.maximum;
                 break;
             }
           }

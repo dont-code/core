@@ -98,7 +98,7 @@ export abstract class AbstractDontCodeStoreProvider<T> implements DontCodeStoreP
     // We must first sort by the groupBy, and then by the sort
     let rootSort:DontCodeStoreSort|undefined;
     if (groupBy!=null) {
-      rootSort=new DontCodeStoreSort(groupBy.name, undefined, sort);
+      rootSort=new DontCodeStoreSort(groupBy.of, undefined, sort);
     } else {
       rootSort=sort;
     }

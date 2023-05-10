@@ -1,7 +1,5 @@
-import { DontCodeCore } from './dontcode';
-import * as DontCode from './globals';
-import PluginConfig = DontCode.PluginConfig;
-import {Core, dtcde} from "./globals";
+import {dtcde} from './dontcode';
+import {Core, Plugin, PluginConfig} from "./globals";
 
 describe('dontcode', () => {
   it('should work', () => {
@@ -17,7 +15,7 @@ describe('dontcode', () => {
   });
 });
 
-class PluginTest implements DontCode.Plugin {
+class PluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -29,5 +27,6 @@ class PluginTest implements DontCode.Plugin {
   }
 
   pluginInit(dontCode: Core): void {
+    // Nothing to do
   }
 }
