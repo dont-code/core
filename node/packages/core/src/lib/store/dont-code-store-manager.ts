@@ -1,17 +1,25 @@
-import {Observable} from 'rxjs';
 import {DontCodeStoreProvider,} from './dont-code-store-provider';
 import {DontCodeModelManager} from '../model/dont-code-model-manager';
-import {DontCodeSourceType} from '../globals';
+import {
+  DontCodeGroupOperationType,
+  DontCodeReportGroupAggregateType,
+  DontCodeReportGroupType,
+  DontCodeReportSortType,
+  DontCodeSortDirectionType,
+  DontCodeSourceType
+} from '../globals';
 import {DontCodeModel} from '../model/dont-code-model';
+import {DontCodeStorePreparedEntities} from "./store-provider-helper";
+import {Observable} from "rxjs";
 
 export class DontCodeStoreManager {
-  private _default?: DontCodeStoreProvider;
-  private providerByPosition = new Map<string, DontCodeStoreProvider>();
-  private providerByType = new Map<string, DontCodeStoreProvider>();
+  private _default?: DontCodeStoreProvider<never>;
+  private providerByPosition = new Map<string, DontCodeStoreProvider<never>>();
+  private providerByType = new Map<string, DontCodeStoreProvider<never>>();
 
   constructor(
     protected modelMgr: DontCodeModelManager,
-    provider?: DontCodeStoreProvider
+    provider?: DontCodeStoreProvider<never>
   ) {
     this._default = provider;
     this.reset();
@@ -22,7 +30,7 @@ export class DontCodeStoreManager {
     this.providerByType.clear();
   }
 
-  getProvider(position?: string): DontCodeStoreProvider | undefined {
+  getProvider<T>(position?: string): DontCodeStoreProvider<T> | undefined {
     if (position == null) {
       return this._default;
     } else {
@@ -42,8 +50,8 @@ export class DontCodeStoreManager {
     }
   }
 
-  getProviderSafe(position?: string): DontCodeStoreProvider {
-    const ret = this.getProvider(position);
+  getProviderSafe<T=never>(position?: string): DontCodeStoreProvider<T> {
+    const ret = this.getProvider<T>(position);
     if (ret == null) {
       throw new Error('Trying to get an undefined or null provider');
     } else {
@@ -51,15 +59,15 @@ export class DontCodeStoreManager {
     }
   }
 
-  getDefaultProvider(): DontCodeStoreProvider | undefined {
+  getDefaultProvider<T=never>(): DontCodeStoreProvider<T> | undefined {
     return this.getProvider();
   }
 
-  getDefaultProviderSafe(): DontCodeStoreProvider {
+  getDefaultProviderSafe<T=never>(): DontCodeStoreProvider<T> {
     return this.getProviderSafe();
   }
 
-  setProvider(value: DontCodeStoreProvider, position?: string): void {
+  setProvider(value: DontCodeStoreProvider<never>, position?: string): void {
     if (position == null) this._default = value;
     else {
       this.providerByPosition.set(position, value);
@@ -67,13 +75,13 @@ export class DontCodeStoreManager {
   }
 
   setProviderForSourceType(
-    value: DontCodeStoreProvider,
+    value: DontCodeStoreProvider<never>,
     srcType: string
   ): void {
     this.providerByType.set(srcType, value);
   }
 
-  setDefaultProvider(value: DontCodeStoreProvider): void {
+  setDefaultProvider(value: DontCodeStoreProvider<never>): void {
     this.setProvider(value);
   }
 
@@ -92,24 +100,38 @@ export class DontCodeStoreManager {
     this.removeProvider();
   }
 
-  storeEntity(position: string, entity: any): Promise<any> {
-    return this.getProviderSafe(position).storeEntity(position, entity);
+  storeEntity<T=never>(position: string, entity: T): Promise<T> {
+    return this.getProviderSafe<T>(position).storeEntity(position, entity);
   }
 
-  loadEntity(position: string, key: any): Promise<any> {
-    return this.getProviderSafe(position).loadEntity(position, key);
+  loadEntity<T=never>(position: string, key: any): Promise<T|undefined> {
+    return this.getProviderSafe<T>(position).loadEntity(position, key);
+  }
+
+  safeLoadEntity<T=never>(position: string, key: any): Promise<T> {
+    return this.getProviderSafe<T>(position).safeLoadEntity(position, key);
   }
 
   deleteEntity(position: string, key: any): Promise<boolean> {
     return this.getProviderSafe(position).deleteEntity(position, key);
   }
 
-  searchEntities(
+  searchEntities<T=never>(
     position: string,
     ...criteria: DontCodeStoreCriteria[]
-  ): Observable<Array<any>> {
-    return this.getProviderSafe(position).searchEntities(position, ...criteria);
+  ): Observable<Array<T>> {
+    return this.getProviderSafe<T>(position).searchEntities(position, ...criteria);
   }
+
+  searchAndPrepareEntities<T=never>(
+    position: string,
+    sort?:DontCodeStoreSort,
+    groupBy?:DontCodeStoreGroupby,
+    ...criteria: DontCodeStoreCriteria[]
+  ): Observable<DontCodeStorePreparedEntities<T>> {
+    return this.getProviderSafe<T>(position).searchAndPrepareEntities(position, sort, groupBy, ...criteria);
+  }
+
 
   canStoreDocument(position?: string): boolean {
     const res = this.getProvider(position)?.canStoreDocument(position);
@@ -154,5 +176,44 @@ export class DontCodeStoreCriteria {
     else {
       this.operator = operator;
     }
+  }
+}
+
+export class DontCodeStoreSort implements DontCodeReportSortType {
+
+  direction: DontCodeSortDirectionType;
+
+  constructor(public by: string, direction?:DontCodeSortDirectionType, public subSort?:DontCodeStoreSort) {
+    if (direction==null)   this.direction=DontCodeSortDirectionType.None;
+    else this.direction=direction;
+  }
+}
+
+export class DontCodeStoreGroupby implements DontCodeReportGroupType {
+  display:DontCodeStoreAggregate[];
+  constructor(public of:string, display?:DontCodeStoreAggregate[]) {
+    if (display==null) this.display=[];
+    else this.display=display;
+  }
+
+  public atLeastOneGroupIsRequested (): boolean {
+    if( (this.display!=null) && (this.display.length>0))
+      return true;
+    return false;
+  }
+
+  getRequiredListOfFields(): Set<string> {
+    const ret = new Set<string>();
+    if( this.display!=null) {
+      for (const aggregate of this.display) {
+        ret.add(aggregate.of);
+      }
+    }
+    return ret;
+  }
+}
+
+export class DontCodeStoreAggregate implements DontCodeReportGroupAggregateType{
+  constructor(public of:string, public operation:DontCodeGroupOperationType) {
   }
 }

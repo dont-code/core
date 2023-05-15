@@ -918,9 +918,11 @@ export class DontCodeModelManager {
    * Extract the value of any data in parameter. It can handle complex data and flattens it into something that you can calculate or act upon (number or string)
    * @param obj
    * @param metaData: Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param position
+   * @param schemaItem
    * @protected
    */
-  public extractValue (obj:any, metaData:DataTransformationInfo, position?:string, schemaItem?:DontCodeSchemaItem) : any {
+  public extractValue (obj:any, metaData:DataTransformationInfo, position?:DontCodeModelPointer, schemaItem?:DontCodeSchemaItem) : any {
     if( obj==null)
       return obj;
     if (!metaData.parsed) {

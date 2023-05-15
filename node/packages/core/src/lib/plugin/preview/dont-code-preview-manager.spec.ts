@@ -1,7 +1,5 @@
-import { DontCodeCore } from '../../dontcode';
-import * as DontCode from '../../globals';
-import PluginConfig = DontCode.PluginConfig;
-import {Core, dtcde} from "../../globals";
+import {dtcde} from '../../dontcode';
+import {Core, PluginConfig, Plugin} from '../../globals';
 
 describe('Preview Manager', () => {
   it('should work', () => {
@@ -195,7 +193,7 @@ describe('Preview Manager', () => {
   });
 });
 
-class SimplePluginTest implements DontCode.Plugin {
+class SimplePluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -223,7 +221,7 @@ class SimplePluginTest implements DontCode.Plugin {
   }
 }
 
-class BasicPluginTest implements DontCode.Plugin {
+class BasicPluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -251,7 +249,7 @@ class BasicPluginTest implements DontCode.Plugin {
   }
 }
 
-class ValuesPluginTest implements DontCode.Plugin {
+class ValuesPluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -280,7 +278,7 @@ class ValuesPluginTest implements DontCode.Plugin {
   }
 }
 
-class OtherValuesPluginTest implements DontCode.Plugin {
+class OtherValuesPluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -309,7 +307,7 @@ class OtherValuesPluginTest implements DontCode.Plugin {
   }
 }
 
-class SubTypeValuesPluginTest implements DontCode.Plugin {
+class SubTypeValuesPluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -347,7 +345,7 @@ class SubTypeValuesPluginTest implements DontCode.Plugin {
   }
 }
 
-class NoValuesPluginTest implements DontCode.Plugin {
+class NoValuesPluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -375,7 +373,7 @@ class NoValuesPluginTest implements DontCode.Plugin {
   }
 }
 
-class GlobalHandlerPluginTest implements DontCode.Plugin {
+class GlobalHandlerPluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {

@@ -1,18 +1,18 @@
 import {
-  DontCodeSchemaObject,
-  DontCodeSchemaRoot,
   DontCodeStoreCriteria,
-  DontCodeStoreProvider,
-  DontCodeTestManager,
-  dtcde,
-  UploadedDocumentInfo,
-} from '@dontcode/core';
-import { Observable, of } from 'rxjs';
+  DontCodeStoreGroupby,
+  DontCodeStoreSort,
+  UploadedDocumentInfo
+} from './dont-code-store-manager';
+import {AbstractDontCodeStoreProvider} from './dont-code-store-provider';
+import {dtcde} from '../dontcode';
+import {Observable, of} from 'rxjs';
+import {DontCodeStorePreparedEntities} from './store-provider-helper';
 
 describe('Store Manager', () => {
   it('should correctly return the default provider', () => {
     const storeManager = dtcde.getStoreManager();
-    const defaultProvider = new DummyStoreProvider();
+    const defaultProvider = new DummyStoreProvider<never>();
 
     storeManager.setProvider(defaultProvider);
     expect(storeManager.getProvider() == defaultProvider).toBeTruthy();
@@ -21,7 +21,7 @@ describe('Store Manager', () => {
       storeManager.getProvider('anyposition') == defaultProvider
     ).toBeTruthy();
 
-    const newProvider = new DummyStoreProvider();
+    const newProvider = new DummyStoreProvider<never>();
     storeManager.setDefaultProvider(newProvider);
     expect(storeManager.getProvider() == newProvider).toBeTruthy();
     expect(storeManager.getDefaultProvider() == newProvider).toBeTruthy();
@@ -38,8 +38,8 @@ describe('Store Manager', () => {
 
   it('should correctly return other providers', () => {
     const storeManager = dtcde.getStoreManager();
-    const defaultProvider = new DummyStoreProvider();
-    const testProvider = new DummyStoreProvider();
+    const defaultProvider = new DummyStoreProvider<never>();
+    const testProvider = new DummyStoreProvider<never>();
 
     storeManager.setProvider(defaultProvider);
     storeManager.setProvider(testProvider, 'test/position');
@@ -51,7 +51,7 @@ describe('Store Manager', () => {
       storeManager.getProvider('test/position') == testProvider
     ).toBeTruthy();
 
-    const newProvider = new DummyStoreProvider();
+    const newProvider = new DummyStoreProvider<never>();
     storeManager.setProvider(newProvider, 'test/position');
     expect(
       storeManager.getProvider('test/position') == newProvider
@@ -64,7 +64,7 @@ describe('Store Manager', () => {
   });
 });
 
-class DummyStoreProvider implements DontCodeStoreProvider {
+class DummyStoreProvider<T> extends AbstractDontCodeStoreProvider<T> {
   canStoreDocument(position?: string): boolean {
     return false;
   }
@@ -73,15 +73,18 @@ class DummyStoreProvider implements DontCodeStoreProvider {
     return Promise.resolve(false);
   }
 
-  loadEntity(position: string, key: any): Promise<any> {
-    return Promise.resolve(undefined);
+  loadEntity(position: string, key: any): Promise<T> {
+    return Promise.reject();
   }
 
   searchEntities(
     position: string,
     ...criteria: DontCodeStoreCriteria[]
-  ): Observable<Array<any>> {
+  ): Observable<Array<T>> {
     return of([]);
+  }
+  searchAndPrepareEntities(position: string, sort?: DontCodeStoreSort | undefined, groupBy?: DontCodeStoreGroupby | undefined, ...criteria: DontCodeStoreCriteria[]): Observable<DontCodeStorePreparedEntities<T>> {
+    return of (new DontCodeStorePreparedEntities([]));
   }
 
   storeDocuments(
@@ -95,7 +98,7 @@ class DummyStoreProvider implements DontCodeStoreProvider {
     });
   }
 
-  storeEntity(position: string, entity: any): Promise<any> {
-    return Promise.resolve(undefined);
+  storeEntity(position: string, entity: T): Promise<T> {
+    return Promise.resolve(entity);
   }
 }
