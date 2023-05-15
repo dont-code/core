@@ -10,14 +10,21 @@ import {
   DontCodeStorePreparedEntities,
   StoreProviderHelper
 } from "./store-provider-helper";
+import {popScheduler} from "rxjs/internal/util/args";
 
 /**
  * The standard interface for any store provider
  */
-export interface DontCodeStoreProvider<T> {
+export interface DontCodeStoreProvider<T=never> {
   storeEntity(position: string, entity: T): Promise<T>;
 
-  loadEntity(position: string, key: any): Promise<T>;
+  /**
+   * Rejects the promise if the entity is not found
+   * @param position
+   * @param key
+   */
+  safeLoadEntity(position: string, key: any): Promise<T>;
+  loadEntity(position: string, key: any): Promise<T|undefined>;
 
   deleteEntity(position: string, key: any): Promise<boolean>;
 
@@ -46,12 +53,20 @@ export interface DontCodeStoreProvider<T> {
   ): Observable<UploadedDocumentInfo>;
 }
 
-export abstract class AbstractDontCodeStoreProvider<T> implements DontCodeStoreProvider<T> {
+export abstract class AbstractDontCodeStoreProvider<T=never> implements DontCodeStoreProvider<T> {
   abstract canStoreDocument(position?: string): boolean;
 
   abstract deleteEntity(position: string, key: any): Promise<boolean>;
 
-  abstract loadEntity(position: string, key: any): Promise<T>;
+  abstract loadEntity(position: string, key: any): Promise<T|undefined>;
+
+  safeLoadEntity(position: string, key: any): Promise<T> {
+    return this.loadEntity(position, key).then(value => {
+      if (value==null)
+        return Promise.reject("Not found");
+      else return value;
+    })
+  }
 
   /**
    * If the store supports queries with criteria, this function must be implemented, if not, listEntities must be implemented, and this function will apply filters

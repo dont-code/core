@@ -1,14 +1,16 @@
-import {Observable} from 'rxjs';
 import {DontCodeStoreProvider,} from './dont-code-store-provider';
 import {DontCodeModelManager} from '../model/dont-code-model-manager';
 import {
+  DontCodeGroupOperationType,
   DontCodeReportGroupAggregateType,
-  DontCodeGroupOperationType, DontCodeReportGroupType,
-  DontCodeSortDirectionType, DontCodeReportSortType,
+  DontCodeReportGroupType,
+  DontCodeReportSortType,
+  DontCodeSortDirectionType,
   DontCodeSourceType
 } from '../globals';
 import {DontCodeModel} from '../model/dont-code-model';
 import {DontCodeStorePreparedEntities} from "./store-provider-helper";
+import {Observable} from "rxjs";
 
 export class DontCodeStoreManager {
   private _default?: DontCodeStoreProvider<never>;
@@ -48,7 +50,7 @@ export class DontCodeStoreManager {
     }
   }
 
-  getProviderSafe<T>(position?: string): DontCodeStoreProvider<T> {
+  getProviderSafe<T=never>(position?: string): DontCodeStoreProvider<T> {
     const ret = this.getProvider<T>(position);
     if (ret == null) {
       throw new Error('Trying to get an undefined or null provider');
@@ -57,11 +59,11 @@ export class DontCodeStoreManager {
     }
   }
 
-  getDefaultProvider<T>(): DontCodeStoreProvider<T> | undefined {
+  getDefaultProvider<T=never>(): DontCodeStoreProvider<T> | undefined {
     return this.getProvider();
   }
 
-  getDefaultProviderSafe<T>(): DontCodeStoreProvider<T> {
+  getDefaultProviderSafe<T=never>(): DontCodeStoreProvider<T> {
     return this.getProviderSafe();
   }
 
@@ -98,32 +100,36 @@ export class DontCodeStoreManager {
     this.removeProvider();
   }
 
-  storeEntity(position: string, entity: any): Promise<any> {
-    return this.getProviderSafe(position).storeEntity(position, entity);
+  storeEntity<T=never>(position: string, entity: T): Promise<T> {
+    return this.getProviderSafe<T>(position).storeEntity(position, entity);
   }
 
-  loadEntity(position: string, key: any): Promise<any> {
-    return this.getProviderSafe(position).loadEntity(position, key);
+  loadEntity<T=never>(position: string, key: any): Promise<T|undefined> {
+    return this.getProviderSafe<T>(position).loadEntity(position, key);
+  }
+
+  safeLoadEntity<T=never>(position: string, key: any): Promise<T> {
+    return this.getProviderSafe<T>(position).safeLoadEntity(position, key);
   }
 
   deleteEntity(position: string, key: any): Promise<boolean> {
     return this.getProviderSafe(position).deleteEntity(position, key);
   }
 
-  searchEntities(
+  searchEntities<T=never>(
     position: string,
     ...criteria: DontCodeStoreCriteria[]
-  ): Observable<Array<any>> {
-    return this.getProviderSafe(position).searchEntities(position, ...criteria);
+  ): Observable<Array<T>> {
+    return this.getProviderSafe<T>(position).searchEntities(position, ...criteria);
   }
 
-  searchAndPrepareEntities(
+  searchAndPrepareEntities<T=never>(
     position: string,
     sort?:DontCodeStoreSort,
     groupBy?:DontCodeStoreGroupby,
     ...criteria: DontCodeStoreCriteria[]
-  ): Observable<DontCodeStorePreparedEntities<any>> {
-    return this.getProviderSafe(position).searchAndPrepareEntities(position, sort, groupBy, ...criteria);
+  ): Observable<DontCodeStorePreparedEntities<T>> {
+    return this.getProviderSafe<T>(position).searchAndPrepareEntities(position, sort, groupBy, ...criteria);
   }
 
 

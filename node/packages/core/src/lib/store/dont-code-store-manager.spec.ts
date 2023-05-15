@@ -4,7 +4,7 @@ import {
   DontCodeStoreSort,
   UploadedDocumentInfo
 } from './dont-code-store-manager';
-import {DontCodeStoreProvider} from './dont-code-store-provider';
+import {AbstractDontCodeStoreProvider} from './dont-code-store-provider';
 import {dtcde} from '../dontcode';
 import {Observable, of} from 'rxjs';
 import {DontCodeStorePreparedEntities} from './store-provider-helper';
@@ -64,7 +64,7 @@ describe('Store Manager', () => {
   });
 });
 
-class DummyStoreProvider<T> implements DontCodeStoreProvider<T> {
+class DummyStoreProvider<T> extends AbstractDontCodeStoreProvider<T> {
   canStoreDocument(position?: string): boolean {
     return false;
   }
