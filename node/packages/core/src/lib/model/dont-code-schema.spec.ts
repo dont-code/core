@@ -19,6 +19,15 @@ describe('Model Pointer', () => {
     expect(sub.positionInSchema).toEqual('creation');
   });
 
+  it('should manage pointer parenting', () => {
+    const base=new DontCodeModelPointer('a/b/c', 'a/b/c');
+
+    expect(base.isParentOf('a/b/c/d/e')).toBeTruthy();
+    expect(base.isParentOf('a/b/c/d/e', true)).toBeFalsy();
+    expect(base.isParentOf('a/b/c/d')).toBeTruthy();
+    expect(base.isParentOf('a/b/c/d', true)).toBeTruthy();
+  });
+
   it('should calculate next item', () => {
     const testPosition = 'creation/screens/a/components/b';
     expect(DontCodeModelPointer.nextItemAndPosition(testPosition, 0)).toEqual({

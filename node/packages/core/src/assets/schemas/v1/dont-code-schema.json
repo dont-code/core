@@ -129,10 +129,16 @@
           "format": "$.creation.entities.name"
         },
         "groupedBy": {
-          "$ref": "#/$defs/report-group"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report-group"
+          }
         },
         "sortedBy": {
-          "$ref": "#/$defs/report-sort"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report-sort"
+          }
         },
         "as": {
           "type": "array",
@@ -154,7 +160,10 @@
           "type": "string"
         },
         "display": {
-          "$ref": "#/$defs/report-group-aggregate"
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report-group-aggregate"
+          }
         }
       },
       "additionalProperties": false

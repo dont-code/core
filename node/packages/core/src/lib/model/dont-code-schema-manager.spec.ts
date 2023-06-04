@@ -1,13 +1,6 @@
-import * as DontCode from '@dontcode/core';
-import dtcde = DontCode.dtcde;
-import {
-  DontCodeSchemaEnum,
-  DontCodeSchemaObject,
-  DontCodeSchemaRoot,
-} from './dont-code-schema-item';
-import PluginConfig = DontCode.PluginConfig;
-import { DontCodeSchemaEnumValue } from '@dontcode/core';
-import { windowCount } from 'rxjs/operators';
+import {DontCodeSchemaEnum, DontCodeSchemaObject, DontCodeSchemaRoot, DontCodeSchemaEnumValue} from './dont-code-schema-item';
+import {PluginConfig, Plugin, Core, DontCodeReportType} from '../globals';
+import {dtcde} from "../dontcode";
 
 describe('Schema Manager', () => {
   it('should work', () => {
@@ -179,7 +172,37 @@ describe('Schema Manager', () => {
   });
 });
 
-class PluginTest implements DontCode.Plugin {
+it('should define correctly report definitions', () => {
+  const reportSample={
+        "title": "Table Reports",
+        "for": "Basic Entity",
+        "groupedBy": [{
+          "label": "By Type",
+          "of": "Type",
+          "display": [{
+            "operation": "Count",
+            "of": "Value",
+            "label": "Elements #"
+          },
+            {
+              "operation": "Minimum",
+              "of": "Amount",
+              "label": "Min cost"
+            }]
+        }],
+        "as": [{
+            "type": "Table",
+            "title": "Infos"
+          }]
+      };
+
+    // Compile time verification
+  const asReport = reportSample as DontCodeReportType;
+
+});
+
+
+class PluginTest implements Plugin {
   getConfiguration(): PluginConfig {
     return {
       plugin: {
@@ -227,7 +250,7 @@ class PluginTest implements DontCode.Plugin {
     };
   }
 
-  pluginInit(dontCode: DontCode.Core): void {
+  pluginInit(dontCode: Core): void {
     throw new Error('Method not implemented.');
   }
 }

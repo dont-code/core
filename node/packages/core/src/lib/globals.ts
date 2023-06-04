@@ -60,8 +60,8 @@ export interface DontCodeSharingType {
 export interface DontCodeReportType {
   title: string;
   for: string;
-  groupedBy: DontCodeReportGroupType;
-  sortedBy: DontCodeReportSortType;
+  groupedBy?: Array<DontCodeReportGroupType>;
+  sortedBy?: Array<DontCodeReportSortType>;
   as?: Array<DontCodeReportDisplayType>;
 }
 

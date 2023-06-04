@@ -488,6 +488,23 @@ export class DontCodeModelPointer {
       return newPointer;
     }
 
+    /**
+     * Returns true if the pointer is the parent of the position.
+     * @param position
+     * @param directOnly: if true, only returns true if it's a direct parent
+     */
+    public isParentOf (position:string, directOnly?:boolean): boolean {
+      if (directOnly===true) {
+        const parent=DontCodeModelPointer.parentPosition(position);
+        if( parent==null) {
+          return false;
+        } else {
+          return this.position == parent;
+        }
+      }else {
+        return position.startsWith(this.position);
+      }
+    }
 
     /**
    * Safely returns the parent position
@@ -501,6 +518,7 @@ export class DontCodeModelPointer {
       return position.substring(0, lastSlash);
     }
   }
+
 
   /**
    * Safely splits between the parent position and last element

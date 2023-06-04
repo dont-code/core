@@ -3,7 +3,9 @@ import {DontCodeModelPointer} from '../model/dont-code-schema';
 import {dtcde} from "../dontcode";
 import {AbstractDontCodeStoreProvider} from "../store/dont-code-store-provider";
 import {DontCodeStoreCriteria, UploadedDocumentInfo} from "../store/dont-code-store-manager";
-import {from, Observable, Subject, take, takeUntil, throwError, timer} from "rxjs";
+import {filter, firstValueFrom, from, map, Observable, Subject, take, takeUntil, throwError, timer} from "rxjs";
+import {CommandProviderInterface} from "../plugin/command-provider-interface";
+import {DontCodeSchemaManager} from "../model/dont-code-schema-manager";
 
 export class DontCodeTestManager {
   public static createDeleteChange(
@@ -93,34 +95,40 @@ export class DontCodeTestManager {
    * Wait until the tester function returns true. Ideal for ensuring tests wait an async result.
    * It will call done () if tester was true, or done("Timeout") if tester has always returned false
    * @param tester
-   * @param Jest done() method equivalent
+   * @param done
    * @param interval
    * @param maxTry
    */
   public static waitUntilTrue ( tester: () => boolean, done: (err?:string) => void, interval?:number, maxTry?:number ): void {
-    interval = interval??50;
-    maxTry=maxTry??50;
-
-    const stop = new Subject();
-    let stopped = false;
-
-    timer(interval, interval).pipe(takeUntil(stop), take(maxTry)).subscribe({
-      next: () => {
-        if (tester()) {
-          if( !stopped) {
-            stopped=true;
-            stop.next(true);
-            done();
-          }
-        }
-      },
-      complete: () => {
-        if (!stopped)
-          done("Timeout");
+    DontCodeTestManager.waitUntilTrueAndEmit(tester, interval, maxTry).then ((ok)=> {
+      if (ok) {
+        done ();
+      }else {
+        done ("Timeout waiting for an event");
       }
+    }, (err) => {
+      done (err);
     });
+  }
+
+  public static waitUntilTrueAndEmit ( tester: () => boolean, interval?:number, maxTry?:number ): Promise<boolean> {
+      interval = interval??50;
+      maxTry=maxTry??50;
+
+      return firstValueFrom(timer(interval, interval).pipe(
+        take(maxTry),
+        filter( ()=> {
+          return tester();
+        }),
+        map(() => {
+            return true;
+          })
+        ),
+      {defaultValue:false}
+      );
 
   }
+
 
   public static createAnyChange(
     type: ChangeType,
@@ -187,7 +195,7 @@ class DummyStoreProvider<T> extends AbstractDontCodeStoreProvider<T> {
   }
 
   deleteEntity(position: string, key: any): Promise<boolean> {
-    return Promise.reject("Not implemened by Dummy tester");
+    return Promise.reject("Not implemented by Dummy tester");
   }
 
   loadEntity(position: string, key: any): Promise<T> {
@@ -213,3 +221,27 @@ class DummyStoreProvider<T> extends AbstractDontCodeStoreProvider<T> {
   }
 
 }
+
+/**
+ * A Class able to return a pre-defined json value. Can be used to inject to component
+ */
+export class TestProviderInterface implements CommandProviderInterface {
+  constructor(protected toRet: any) {}
+
+  getJsonAt(position: string): any {
+    return this.toRet;
+  }
+
+  receiveCommands(position?: string, lastItem?: string): Observable<Change> {
+    return new Observable<Change>();
+  }
+
+  calculatePointerFor(position: string): DontCodeModelPointer {
+    return dtcde.getSchemaManager().generateSchemaPointer(position);
+  }
+
+  getSchemaManager(): DontCodeSchemaManager {
+    return dtcde.getSchemaManager();
+  }
+}
+
