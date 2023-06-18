@@ -258,7 +258,7 @@ export class StoreProviderHelper {
       // Now that we have all the counters, let's generate the GroupedFields
       let ret: DontCodeStoreGroupedByEntities|undefined;
       if (counters.size>0) {
-        ret = new DontCodeStoreGroupedByEntities(groupBy, new Map<any, Map<any,DontCodeStoreGroupedByValues[]>>);
+        ret = new DontCodeStoreGroupedByEntities(groupBy, new Map<any,DontCodeStoreGroupedByValues[]>);
         for (const groupKey of counters.keys()) {
           const group=counters.get(groupKey)!;
 
@@ -283,15 +283,10 @@ export class StoreProviderHelper {
                   value = counter.maximum;
                   break;
               }
-              let listOfValues= ret.values?.get(groupKey)?.get(aggregate.of);
+              let listOfValues= ret.values?.get(groupKey);
               if (listOfValues==null) {
                 listOfValues = new Array<DontCodeStoreGroupedByValues>();
-                let groupedListOfValues = ret.values?.get(groupKey);
-                if (groupedListOfValues==null) {
-                  groupedListOfValues= new Map<keyof T, DontCodeStoreGroupedByValues []> ();
-                  ret.values?.set(groupKey, groupedListOfValues);
-                }
-                groupedListOfValues.set(aggregate.of, listOfValues);
+                  ret.values?.set(groupKey, listOfValues);
               }
               listOfValues.push(new DontCodeStoreGroupedByValues(aggregate, value));
             }
@@ -335,9 +330,9 @@ export class DontCodeStorePreparedEntities<T> {
 }
 
 export class DontCodeStoreGroupedByEntities {
-  constructor(public groupInfo:DontCodeStoreGroupby, public values?:Map<any,Map<any,DontCodeStoreGroupedByValues[]>>) {
+  constructor(public groupInfo:DontCodeStoreGroupby, public values?:Map<any,DontCodeStoreGroupedByValues[]>) {
     if (values==null)
-      this.values=new Map<any,Map<any,DontCodeStoreGroupedByValues[]>>();
+      this.values=new Map<any,DontCodeStoreGroupedByValues[]>();
   }
 }
 
