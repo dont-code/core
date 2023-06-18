@@ -204,14 +204,33 @@ export class StoreProviderHelper {
   }
 
   static calculateGroupedByValues<T>(values: T[], groupBy: DontCodeStoreGroupby, modelMgr?: DontCodeModelManager, position?: DontCodeModelPointer, item?:DontCodeSchemaItem):DontCodeStoreGroupedByEntities|undefined {
-    const counters=new Map<keyof T, Counters> ();
-    let ret: DontCodeStoreGroupedByEntities|undefined;
+      // We are counting per different value of the groupedBy Item
     if ((groupBy!=null) && (groupBy.display!=null)) {
+      const fieldToGroupBy=groupBy.of as keyof T;
+      const counters=new Map<any,Map<keyof T, Counters>> ();
+      let lastGroupDelimiter:any;
+      let oneGroupOfCounters=new Map<keyof T, Counters>();
+
       const fieldsRequired = groupBy.getRequiredListOfFields() as Set<keyof T>;
-      for (const field of fieldsRequired) {
-        const counter=new Counters();
-        counters.set(field, counter);
-        for (const value of values) {
+      for (const value of values) {
+        if (value[fieldToGroupBy]!=lastGroupDelimiter) {   // We change the group
+          lastGroupDelimiter=value[fieldToGroupBy];
+          const storedGroupOfCounters=counters.get(lastGroupDelimiter);
+          if( storedGroupOfCounters==null) {
+            oneGroupOfCounters = new Map<keyof T, Counters>();
+            counters.set(lastGroupDelimiter, oneGroupOfCounters);
+          }else {
+            oneGroupOfCounters = storedGroupOfCounters;
+          }
+        }
+
+        for (const field of fieldsRequired) {
+          let counter=oneGroupOfCounters?.get(field);
+          if( counter==null) {
+            counter = new Counters();
+            oneGroupOfCounters.set(field, counter);
+          }
+
           let val=value[field];
           if (val!=null) {
             if ((typeof val === 'object') && (modelMgr!=null)) {
@@ -237,37 +256,51 @@ export class StoreProviderHelper {
       }
 
       // Now that we have all the counters, let's generate the GroupedFields
+      let ret: DontCodeStoreGroupedByEntities|undefined;
       if (counters.size>0) {
-        ret = new DontCodeStoreGroupedByEntities(groupBy, []);
+        ret = new DontCodeStoreGroupedByEntities(groupBy, new Map<any, Map<any,DontCodeStoreGroupedByValues[]>>);
+        for (const groupKey of counters.keys()) {
+          const group=counters.get(groupKey)!;
 
-        for (const aggregate of groupBy.display) {
-          let value;
-          const counter=counters.get(aggregate.of as keyof T);
-          if( counter!=null) {
-            switch (aggregate.operation) {
-              case DontCodeGroupOperationType.Count:
-                value=counter.count;
-                break;
-              case DontCodeGroupOperationType.Sum:
-                value=counter.sum;
-                break;
-              case DontCodeGroupOperationType.Average:
-                value=counter.sum / counter.count;
-                break;
-              case DontCodeGroupOperationType.Minimum:
-                value=counter.minimum;
-                break;
-              case DontCodeGroupOperationType.Maximum:
-                value=counter.maximum;
-                break;
+          for (const aggregate of groupBy.display) {
+            let value;
+            const counter = group.get(aggregate.of as keyof T);
+            if (counter != null) {
+              switch (aggregate.operation) {
+                case DontCodeGroupOperationType.Count:
+                  value = counter.count;
+                  break;
+                case DontCodeGroupOperationType.Sum:
+                  value = counter.sum;
+                  break;
+                case DontCodeGroupOperationType.Average:
+                  value = counter.sum / counter.count;
+                  break;
+                case DontCodeGroupOperationType.Minimum:
+                  value = counter.minimum;
+                  break;
+                case DontCodeGroupOperationType.Maximum:
+                  value = counter.maximum;
+                  break;
+              }
+              let listOfValues= ret.values?.get(groupKey)?.get(aggregate.of);
+              if (listOfValues==null) {
+                listOfValues = new Array<DontCodeStoreGroupedByValues>();
+                let groupedListOfValues = ret.values?.get(groupKey);
+                if (groupedListOfValues==null) {
+                  groupedListOfValues= new Map<keyof T, DontCodeStoreGroupedByValues []> ();
+                  ret.values?.set(groupKey, groupedListOfValues);
+                }
+                groupedListOfValues.set(aggregate.of, listOfValues);
+              }
+              listOfValues.push(new DontCodeStoreGroupedByValues(aggregate, value));
             }
           }
-          ret.values?.push( new DontCodeStoreGroupedByValues(aggregate, value));
         }
-        return ret.values!.length>0?ret:undefined;
+        return ret.values!.size>0?ret:undefined;
       }
     }
-    return ret;
+    return undefined;
   }
 }
 
@@ -302,9 +335,9 @@ export class DontCodeStorePreparedEntities<T> {
 }
 
 export class DontCodeStoreGroupedByEntities {
-  constructor(public groupInfo:DontCodeStoreGroupby, public values?:DontCodeStoreGroupedByValues[]) {
+  constructor(public groupInfo:DontCodeStoreGroupby, public values?:Map<any,Map<any,DontCodeStoreGroupedByValues[]>>) {
     if (values==null)
-      this.values=new Array<DontCodeStoreGroupedByValues>();
+      this.values=new Map<any,Map<any,DontCodeStoreGroupedByValues[]>>();
   }
 }
 
