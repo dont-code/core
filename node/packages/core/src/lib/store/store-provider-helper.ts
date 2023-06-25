@@ -262,7 +262,7 @@ export class StoreProviderHelper {
         for (const groupKey of counters.keys()) {
           const group=counters.get(groupKey)!;
 
-          for (const aggregate of groupBy.display) {
+          for (const aggregate of Object.values(groupBy.display)) {
             let value;
             const counter = group.get(aggregate.of as keyof T);
             if (counter != null) {

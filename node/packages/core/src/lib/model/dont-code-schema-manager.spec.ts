@@ -176,24 +176,32 @@ it('should define correctly report definitions', () => {
   const reportSample={
         "title": "Table Reports",
         "for": "Basic Entity",
-        "groupedBy": [{
-          "label": "By Type",
-          "of": "Type",
-          "display": [{
-            "operation": "Count",
-            "of": "Value",
-            "label": "Elements #"
-          },
-            {
-              "operation": "Minimum",
-              "of": "Amount",
-              "label": "Min cost"
-            }]
-        }],
-        "as": [{
+        "groupedBy": {
+          "a":{
+            "label": "By Type",
+            "of": "Type",
+            "display": {
+              "aa": {
+                "operation": "Count",
+                "of": "Value",
+                "label": "Elements #"
+              },
+              "ab":
+                {
+                  "operation": "Minimum",
+                  "of": "Amount",
+                  "label": "Min cost"
+                }
+            }
+          }
+        },
+        "as": {
+          "b":{
             "type": "Table",
+            "of":"value",
             "title": "Infos"
-          }]
+          }
+        }
       };
 
     // Compile time verification

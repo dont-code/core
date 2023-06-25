@@ -190,14 +190,14 @@ export class DontCodeStoreSort implements DontCodeReportSortType {
 }
 
 export class DontCodeStoreGroupby implements DontCodeReportGroupType {
-  display:DontCodeStoreAggregate[];
-  constructor(public of:string, display?:DontCodeStoreAggregate[]) {
-    if (display==null) this.display=[];
+  display:{[key:string]:DontCodeStoreAggregate};
+  constructor(public of:string, display?:{[key:string]:DontCodeStoreAggregate}) {
+    if (display==null) this.display={};
     else this.display=display;
   }
 
   public atLeastOneGroupIsRequested (): boolean {
-    if( (this.display!=null) && (this.display.length>0))
+    if( (this.display!=null) && (Object.keys(this.display).length>0))
       return true;
     return false;
   }
@@ -205,7 +205,7 @@ export class DontCodeStoreGroupby implements DontCodeReportGroupType {
   getRequiredListOfFields(): Set<string> {
     const ret = new Set<string>();
     if( this.display!=null) {
-      for (const aggregate of this.display) {
+      for (const aggregate of Object.values(this.display)) {
         ret.add(aggregate.of);
       }
     }

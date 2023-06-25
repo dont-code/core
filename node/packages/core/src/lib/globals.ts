@@ -32,10 +32,10 @@ export interface DontCodeSchemaType {
   creation: {
     type: string;
     name: string;
-    entities?: Array<DontCodeEntityType>;
+    entities?: {[key:string]:DontCodeEntityType};
     sharing?: DontCodeSharingType;
-    reports?: Array<DontCodeReportType>;
-    sources?: Array<DontCodeSourceType>;
+    reports?: {[key:string]:DontCodeReportType};
+    sources?: {[key:string]:DontCodeSourceType};
     screens?: Array<{
       name: string;
     }>;
@@ -45,7 +45,7 @@ export interface DontCodeSchemaType {
 export interface DontCodeEntityType {
   from: string;
   name: string;
-  fields?: Array<DontCodeFieldType>;
+  fields?: {[key:string]:DontCodeFieldType};
 }
 
 export interface DontCodeFieldType {
@@ -60,14 +60,14 @@ export interface DontCodeSharingType {
 export interface DontCodeReportType {
   title: string;
   for: string;
-  groupedBy?: Array<DontCodeReportGroupType>;
-  sortedBy?: Array<DontCodeReportSortType>;
-  as?: Array<DontCodeReportDisplayType>;
+  groupedBy?: {[key:string]:DontCodeReportGroupType};
+  sortedBy?: {[key:string]:DontCodeReportSortType};
+  as?: {[key:string]:DontCodeReportDisplayType};
 }
 
 export interface DontCodeReportGroupType {
   of: string,
-  display:Array<DontCodeReportGroupAggregateType>;
+  display:{[key:string]:DontCodeReportGroupAggregateType};
   label?:string,
 }
 
