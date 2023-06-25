@@ -82,7 +82,7 @@ export class DontCodePreviewManager {
     let contentNeeded = false;
 
     if (found) {
-      found.forEach((configuration) => {
+      for (const configuration of found) {
         if (configuration.location.values) {
           if (modelContent) {
             let jsonValue = modelContent as string;
@@ -107,7 +107,7 @@ export class DontCodePreviewManager {
             ret = configuration;
           }
         }
-      });
+      }
     } else {
       // Try to see if the parent position is handled
       if (typeof modelContent === 'string' && position.lastIndexOf('/') > 0) {
