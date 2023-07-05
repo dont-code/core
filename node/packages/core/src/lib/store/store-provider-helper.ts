@@ -231,23 +231,53 @@ export class StoreProviderHelper {
             oneGroupOfCounters.set(field, counter);
           }
 
-          let val=value[field];
-          if (val!=null) {
-            if ((typeof val === 'object') && (modelMgr!=null)) {
-              val = modelMgr.extractValue(val, counter.metaData, position, item);
-            }
-            if (typeof val === 'number') {
+          const valSrc=value[field];
+          const val=valSrc;
+          if (valSrc!=null) {
+              // If it's an object, we need to set the calculated values as the object itself
+            if ((typeof valSrc === 'object') && (modelMgr!=null)) {
+              if( counter.sum==null) counter.sum=structuredClone(valSrc);
+              else {
+                counter.sum=modelMgr.modifyValues(counter.sum, valSrc, counter.metaData,
+                  (first, second) => {
+                    return first + second
+                  },
+                  position, item);
+              }
+              if( counter.minimum==null)  counter.minimum=structuredClone(valSrc);
+              else {
+                const compare: number = modelMgr.modifyValues(counter.minimum, valSrc, counter.metaData,
+                  (first, second) => {
+                    return first - second;
+                  },
+                  position, item);
+                if (compare > 0) counter.minimum = valSrc;
+              }
+
+              if( counter.maximum==null)  counter.maximum=structuredClone(valSrc);
+              else {
+                const compare = modelMgr.modifyValues(counter.maximum, valSrc, counter.metaData,
+                  (first, second) => {
+                    return first - second;
+                  },
+                  position, item);
+
+                if (compare < 0)
+                  counter.maximum = valSrc;
+              }
+
+            } else if (typeof val === 'number') {
               counter.sum=counter.sum+val;
               if( (counter.minimum==null) || (val < counter.minimum))
-                counter.minimum=val;
+                counter.minimum=valSrc;
               if( (counter.maximum==null) || (val > counter.maximum))
-                counter.maximum=val;
+                counter.maximum=valSrc;
             } else if ((val instanceof Date) && (!isNaN(val.getTime()))) {
               if ((counter.minimum==null) || (val.valueOf() < counter.minimum.valueOf())) {
-                counter.minimum=val;
+                counter.minimum=valSrc;
               }
               if ((counter.maximum==null) || (val.valueOf() > counter.maximum.valueOf())) {
-                counter.maximum=val;
+                counter.maximum=valSrc;
               }
             }
             if (val!=null) counter.count++;
@@ -300,7 +330,7 @@ export class StoreProviderHelper {
 }
 
 class Counters {
-  sum=0;
+  sum:any;
 
   count=0;
 
