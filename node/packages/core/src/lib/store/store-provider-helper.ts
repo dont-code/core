@@ -235,7 +235,7 @@ export class StoreProviderHelper {
           const val=valSrc;
           if (valSrc!=null) {
               // If it's an object, we need to set the calculated values as the object itself
-            if ((typeof valSrc === 'object') && (modelMgr!=null)) {
+            if ((typeof valSrc === 'object') &&  (!(valSrc instanceof Date)) && (modelMgr!=null)) {
               if( counter.sum==null) counter.sum=structuredClone(valSrc);
               else {
                 counter.sum=modelMgr.modifyValues(counter.sum, valSrc, counter.metaData,
@@ -244,43 +244,46 @@ export class StoreProviderHelper {
                   },
                   position, item);
               }
-              if( counter.minimum==null)  counter.minimum=structuredClone(valSrc);
+              const value=modelMgr.extractValue(valSrc, counter.metaData,position, item);
+              if( counter.minimum==null)  counter.minimum=valSrc;
               else {
-                const compare: number = modelMgr.modifyValues(counter.minimum, valSrc, counter.metaData,
-                  (first, second) => {
-                    return first - second;
-                  },
-                  position, item);
-                if (compare > 0) counter.minimum = valSrc;
+                const minValue=modelMgr.extractValue(counter.minimum, counter.metaData, position, item);
+                if ((value!=null) && (value < minValue) ) counter.minimum = valSrc;
               }
 
               if( counter.maximum==null)  counter.maximum=structuredClone(valSrc);
               else {
-                const compare = modelMgr.modifyValues(counter.maximum, valSrc, counter.metaData,
-                  (first, second) => {
-                    return first - second;
-                  },
-                  position, item);
+                const maxValue=modelMgr.extractValue(counter.maximum, counter.metaData, position, item);
 
-                if (compare < 0)
+                if ((value!=null) && (value > maxValue))
                   counter.maximum = valSrc;
               }
 
+              const valueNum=modelMgr.extractValue(valSrc, counter.metaData,position,item);
+              if (valueNum!=null) {
+                counter.count++;
+              }
+
             } else if (typeof val === 'number') {
+              if( counter.sum==null) counter.sum=0;
               counter.sum=counter.sum+val;
               if( (counter.minimum==null) || (val < counter.minimum))
                 counter.minimum=valSrc;
               if( (counter.maximum==null) || (val > counter.maximum))
                 counter.maximum=valSrc;
+              counter.count++;
             } else if ((val instanceof Date) && (!isNaN(val.getTime()))) {
+              counter.sum=null;
               if ((counter.minimum==null) || (val.valueOf() < counter.minimum.valueOf())) {
                 counter.minimum=valSrc;
               }
               if ((counter.maximum==null) || (val.valueOf() > counter.maximum.valueOf())) {
                 counter.maximum=valSrc;
               }
+              counter.count++;
+            } else {  // strings
+                counter.count++;
             }
-            if (val!=null) counter.count++;
           }
         }
       }
@@ -303,8 +306,14 @@ export class StoreProviderHelper {
                 case DontCodeGroupOperationType.Sum:
                   value = counter.sum;
                   break;
-                case DontCodeGroupOperationType.Average:
-                  value = counter.sum / counter.count;
+                case DontCodeGroupOperationType.Average: {
+                  if ((counter.sum==null) || (counter.count==0)) value=null;
+                  else if ((typeof counter.sum === 'object') &&  (!(counter.sum instanceof Date)) && (modelMgr!=null)) {
+                    value = modelMgr.applyValue(structuredClone(counter.sum),
+                      modelMgr.extractValue(counter.sum, counter.metaData, position, item)/counter.count,
+                      counter.metaData, position, item);
+                  } else value = counter.sum / counter.count;
+                }
                   break;
                 case DontCodeGroupOperationType.Minimum:
                   value = counter.minimum;
