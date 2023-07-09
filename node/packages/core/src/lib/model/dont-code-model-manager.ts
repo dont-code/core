@@ -12,8 +12,8 @@ import {DefinitionUpdateConfig} from "../globals";
 export class DontCodeModelManager {
   protected content: any;
 
-  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS="abcdefghijklmnopqrstuvxyz";
-  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS.length;
+  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS = "abcdefghijklmnopqrstuvxyz";
+  static readonly POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH = DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS.length;
 
   constructor(protected schemaMgr: DontCodeSchemaManager) {
     this.reset();
@@ -117,7 +117,7 @@ export class DontCodeModelManager {
     if (srcChange.pointer == null)
       throw new Error(
         'Cannot apply a change without a pointer at position ' +
-          srcChange.position
+        srcChange.position
       );
 
     if (oldPosition == null) oldPosition = srcChange.oldPosition;
@@ -130,40 +130,14 @@ export class DontCodeModelManager {
       switch (srcChange.type) {
         case ChangeType.ADD:
         case ChangeType.UPDATE:
-        case ChangeType.RESET:
-          {
-            let curAtomicChange;
+        case ChangeType.RESET: {
+          let curAtomicChange;
+          if (
+            srcChange.type === ChangeType.RESET &&
+            srcChange.position === pointer.position
+          ) {
+            // Create a RESET change for the root element reset only
             if (
-              srcChange.type === ChangeType.RESET &&
-              srcChange.position === pointer.position
-            ) {
-              // Create a RESET change for the root element reset only
-              if (
-                typeof newContent === 'object' &&
-                this.isTheSameForParent(oldSubContent, newContent)
-              ) {
-                curAtomicChange = atomicChanges.createSubChange(
-                  undefined,
-                  subElem,
-                  null
-                );
-              } else if (
-                typeof newContent === 'object' ||
-                oldSubContent !== newContent
-              ) {
-                curAtomicChange = atomicChanges.createSubChange(
-                  ChangeType.RESET,
-                  subElem,
-                  newContent
-                );
-              }
-            } else if (oldSubContent == null) {
-              curAtomicChange = atomicChanges.createSubChange(
-                ChangeType.ADD,
-                subElem,
-                newContent
-              );
-            } else if (
               typeof newContent === 'object' &&
               this.isTheSameForParent(oldSubContent, newContent)
             ) {
@@ -177,127 +151,150 @@ export class DontCodeModelManager {
               oldSubContent !== newContent
             ) {
               curAtomicChange = atomicChanges.createSubChange(
-                ChangeType.UPDATE,
+                ChangeType.RESET,
                 subElem,
                 newContent
               );
             }
+          } else if (oldSubContent == null) {
+            curAtomicChange = atomicChanges.createSubChange(
+              ChangeType.ADD,
+              subElem,
+              newContent
+            );
+          } else if (
+            typeof newContent === 'object' &&
+            this.isTheSameForParent(oldSubContent, newContent)
+          ) {
+            curAtomicChange = atomicChanges.createSubChange(
+              undefined,
+              subElem,
+              null
+            );
+          } else if (
+            typeof newContent === 'object' ||
+            oldSubContent !== newContent
+          ) {
+            curAtomicChange = atomicChanges.createSubChange(
+              ChangeType.UPDATE,
+              subElem,
+              newContent
+            );
+          }
 
-            if (curAtomicChange)
-              this.compareRecursiveIfNeeded(
-                srcChange,
-                oldSubContent,
-                newContent,
-                pointer,
-                curAtomicChange
-              );
-            if (subElem.length > 0)
-              // Special case when changing the root element (subElem = '')
-              this.insertProperty(
-                oldContent,
-                subElem,
-                newContent,
-                srcChange.beforeKey
-              );
-          }
+          if (curAtomicChange)
+            this.compareRecursiveIfNeeded(
+              srcChange,
+              oldSubContent,
+              newContent,
+              pointer,
+              curAtomicChange
+            );
+          if (subElem.length > 0)
+            // Special case when changing the root element (subElem = '')
+            this.insertProperty(
+              oldContent,
+              subElem,
+              newContent,
+              srcChange.beforeKey
+            );
+        }
           break;
-        case ChangeType.DELETE:
-          {
-            if (oldContent[subElem]) {
-              const curAtomicChange = atomicChanges.createSubChange(
-                ChangeType.DELETE,
-                subElem,
-                null
+        case ChangeType.DELETE: {
+          if (oldContent[subElem]) {
+            const curAtomicChange = atomicChanges.createSubChange(
+              ChangeType.DELETE,
+              subElem,
+              null
+            );
+            this.compareRecursiveIfNeeded(
+              srcChange,
+              oldContent[subElem],
+              newContent,
+              pointer,
+              curAtomicChange
+            );
+            delete oldContent[subElem];
+          }
+        }
+          break;
+        case ChangeType.MOVE: {
+          // If it's the root of move, then find the value to move from the oldPosition
+          if (srcChange.position === pointer.position) {
+            if (oldPosition == null)
+              throw new Error(
+                'Cannot process MOVE change without oldPosition' +
+                srcChange.position
               );
-              this.compareRecursiveIfNeeded(
-                srcChange,
-                oldContent[subElem],
-                newContent,
-                pointer,
-                curAtomicChange
-              );
-              delete oldContent[subElem];
+            if (newContent == null) {
+              newContent = this.findAtPosition(oldPosition);
             }
-          }
-          break;
-        case ChangeType.MOVE:
-          {
-            // If it's the root of move, then find the value to move from the oldPosition
-            if (srcChange.position === pointer.position) {
-              if (oldPosition == null)
-                throw new Error(
-                  'Cannot process MOVE change without oldPosition' +
-                    srcChange.position
-                );
-              if (newContent == null) {
-                newContent = this.findAtPosition(oldPosition);
-              }
-              if (newContent) {
-                const curAtomicChange = atomicChanges.createSubChange(
-                  ChangeType.MOVE,
-                  subElem,
-                  newContent,
-                  oldPosition
-                );
-                if (srcChange.position !== oldPosition) {
-                  // When we reorder elements of an array, it's a move to the same position: No changes
-                  this.compareRecursiveIfNeeded(
-                    srcChange,
-                    null,
-                    newContent,
-                    pointer,
-                    curAtomicChange,
-                    oldPosition
-                  );
-                  this.insertProperty(
-                    oldContent,
-                    subElem,
-                    newContent,
-                    srcChange.beforeKey
-                  );
-                  // Really perform the change
-                  const splittedPosition =
-                    DontCodeModelPointer.splitPosition(oldPosition)!;
-                  const parentContent = this.findAtPosition(
-                    splittedPosition.parent
-                  );
-                  delete parentContent[splittedPosition.element];
-                } else {
-                  // Just insert the same element at a different position in the object
-                  this.compareRecursiveIfNeeded(
-                    srcChange,
-                    null,
-                    newContent,
-                    pointer,
-                    curAtomicChange,
-                    oldPosition
-                  );
-                  this.insertProperty(
-                    oldContent,
-                    subElem,
-                    newContent,
-                    srcChange.beforeKey
-                  );
-                }
-              }
-            } else {
-              // The move has already been done, so just createSubChange and loop through subElements
+            if (newContent) {
               const curAtomicChange = atomicChanges.createSubChange(
                 ChangeType.MOVE,
                 subElem,
-                null,
-                oldPosition
-              );
-              this.compareRecursiveIfNeeded(
-                srcChange,
-                oldContent,
                 newContent,
-                pointer,
-                curAtomicChange,
                 oldPosition
               );
+              if (srcChange.position !== oldPosition) {
+                // When we reorder elements of an array, it's a move to the same position: No changes
+                this.compareRecursiveIfNeeded(
+                  srcChange,
+                  null,
+                  newContent,
+                  pointer,
+                  curAtomicChange,
+                  oldPosition
+                );
+                this.insertProperty(
+                  oldContent,
+                  subElem,
+                  newContent,
+                  srcChange.beforeKey
+                );
+                // Really perform the change
+                const splittedPosition =
+                  DontCodeModelPointer.splitPosition(oldPosition)!;
+                const parentContent = this.findAtPosition(
+                  splittedPosition.parent
+                );
+                delete parentContent[splittedPosition.element];
+              } else {
+                // Just insert the same element at a different position in the object
+                this.compareRecursiveIfNeeded(
+                  srcChange,
+                  null,
+                  newContent,
+                  pointer,
+                  curAtomicChange,
+                  oldPosition
+                );
+                this.insertProperty(
+                  oldContent,
+                  subElem,
+                  newContent,
+                  srcChange.beforeKey
+                );
+              }
             }
+          } else {
+            // The move has already been done, so just createSubChange and loop through subElements
+            const curAtomicChange = atomicChanges.createSubChange(
+              ChangeType.MOVE,
+              subElem,
+              null,
+              oldPosition
+            );
+            this.compareRecursiveIfNeeded(
+              srcChange,
+              oldContent,
+              newContent,
+              pointer,
+              curAtomicChange,
+              oldPosition
+            );
           }
+        }
           break;
         default:
           throw new Error('No support for change of type ' + srcChange.type);
@@ -525,15 +522,15 @@ export class DontCodeModelManager {
    * Calculates a key that can be inserted at the given position in the content
    * @param pos
    */
-  generateNextKeyForPosition(pos:string, create=false):string {
-    const array=this.findAtPosition(pos, create);
-    if(array==null)
-      throw new Error("No element at position "+pos);
+  generateNextKeyForPosition(pos: string, create = false): string {
+    const array = this.findAtPosition(pos, create);
+    if (array == null)
+      throw new Error("No element at position " + pos);
     return DontCodeModelManager.generateNextKey(array);
   }
 
-  static generateNextKey(array:Record<string, unknown>|Set<string>):string {
-    let keys:Set<string>;
+  static generateNextKey(array: Record<string, unknown> | Set<string>): string {
+    let keys: Set<string>;
     if (array.size != null) {
       keys = array as Set<string>;
     } else {
@@ -541,24 +538,24 @@ export class DontCodeModelManager {
     }
     let tentative = keys.size;
     let found = false;
-    const modulo=DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH;
+    const modulo = DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS_LENGTH;
     let key;
     do {
       // Calculate a tentative key
-      key='';
+      key = '';
       do {
-        const quotient = Math.trunc(tentative/modulo);
-        const rest = tentative%modulo;
+        const quotient = Math.trunc(tentative / modulo);
+        const rest = tentative % modulo;
 
         key = DontCodeModelManager.POSSIBLE_CHARS_FOR_ARRAY_KEYS[rest].concat(key);
-        tentative=quotient-1; // -1 because we need to not take into account the first row of values as they don't have the same number of chars
+        tentative = quotient - 1; // -1 because we need to not take into account the first row of values as they don't have the same number of chars
 
-      } while (tentative>=0);
+      } while (tentative >= 0);
 
       // Check if the key is already present
       found = keys.has(key);
       tentative++;
-    } while(found);
+    } while (found);
     return key;
   }
 
@@ -651,12 +648,12 @@ export class DontCodeModelManager {
           'Multiple results returned by queryModelToSingle with path ' + query
         );
     }
-      // In Dont-code, on the contrary of Json Pointer, you don't start a pointer by /
+    // In Dont-code, on the contrary of Json Pointer, you don't start a pointer by /
     if (result?.pointer?.startsWith('/')) {
-      result.pointer=result.pointer.substring(1);
+      result.pointer = result.pointer.substring(1);
     }
 
-    if( result!=null) {
+    if (result != null) {
       delete result.path;
       delete result.parent;
       delete result.parentProperty;
@@ -682,7 +679,7 @@ export class DontCodeModelManager {
     position: string,
     schemaItem?: DontCodeSchemaItem
   ): Array<any> {
-    if (schemaItem==null) {
+    if (schemaItem == null) {
       const ptr = this.schemaMgr.generateSchemaPointer(position);
       schemaItem = this.schemaMgr.locateItem(
         ptr.subPropertyPointer(property).positionInSchema,
@@ -722,10 +719,10 @@ export class DontCodeModelManager {
     property: string,
     position: string,
     schemaItem?: DontCodeSchemaItem
-  ): ModelQuerySingleResult|null {
+  ): ModelQuerySingleResult | null {
     const src = this.findAtPosition(position, false);
     if (src && src[property]) {
-      if (schemaItem==null) {
+      if (schemaItem == null) {
         const ptr = this.schemaMgr.generateSchemaPointer(position);
         schemaItem = this.schemaMgr.locateItem(
           ptr.subPropertyPointer(property).positionInSchema,
@@ -790,24 +787,24 @@ export class DontCodeModelManager {
    * From a DefinitionUpdateConfig given by a repository configuration, generates a Change that can be applied to the model.
    * @param definition
    */
-  convertToChange (definition: DefinitionUpdateConfig): Change {
-    let ptr=this.schemaMgr.generateSchemaPointer(definition.location.parent);
+  convertToChange(definition: DefinitionUpdateConfig): Change {
+    let ptr = this.schemaMgr.generateSchemaPointer(definition.location.parent);
     const schemaItem = this.schemaMgr.locateItem(ptr.positionInSchema, false);
-    if( schemaItem.isArray()) {
-      if ((definition.location.id==null) || (definition.location.id==='*')) {
+    if (schemaItem.isArray()) {
+      if ((definition.location.id == null) || (definition.location.id === '*')) {
         // We must create a subelement
         ptr = ptr.subItemPointer(this.generateNextKeyForPosition(ptr.position, true));
       } else {
         ptr = ptr.subItemPointer(definition.location.id);
       }
     } else {
-      if (definition.location.id!=null) {
+      if (definition.location.id != null) {
         ptr = ptr.subItemPointer(definition.location.id);
       }
     }
     return new Change(ChangeType.ADD, ptr.position, definition.update
-        ,ptr
-        ,definition.location.after);
+      , ptr
+      , definition.location.after);
 
   }
 
@@ -816,49 +813,49 @@ export class DontCodeModelManager {
    * @param position
    * @param modelAsJson
    */
-  guessNamePropertyOfElement (position:string|null, modelAsJson:any): string|null {
-    if( modelAsJson==null) {
-      if (position==null)
-        throw new Error ("Either position or model must be provided");
+  guessNamePropertyOfElement(position: string | null, modelAsJson: any): string | null {
+    if (modelAsJson == null) {
+      if (position == null)
+        throw new Error("Either position or model must be provided");
       modelAsJson = this.findAtPosition(position, false);
-      if (modelAsJson==null) {
-        throw new Error ("Position "+position+" does not exist in model");
+      if (modelAsJson == null) {
+        throw new Error("Position " + position + " does not exist in model");
       }
     }
     if ((modelAsJson.fields != null) && (Array.isArray(modelAsJson.fields)))
-      modelAsJson=modelAsJson.fields;
+      modelAsJson = modelAsJson.fields;
 
-    const curScore:{score:number, field:any} = {score:-1, field:null};
+    const curScore: { score: number, field: any } = {score: -1, field: null};
 
     for (const field in modelAsJson) {
-        if (DontCodeModelManager.scoreFieldAsName(modelAsJson[field].name, modelAsJson[field].type, curScore))
-          break;
+      if (DontCodeModelManager.scoreFieldAsName(modelAsJson[field].name, modelAsJson[field].type, curScore))
+        break;
     }
 
-    if (curScore.score>0) {
+    if (curScore.score > 0) {
       return curScore.field;
     } else
       return null;
 
   }
 
-  public static guessNamePropertyOfObject (obj:any): string|null {
-    const score:{score:number, field:any}={score:-1, field:null};
+  public static guessNamePropertyOfObject(obj: any): string | null {
+    const score: { score: number, field: any } = {score: -1, field: null};
     for (const prop in obj) {
       DontCodeModelManager.scoreFieldAsName(prop, 'Text', score);
     }
-    if( score.score>0)
+    if (score.score > 0)
       return score.field;
     else
       return null;
   }
 
-  public static guessNamePropertyFromList (...list:string[]): string|null {
-    const score:{score:number, field:any}={score:-1, field:null};
+  public static guessNamePropertyFromList(...list: string[]): string | null {
+    const score: { score: number, field: any } = {score: -1, field: null};
     for (const prop of list) {
       DontCodeModelManager.scoreFieldAsName(prop, 'Text', score);
     }
-    if( score.score>0)
+    if (score.score > 0)
       return score.field;
     else
       return null;
@@ -871,40 +868,40 @@ export class DontCodeModelManager {
    * @param score
    * @protected
    */
-  protected static scoreFieldAsName (name:string, type:string, score:{score:number, field:any}): boolean {
-    if( name==null)
+  protected static scoreFieldAsName(name: string, type: string, score: { score: number, field: any }): boolean {
+    if (name == null)
       return false;
-    const propName=name.toLowerCase();
-    for (const [key,value] of this.NAME_PROPERTY_NAMES) {
+    const propName = name.toLowerCase();
+    for (const [key, value] of this.NAME_PROPERTY_NAMES) {
       if (propName === key) {
-        const foundScore=value??0;
-        if (score.score<foundScore) {
-          score.score=foundScore;
-          score.field=name;
-          if (score.score==100)
+        const foundScore = value ?? 0;
+        if (score.score < foundScore) {
+          score.score = foundScore;
+          score.field = name;
+          if (score.score == 100)
             return true;
         }
       } else if (propName.includes(key)) {
-        const foundScore=(value??0)/2;
-        if (score.score<foundScore) {
+        const foundScore = (value ?? 0) / 2;
+        if (score.score < foundScore) {
           score.score = foundScore;
           score.field = name;
         }
       }
     }
 
-    if (type=="Text") {
-        if( score.score<20) {
-          score.score=20;
-          score.field=name;
-        }
+    if (type == "Text") {
+      if (score.score < 20) {
+        score.score = 20;
+        score.field = name;
       }
+    }
 
-    if( score.score>0) return true;
+    if (score.score > 0) return true;
     else return false;
   }
 
-  protected static readonly NAME_PROPERTY_NAMES = new Map<string,number> ([
+  protected static readonly NAME_PROPERTY_NAMES = new Map<string, number>([
     ['name', 100],
     ['nom', 100],
     ['title', 80],
@@ -922,55 +919,11 @@ export class DontCodeModelManager {
    * @param schemaItem
    * @protected
    */
-  public extractValue (obj:any, metaData:DataTransformationInfo, position?:DontCodeModelPointer, schemaItem?:DontCodeSchemaItem) : any {
-    if( obj==null)
+  public extractValue<T>(obj: T, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): any {
+    if (obj == null)
       return obj;
     if (!metaData.parsed) {
-      metaData.parsed=true;
-      if (typeof obj !== 'object' ) {
-        if (obj != null) {
-          metaData.direct=true;
-        } else {
-          metaData.parsed=false;
-          return obj;
-        }
-      } else {
-        if (Array.isArray(obj)) {
-          metaData.array = true;
-          // eslint-disable-next-line no-restricted-syntax
-          console.debug("Getting an array as a value for a graph ", obj);
-          if ((obj as Array<any>).length > 0) {
-            obj = (obj as Array<any>)[0];
-          } else {
-            metaData.parsed = false;
-            return obj;
-          }
-        }
-        if (obj instanceof Date) {
-          metaData.direct = true;
-          return obj;
-        } else {
-          // It's an unknown object
-          if (obj.value !== undefined) {
-            metaData.subValue = 'value';
-          } else if (obj.amount !== undefined) {
-            metaData.subValue = 'amount';
-          } else {
-            let firstKey = null;
-            for (const key in obj) {
-              if (firstKey == null) firstKey = key;
-              if ((obj[key] != null) && (typeof (obj[key]) !== 'object')) {
-                metaData.subValue = key;
-              }
-            }
-            if (metaData.subValue == null) {
-              metaData.subValue = firstKey;
-            }
-            console.warn("Guessed value key of "+metaData.subValue+' for object.', obj);
-
-          }
-        }
-      }
+      this.extractMetaData(obj, metaData, position, schemaItem);
     }
 
     // We already know what to do
@@ -978,20 +931,134 @@ export class DontCodeModelManager {
       return obj;
     } else {
       if (metaData.array) {
-        if ((obj as Array<any>).length > 0) {
-          obj = (obj as Array<any>)[0];
+        if ((obj as Array<T>).length > 0) {
+          obj = (obj as Array<T>)[0];
         } else return obj;
       }
-      if (metaData.subValue!=null) {
-        return obj[metaData.subValue];
-      }else {
+      if (metaData.subValue != null) {
+        return (obj as any)[metaData.subValue];
+      } else {
         return obj;
       }
     }
   }
 
-}
+  /**
+   * Apply the primitive value back in the object
+   * @param obj
+   * @param value
+   * @param metaData: Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param position
+   * @param schemaItem
+   * @return The object with the primitive set or the value if the obj is indeed a primitive already
+   */
+  public applyValue <T>(obj: T, value:any, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): T {
+    if ((obj == null) && (value!=null))
+      throw new Error ('Cannot apply a value to a null or undefined object');
 
+    if (!metaData.parsed) {
+      this.extractMetaData(obj, metaData, position, schemaItem);
+    }
+
+    // We already know what to do
+    if (metaData.direct) {
+      return value as unknown as T;
+    } else {
+      if (metaData.array) {
+          // We extract the first element of the array
+        if ((obj as Array<T>).length > 0) {
+          obj = (obj as Array<T>)[0];
+        } else {
+          if (value!=undefined) // Only undefined are not pushed, null values can be pushed
+            (obj as Array<T>).push(value as unknown as T);
+          return obj
+        }
+      }
+      if (metaData.subValue != null) {
+        if( value==undefined) {
+          delete (obj as any)[metaData.subValue];
+        } else {
+          (obj as any)[metaData.subValue]=value;
+        }
+      }
+      return obj;
+    }
+  }
+
+  /**
+   * Guess how values can be set or extracted from an unknown object
+   * @param obj
+   * @param metaData
+   * @param position
+   * @param schemaItem
+   */
+  public extractMetaData<T>(obj: T, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): void {
+
+    metaData.parsed = true;
+    if (typeof obj !== 'object') {
+      if (obj != null) {
+        metaData.direct = true;
+      } else {
+        metaData.parsed = false;
+      }
+    } else {
+      if (Array.isArray(obj)) {
+        metaData.array = true;
+        // eslint-disable-next-line no-restricted-syntax
+        console.debug("Getting an array as a value for metadata extraction", obj);
+        if ((obj as Array<any>).length > 0) {
+          obj = (obj as Array<any>)[0];
+        } else {
+          metaData.parsed = false;
+        }
+      }
+      if (obj instanceof Date) {
+        metaData.direct = true;
+      } else {
+        // It's an unknown object
+        if ((obj as any).value !== undefined) {
+          metaData.subValue = 'value';
+        } else if ((obj as any).amount !== undefined) {
+          metaData.subValue = 'amount';
+        } else {
+          let firstKey = null;
+          for (const key in obj) {
+            if (firstKey == null) firstKey = key;
+            if ((obj[key] != null) && (typeof (obj[key]) !== 'object')) {
+              metaData.subValue = key;
+            }
+          }
+          if (metaData.subValue == null) {
+            metaData.subValue = firstKey;
+          }
+          console.warn("Guessed value key of " + metaData.subValue + ' for object.', obj);
+
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Modify the first element with the value of the second element by applying the operator given in parameter
+   * @param firstElement
+   * @param secondElement
+   * @param metaData: Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param operator
+   * @param position
+   * @param schemaItem
+   * @protected
+   */
+  public modifyValues<T>(firstElement: T, secondElement: T, metaData: DataTransformationInfo, operator: (firstValue: any, secondValue: any) => any , position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): T {
+    if (firstElement == null) {
+      throw new Error("Cannot modify value of null object");
+    }
+    const calculatedValue = operator(this.extractValue(firstElement, metaData, position, schemaItem),
+      this.extractValue(secondElement, metaData, position, schemaItem));
+
+    return this.applyValue(firstElement, calculatedValue, metaData, position, schemaItem);
+  }
+}
 /**
  * Keep track of information about how to extract value of data
  */

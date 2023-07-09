@@ -44,4 +44,33 @@ describe('Test Manager', () => {
       })
     }
   });
+
+  it ('should properly send wait result value', (done) => {
+    DontCodeTestManager.waitUntilTrueAndEmit(() => {
+      return false;
+    }, 20, 3).then (value => {
+      if (value) done("Error should return false");
+
+      let count=0;
+      return DontCodeTestManager.waitUntilTrueAndEmit( () => {
+        count++;
+        if( count < 5) return false;
+        else  return true;
+      }, 20, 10).then(value => {
+          if (!value) done ("Error should return true");
+          done();
+        }
+      )
+    })
+  });
+
+  it ('should properly wait ', (done) => {
+    let count=0;
+    DontCodeTestManager.waitUntilTrue(() => {
+        count++;
+        if( count < 5) return false;
+        else  return true;
+      }, done,20, 10);
+  });
+
 });
