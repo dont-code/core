@@ -162,6 +162,9 @@ export class DontCodeSchema {
           "label": {
             "type": "string"
           },
+          "show": {
+            "enum": ["OnlyLowest","OnlyHighest"]
+          },
           "display": {
             "$ref": "#/$defs/report-group-aggregate"
           }

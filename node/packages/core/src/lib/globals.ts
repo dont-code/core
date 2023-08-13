@@ -68,6 +68,7 @@ export interface DontCodeReportType {
 export interface DontCodeReportGroupType {
   of: string,
   display:{[key:string]:DontCodeReportGroupAggregateType};
+  show?:DontCodeReportGroupShowType,
   label?:string,
 }
 
@@ -75,6 +76,11 @@ export interface DontCodeReportGroupAggregateType {
   operation: DontCodeGroupOperationType;
   of:string,
   label?:string
+}
+
+export enum DontCodeReportGroupShowType {
+  OnlyLowest="OnlyLowest",
+  OnlyHighest="OnlyHighest"
 }
 
 export enum DontCodeGroupOperationType {
