@@ -11,6 +11,7 @@ import {
 import {DontCodeModel} from '../model/dont-code-model';
 import {DontCodeStorePreparedEntities} from "./store-provider-helper";
 import {Observable} from "rxjs";
+import {DontCodeDataTransformer} from "./dont-code-data-transformer";
 
 export class DontCodeStoreManager {
   private _default?: DontCodeStoreProvider<never>;
@@ -127,9 +128,10 @@ export class DontCodeStoreManager {
     position: string,
     sort?:DontCodeStoreSort,
     groupBy?:DontCodeStoreGroupby,
+    dataTransformer?:DontCodeDataTransformer,
     ...criteria: DontCodeStoreCriteria[]
   ): Observable<DontCodeStorePreparedEntities<T>> {
-    return this.getProviderSafe<T>(position).searchAndPrepareEntities(position, sort, groupBy, ...criteria);
+    return this.getProviderSafe<T>(position).searchAndPrepareEntities(position, sort, groupBy, dataTransformer, ...criteria);
   }
 
 

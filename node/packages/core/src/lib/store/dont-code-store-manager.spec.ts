@@ -8,6 +8,7 @@ import {AbstractDontCodeStoreProvider} from './dont-code-store-provider';
 import {dtcde} from '../dontcode';
 import {Observable, of} from 'rxjs';
 import {DontCodeStorePreparedEntities} from './store-provider-helper';
+import {DontCodeDataTransformer} from "./dont-code-data-transformer";
 
 describe('Store Manager', () => {
   it('should correctly return the default provider', () => {
@@ -83,7 +84,7 @@ class DummyStoreProvider<T> extends AbstractDontCodeStoreProvider<T> {
   ): Observable<Array<T>> {
     return of([]);
   }
-  searchAndPrepareEntities(position: string, sort?: DontCodeStoreSort | undefined, groupBy?: DontCodeStoreGroupby | undefined, ...criteria: DontCodeStoreCriteria[]): Observable<DontCodeStorePreparedEntities<T>> {
+  searchAndPrepareEntities(position: string, sort?: DontCodeStoreSort | undefined, groupBy?: DontCodeStoreGroupby | undefined, transformer?:DontCodeDataTransformer,...criteria: DontCodeStoreCriteria[]): Observable<DontCodeStorePreparedEntities<T>> {
     return of (new DontCodeStorePreparedEntities([]));
   }
 

@@ -10,7 +10,7 @@ import {
   DontCodeStorePreparedEntities,
   StoreProviderHelper
 } from "./store-provider-helper";
-import {popScheduler} from "rxjs/internal/util/args";
+import {DontCodeDataTransformer} from "./dont-code-data-transformer";
 
 /**
  * The standard interface for any store provider
@@ -37,6 +37,7 @@ export interface DontCodeStoreProvider<T=never> {
     position: string,
     sort?:DontCodeStoreSort,
     groupBy?:DontCodeStoreGroupby,
+    transformer?: DontCodeDataTransformer<T>,
     ...criteria: DontCodeStoreCriteria[]
   ): Observable<DontCodeStorePreparedEntities<T>>;
 
@@ -90,8 +91,13 @@ export abstract class AbstractDontCodeStoreProvider<T=never> implements DontCode
     return this.searchEntities(position);
   }
 
-  searchAndPrepareEntities(position: string, sort?: DontCodeStoreSort, groupBy?: DontCodeStoreGroupby, ...criteria: DontCodeStoreCriteria[]): Observable<DontCodeStorePreparedEntities<T>> {
+  searchAndPrepareEntities(position: string, sort?: DontCodeStoreSort, groupBy?: DontCodeStoreGroupby, transformer?: DontCodeDataTransformer<T>, ...criteria: DontCodeStoreCriteria[]): Observable<DontCodeStorePreparedEntities<T>> {
     return this.searchEntities(position, ...criteria).pipe(
+      map (value => {
+        // Run the transformation if any
+        if (transformer!=null) return transformer.postLoadingTransformation(value);
+        else return value;
+      }),
       map (value => {
         let groupedByValues:DontCodeStoreGroupedByEntities|undefined;
         if((sort!=null) || (groupBy?.atLeastOneGroupIsRequested()===true)) {
@@ -119,4 +125,5 @@ export abstract class AbstractDontCodeStoreProvider<T=never> implements DontCode
     }
     return rootSort;
   }
+
 }
