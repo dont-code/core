@@ -251,7 +251,7 @@ export class StoreProviderHelper {
                 if ((value!=null) && (value < minValue) ) counter.minimum = valSrc;
               }
 
-              if( counter.maximum==null)  counter.maximum=structuredClone(valSrc);
+              if( counter.maximum==null)  counter.maximum=valSrc;
               else {
                 const maxValue=modelMgr.extractValue(counter.maximum, counter.metaData, position, item);
 

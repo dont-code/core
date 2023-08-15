@@ -159,6 +159,9 @@
         "label": {
           "type": "string"
         },
+        "show": {
+          "enum": ["OnlyLowest","OnlyHighest"]
+        },
         "display": {
           "type": "array",
           "items": {
