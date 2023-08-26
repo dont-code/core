@@ -11,7 +11,7 @@ on:
         required: false
         type: string
       next:
-        description: Is it a next release ?
+        description: Is it a dev / next release ?
         required: true
         type: boolean
 
@@ -31,7 +31,7 @@ jobs:
           repository: dont-code/core
           path: core
           fetch-depth: 0
-          ref: 'main'
+          ref: ${{ inputs.next == true && 'Development' || 'main' }}
           token: ${{secrets.DONTCODE_ACTIONS_TOKEN}}
       - name: Setup
         uses: actions/setup-node@v3
