@@ -16,13 +16,13 @@ export class DontCodePluginManager {
     const fullId = config.plugin.id + '-v' + config.plugin.version;
 
     if( this.plugins.get(fullId)==null) {
-      console.debug ("Setting up", fullId);
+      //console.debug ("Setting up", fullId);
       schemaManager.registerChanges(config);
       previewManager.registerHandlers(config);
 
       this.plugins.set(fullId, new PluginInfo (plugin));
     } else {
-      console.debug("Plugin "+fullId+" already registered, skipping it");
+      //console.debug("Plugin "+fullId+" already registered, skipping it");
     }
   }
 
