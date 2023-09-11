@@ -1,12 +1,4 @@
-import * as DontCode from '@dontcode/core';
-import dtcde = DontCode.dtcde;
-import {
-  DontCodeSchemaEnum,
-  DontCodeSchemaObject,
-  DontCodeSchemaRoot,
-} from './dont-code-schema-item';
-import PluginConfig = DontCode.PluginConfig;
-import { DontCodeModelPointer } from '@dontcode/core';
+import { DontCodeModelPointer } from './dont-code-schema';
 
 describe('Model Pointer', () => {
   it('should calculate subItem properly', () => {

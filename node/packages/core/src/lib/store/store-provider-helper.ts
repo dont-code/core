@@ -206,7 +206,9 @@ export class StoreProviderHelper {
   static calculateGroupedByValues<T>(values: T[], groupBy: DontCodeStoreGroupby, modelMgr?: DontCodeModelManager, position?: DontCodeModelPointer, item?:DontCodeSchemaItem):DontCodeStoreGroupedByEntities|undefined {
       // We are counting per different value of the groupedBy Item
     if ((groupBy!=null) && (groupBy.display!=null)) {
-      const fieldToGroupBy=groupBy.of as keyof T;
+      let fieldToGroupBy=groupBy.of as keyof T;
+      if (groupBy.show!=null) fieldToGroupBy=groupBy.show.valueOf() as keyof T;
+
       const counters=new Map<any,Map<keyof T, Counters>> ();
       let lastGroupDelimiter:any;
       let oneGroupOfCounters=new Map<keyof T, Counters>();
