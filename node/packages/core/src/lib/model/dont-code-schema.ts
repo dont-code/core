@@ -38,7 +38,7 @@ export class DontCodeSchema {
               "$ref": "#/$defs/report"
             }
           },
-        "sources": {
+          "sources": {
             "type": "array",
             "items": {
               "$ref": "#/$defs/source"
@@ -138,10 +138,16 @@ export class DontCodeSchema {
             "format": "$.creation.entities.name"
           },
           "groupedBy": {
-            "$ref": "#/$defs/report-group"
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/report-group"
+            }
           },
           "sortedBy": {
-            "$ref": "#/$defs/report-sort"
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/report-sort"
+            }
           },
           "as": {
             "type": "array",
@@ -155,7 +161,7 @@ export class DontCodeSchema {
       "report-group": {
         "type": "object",
         "properties": {
-          "by": {
+          "of": {
             "type": "string",
             "format": ".fields.name"
           },
@@ -163,10 +169,13 @@ export class DontCodeSchema {
             "type": "string"
           },
           "show": {
-            "enum": ["OnlyLowest","OnlyHighest"]
+            "enum": ["OnlyLowest", "OnlyHighest"]
           },
           "display": {
-            "$ref": "#/$defs/report-group-aggregate"
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/report-group-aggregate"
+            }
           }
         },
         "additionalProperties": false
@@ -193,6 +202,9 @@ export class DontCodeSchema {
           "by": {
             "type": "string",
             "format": ".fields.name"
+          },
+          "direction": {
+            "enum": ["None", "Ascending", "Descending"]
           }
         },
         "additionalProperties": false
@@ -256,7 +268,7 @@ export class DontCodeSchema {
   /**
  * Store all information needed to point to a single element in a model.
  */
-export class DontCodeModelPointer {
+  export class DontCodeModelPointer {
   position: string;
 
   positionInSchema: string;

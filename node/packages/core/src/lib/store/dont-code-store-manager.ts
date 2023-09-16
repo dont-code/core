@@ -2,7 +2,7 @@ import {DontCodeStoreProvider,} from './dont-code-store-provider';
 import {DontCodeModelManager} from '../model/dont-code-model-manager';
 import {
   DontCodeGroupOperationType,
-  DontCodeReportGroupAggregateType,
+  DontCodeReportGroupAggregateType, DontCodeReportGroupShowType,
   DontCodeReportGroupType,
   DontCodeReportSortType,
   DontCodeSortDirectionType,
@@ -193,7 +193,8 @@ export class DontCodeStoreSort implements DontCodeReportSortType {
 
 export class DontCodeStoreGroupby implements DontCodeReportGroupType {
   display:{[key:string]:DontCodeStoreAggregate};
-  constructor(public of:string, display?:{[key:string]:DontCodeStoreAggregate}) {
+
+  constructor(public of:string, display?:{[key:string]:DontCodeStoreAggregate}, public show?:DontCodeReportGroupShowType) {
     if (display==null) this.display={};
     else this.display=display;
   }
