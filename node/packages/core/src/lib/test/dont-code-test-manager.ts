@@ -6,6 +6,7 @@ import {DontCodeStoreCriteria, UploadedDocumentInfo} from "../store/dont-code-st
 import {filter, firstValueFrom, from, map, Observable, Subject, take, takeUntil, throwError, timer} from "rxjs";
 import {CommandProviderInterface} from "../plugin/command-provider-interface";
 import {DontCodeSchemaManager} from "../model/dont-code-schema-manager";
+import {Action} from "../action/action";
 
 export class DontCodeTestManager {
   public static createDeleteChange(
@@ -242,6 +243,10 @@ export class TestProviderInterface implements CommandProviderInterface {
 
   getSchemaManager(): DontCodeSchemaManager {
     return dtcde.getSchemaManager();
+  }
+
+  sendCommand(action: Action): Promise<void> {
+    return Promise.resolve(undefined);
   }
 }
 
