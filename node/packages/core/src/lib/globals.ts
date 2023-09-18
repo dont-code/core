@@ -178,15 +178,27 @@ export interface ClassDefinitionConfig {
 
 export interface ActionHandlerConfig {
   location: LocationConfig;
-  'action-context': string;
+  'action-context': ActionContextType;
   actions: Array<ActionConfig>;
   class: ClassDefinitionConfig
 }
 
+export enum ActionContextType {
+  LIST="list",
+  EDIT="edit",
+  VIEW="view"
+}
+
 export interface ActionConfig {
-  type:string;
+  type:ActionType;
   'display-name':string;
   icon: IconDefinitionConfig;
+}
+
+export enum ActionType {
+  EXTRACT="extract",
+  UPDATE="update",
+  CALCULATE="calculate"
 }
 
 export interface IconDefinitionConfig {
