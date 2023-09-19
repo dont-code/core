@@ -1,6 +1,7 @@
 import {Change, ChangeType} from "../change/change";
 import {ActionContextType, ActionType} from "../globals";
 import {DontCodeModelPointer} from "../model/dont-code-schema";
+import {Observable, Subject} from "rxjs";
 
 /**
  * An action is a special type of change where we ask the handler to act on data.
@@ -8,6 +9,7 @@ import {DontCodeModelPointer} from "../model/dont-code-schema";
 export class Action extends Change {
   context: ActionContextType;
   actionType:ActionType;
+  running: Subject<Promise<void>> | null = new Subject<Promise<void>>();
 
   constructor(
                   position: string,

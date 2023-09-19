@@ -1,9 +1,10 @@
-import {Observable, ReplaySubject, Subject} from "rxjs";
+import {Observable, ReplaySubject, Subject, throwError} from "rxjs";
 import {Change, ChangeType} from "./change";
 import {DontCodeModelManager} from "../model/dont-code-model-manager";
 import {DontCodeSchemaManager} from "../model/dont-code-schema-manager";
 import {DefinitionUpdateConfig} from "../globals";
 import {DontCodeModelPointer} from "../model/dont-code-schema";
+import {Action} from "../action/action";
 
 /**
  * Manages the impact of changes that modify the model.
@@ -103,12 +104,20 @@ export class DontCodeChangeManager {
     property?: string
   ): Observable<Change> {
     const key = { position, property };
+
+    this.clearEmptyListeners ();
     let item = this.listeners.get(key);
-    if (!item) {
+    if (item == null) {
       item = new ReplaySubject<Change>(1);
       this.listeners.set(key, item);
       this.listenerCachePerPosition.clear();
     }
+
+        // Someone was listening to the same element, so we need to send the initial Reset only to the new listener
+    if (item.observed==true) {
+      return throwError( () => new Error ("Several components listen to the same position {"+position+', '+property));
+    }
+
 
     // In case the model already contains a value the listener is interested in, just call it already
     const cleanedPosition = this.cleanPosition(position);
@@ -167,27 +176,31 @@ export class DontCodeChangeManager {
   /**
    * Updates the model by the change (by calling DontCodeModelManager.applyChange ()), and notifies all listeners of the modifications
    * @param change
+   * @return true if at least one listener has been called
    */
-  pushChange(change: Change) {
+  pushChange(change: Change): boolean {
+    let ret=false;
     const subChanges = this.modelManager.applyChange(change);
-    this.manageChangeInternally(change);
+    ret = this.manageChangeInternally(change);
     // Sends as well the subChanges induced by this change
-    subChanges.forEach((subChange) => {
+    for (const subChange of subChanges) {
       if (
         subChange.type !== change.type ||
         subChange.position !== change.position
       ) {
-        this.manageChangeInternally(subChange);
+        const otherRet=this.manageChangeInternally(subChange);
+        ret = ret || otherRet;
       }
-    });
+    }
+    return ret;
   }
 
-  manageChangeInternally(change: Change) {
+  manageChangeInternally(change: Change): boolean {
     if (!change.pointer) {
       change.pointer = this.calculatePointerFor(change.position);
     }
     this.receivedChanges.next(change);
-    this.findAndNotify(change, new Map<Subject<Change>, Array<string>>());
+    return this.findAndNotify(change, new Map<Subject<Change>, Array<string>>());
   }
 
   /**
@@ -198,7 +211,8 @@ export class DontCodeChangeManager {
   findAndNotify(
     change: Change,
     alreadyCalled: Map<Subject<Change>, Array<string>>
-  ) {
+  ): boolean {
+    let ret=false;
     // First resolve the position and cache it
     if (!this.listenerCachePerPosition.get(change.position)) {
       this.listeners.forEach((value, key) => {
@@ -208,6 +222,7 @@ export class DontCodeChangeManager {
       });
     }
 
+      // Then call all listeners, but only once
     const affected = this.listenerCachePerPosition.get(change.position);
     if (affected!=null) {
       for (const subject of affected) {
@@ -224,11 +239,13 @@ export class DontCodeChangeManager {
           alreadyCalled.set(subject, new Array<string>());
         }
         if (canCall) {
+          ret=true;
           subject.next(change);
           alreadyCalled.get(subject)?.push(change.position);
         }
       }
     }
+    return ret;
   }
 
   /**
@@ -276,4 +293,16 @@ export class DontCodeChangeManager {
     return position;
   }
 
+  protected clearEmptyListeners() {
+    const toRemove=new Array<{position:string, property?:string}>
+    for (const listener of this.listeners) {
+      if( !listener[1].observed) {
+        toRemove.push(listener[0]);
+      }
+    }
+
+    for (const remove of toRemove) {
+      this.listeners.delete(remove);
+    }
+  }
 }
