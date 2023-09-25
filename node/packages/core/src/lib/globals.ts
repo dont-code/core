@@ -43,7 +43,7 @@ export interface DontCodeSchemaType {
 }
 
 export interface DontCodeEntityType {
-  from: string;
+  from?: string;
   name: string;
   fields?: {[key:string]:DontCodeFieldType};
 }

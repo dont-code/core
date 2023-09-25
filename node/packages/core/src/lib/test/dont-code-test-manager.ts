@@ -3,11 +3,14 @@ import {DontCodeModelPointer} from '../model/dont-code-schema';
 import {dtcde} from "../dontcode";
 import {AbstractDontCodeStoreProvider} from "../store/dont-code-store-provider";
 import {DontCodeStoreCriteria, UploadedDocumentInfo} from "../store/dont-code-store-manager";
-import {filter, firstValueFrom, from, map, Observable, Subject, take, takeUntil, throwError, timer} from "rxjs";
+import {filter, firstValueFrom, from, map, Observable, take, throwError, timer} from "rxjs";
 import {CommandProviderInterface} from "../plugin/command-provider-interface";
 import {DontCodeSchemaManager} from "../model/dont-code-schema-manager";
 import {Action} from "../action/action";
 
+/**
+ * Ease the unit tests by providing helper functions
+ */
 export class DontCodeTestManager {
   public static createDeleteChange(
     containerSchema: string,
