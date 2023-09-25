@@ -388,7 +388,7 @@ export class DontCodeModelManager {
           // Action are just passed to all subElements
         if (src.type==ChangeType.ACTION) {
           const srcAction = src as Action;
-          this.applyChangeRecursive(new Action(subPosition, srcAction.value, srcAction.context, srcAction.actionType, subPointer),
+          this.applyChangeRecursive(new Action(subPosition, srcAction.value, srcAction.context, srcAction.actionType, subPointer, srcAction.running),
             oldContent, null, subPointer, atomicChanges);
         } else {
           // It doesn't exist in the new element, so it's deleted
@@ -496,7 +496,8 @@ export class DontCodeModelManager {
               srcAction.value,
               srcAction.context,
               srcAction.actionType,
-              pointer
+              pointer,
+              srcAction.running
             )
           );
 
