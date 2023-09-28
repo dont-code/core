@@ -10,6 +10,7 @@ describe('Change Manager', () => {
 
   beforeEach(() => {
     changeMgr = dtcde.getChangeManager();
+    changeMgr.reset();
   });
 
     it('should filter properly', () => {
@@ -19,10 +20,13 @@ describe('Change Manager', () => {
       subscriptions.add(changeMgr.receiveCommands('creation/screens', 'name').subscribe(
         notified
       ));
-      changeMgr.pushChange (new Change (ChangeType.UPDATE, 'creation/name', 'NewName'));
+      let ret = changeMgr.pushChange (new Change (ChangeType.UPDATE, 'creation/name', 'NewName'));
       expect(notified).toHaveBeenCalledTimes(0);
-      changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/a/name', 'NewName'));
+      expect(ret).toEqual (false);
+
+      ret = changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/a/name', 'NewName'));
       expect(notified).toHaveBeenCalledTimes(1);
+      expect(ret).toEqual (true);
       subscriptions.unsubscribe();
 
       subscriptions = new Subscription();
@@ -31,12 +35,15 @@ describe('Change Manager', () => {
         }
 
       ));
-      changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/b', {name:"NewName"}));
+      ret = changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/b', {name:"NewName"}));
       expect(notified).toHaveBeenCalledTimes(5);
-      changeMgr.pushChange (new Change (ChangeType.UPDATE, 'creation/screens/b/name', 'NewName'));
+      expect(ret).toEqual (true);
+      ret = changeMgr.pushChange (new Change (ChangeType.UPDATE, 'creation/screens/b/name', 'NewName'));
       expect(notified).toHaveBeenCalledTimes(6);
-      changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/b/components/b', {type:"edit"}));
+      expect(ret).toEqual (true);
+      ret = changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/b/components/b', {type:"edit"}));
       expect(notified).toHaveBeenCalledTimes(10);
+      expect(ret).toEqual (true);
       subscriptions.unsubscribe();
 
       subscriptions = new Subscription();
@@ -44,22 +51,27 @@ describe('Change Manager', () => {
           notified();
         }
       ));
-      changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/a/name', 'NewName'));
-      expect(notified).toHaveBeenCalledTimes(11);
-      changeMgr.pushChange (new Change (ChangeType.DELETE, 'creation/screens/b', null));
+      ret = changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/a/name', 'NewName'));
+      expect(notified).toHaveBeenCalledTimes(11); // Called because the init value is sent, but the pushChange does not trigger anything
+      expect(ret).toEqual (false);  //
+      ret = changeMgr.pushChange (new Change (ChangeType.DELETE, 'creation/screens/b', null));
       expect(notified).toHaveBeenCalledTimes(13);
+      expect(ret).toEqual (true);
       subscriptions.unsubscribe();
 
       subscriptions = new Subscription();
       subscriptions.add(changeMgr.receiveCommands('creation/screens/?', 'name').subscribe(
         notified
       ));
-      changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/a/name', 'NewName'));
+      ret = changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/a/name', 'NewName'));
       expect(notified).toHaveBeenCalledTimes(15);
-      changeMgr.pushChange (new Change (ChangeType.DELETE, 'creation/screens/b', null));
+      expect(ret).toEqual (true);
+      ret = changeMgr.pushChange (new Change (ChangeType.DELETE, 'creation/screens/b', null));
       expect(notified).toHaveBeenCalledTimes(15);
-      changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/b/components/c/type', 'view'));
+      expect(ret).toEqual (false);
+      ret = changeMgr.pushChange (new Change (ChangeType.ADD, 'creation/screens/b/components/c/type', 'view'));
       expect(notified).toHaveBeenCalledTimes(15);
+      expect(ret).toEqual (false);
     } finally {
       subscriptions.unsubscribe();
       changeMgr.close();
@@ -70,7 +82,10 @@ describe('Change Manager', () => {
     const subscriptions = new Subscription();
     const notified = waitableJestFn(3);
     const notifiedQuestionMark = waitableJestFn(3);
-    changeMgr.pushChange (new Change (ChangeType.RESET, '', {}));
+
+    const ret=changeMgr.pushChange (new Change (ChangeType.RESET, '', {}));
+    expect(ret).toEqual(false);
+
     try {
       subscriptions.add(changeMgr.receiveCommands('creation', 'name').subscribe( value => {
           notified();
@@ -85,7 +100,7 @@ describe('Change Manager', () => {
         }
       ));
 
-      changeMgr.pushChange (new Change (ChangeType.RESET, '', {
+      const ret=changeMgr.pushChange (new Change (ChangeType.RESET, '', {
         creation: {
           name:'CreationName',
           entities: {
@@ -102,6 +117,7 @@ describe('Change Manager', () => {
       expect(notified).toHaveBeenCalledTimes(3);
       notifiedQuestionMark.waitUntilComplete();
       expect(notifiedQuestionMark).toHaveBeenCalledTimes(3);
+      expect(ret).toEqual(true);
     } finally {
       subscriptions.unsubscribe();
       changeMgr.close();
@@ -111,7 +127,8 @@ describe('Change Manager', () => {
   it('should notify new listeners', (done) => {
     const subscriptions = new Subscription();
     const notified = waitableJestFn(1);
-    changeMgr.pushChange(new Change(ChangeType.RESET, "creation/entities/a", {name:'TestName'}));
+    const ret=changeMgr.pushChange(new Change(ChangeType.RESET, "creation/entities/a", {name:'TestName'}));
+    expect(ret).toEqual(false);  // As no listeners were defined, for now there are no changes notified
 
     try {
       subscriptions.add(changeMgr.receiveCommands(DontCodeModel.APP_ENTITIES, DontCodeModel.APP_ENTITIES_NAME_NODE).subscribe(
@@ -124,6 +141,7 @@ describe('Change Manager', () => {
         notified
       ));
       notified.waitUntilComplete();
+      // Despite being set after, the subcriptions must have received the notification
       expect(notified).toHaveBeenCalledTimes(3);
       done();
     } finally {

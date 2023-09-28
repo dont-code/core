@@ -1,6 +1,7 @@
 export * from './lib/dontcode';
 export * from './lib/change/change';
 export * from './lib/change/dont-code-change-manager';
+export * from './lib/action/action';
 export * from './lib/message/message';
 export * from './lib/model/dont-code-model';
 export * from './lib/model/dont-code-schema';

@@ -4,6 +4,7 @@ import {DontCodeSchemaManager} from './dont-code-schema-manager';
 import {JSONPath} from 'jsonpath-plus';
 import {DontCodeModelPointer} from './dont-code-schema';
 import {DefinitionUpdateConfig} from "../globals";
+import {Action} from "../action/action";
 
 /**
  * Stores and constantly updates the json (as an instance of the DontCodeSchema) as it is being edited / modified through Change events
@@ -92,6 +93,10 @@ export class DontCodeModelManager {
       }
     }
 
+    if( toApply.type===ChangeType.ACTION) {
+      lastChange.type=ChangeType.ACTION;
+    }
+
     this.applyChangeRecursive(
       toApply,
       content,
@@ -128,6 +133,13 @@ export class DontCodeModelManager {
       const oldSubContent =
         subElem.length === 0 ? oldContent : oldContent[subElem];
       switch (srcChange.type) {
+        case ChangeType.ACTION: {
+
+          // An action doesn't modify the data but must be created for each subelement
+          const curAtomicChange = atomicChanges.createSubChange(ChangeType.ACTION, subElem, atomicChanges.value);
+          this.compareRecursiveIfNeeded(srcChange, oldSubContent,null,pointer, curAtomicChange);
+          break;
+        }
         case ChangeType.ADD:
         case ChangeType.UPDATE:
         case ChangeType.RESET: {
@@ -373,17 +385,22 @@ export class DontCodeModelManager {
           oldPosition
         );
       } else {
-        //        if ((src.type===ChangeType.RESET) || (!this.schemaMgr.locateItem(pointer.position, false).isArray())) {
-        // It doesn't exist in the new element, so it's deleted
-        this.applyChangeRecursive(
-          new Change(ChangeType.DELETE, subPosition, null, subPointer),
-          oldContent,
-          null,
-          subPointer,
-          atomicChanges,
-          oldPosition
-        );
-        //        }
+          // Action are just passed to all subElements
+        if (src.type==ChangeType.ACTION) {
+          const srcAction = src as Action;
+          this.applyChangeRecursive(new Action(subPosition, srcAction.value, srcAction.context, srcAction.actionType, subPointer, srcAction.running),
+            oldContent, null, subPointer, atomicChanges);
+        } else {
+          // It doesn't exist in the new element, so it's deleted
+          this.applyChangeRecursive(
+            new Change(ChangeType.DELETE, subPosition, null, subPointer),
+            oldContent,
+            null,
+            subPointer,
+            atomicChanges,
+            oldPosition
+          );
+        }
       }
     }
 
@@ -470,14 +487,30 @@ export class DontCodeModelManager {
           )
         );
       } else {
-        result.push(
-          new Change(
-            atomicChanges.type,
-            pointer.position,
-            atomicChanges.value,
-            pointer
-          )
-        );
+        if ( atomicChanges.type===ChangeType.ACTION) {
+            // Create an action for Change of action type
+          const srcAction = src as Action;
+          result.push(
+            new Action(
+              pointer.position,
+              srcAction.value,
+              srcAction.context,
+              srcAction.actionType,
+              pointer,
+              srcAction.running
+            )
+          );
+
+        } else {
+          result.push(
+            new Change(
+              atomicChanges.type,
+              pointer.position,
+              atomicChanges.value,
+              pointer
+            )
+          );
+        }
       }
     } else {
       // First check if we need to send an UPDATED change to this element because a subElement is added / removed

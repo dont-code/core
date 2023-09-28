@@ -58,4 +58,5 @@ export enum ChangeType {
   DELETE = 'DELETE',
   MOVE = 'MOVE',
   RESET = 'RESET',
+  ACTION = 'ACTION'
 }
