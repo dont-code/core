@@ -663,7 +663,7 @@ export class DontCodeModelManager {
    * @param query: the query as a  jsonPath
    * @param position: in case the jsonPath is relative
    */
-  queryModelToSingle(query: string, position?: string): ModelQuerySingleResult {
+  queryModelToSingle(query: string, position?: string): ModelQuerySingleResult|null {
     let root = this.content;
     if (position) {
       root = this.findAtPosition(position, false);

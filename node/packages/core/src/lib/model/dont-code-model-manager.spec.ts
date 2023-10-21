@@ -123,6 +123,12 @@ describe('Model Manager', () => {
     )?.value;
     expect(queryResult2).toHaveProperty('fields');
 
+      // Test that querying something that doesn't exist is still returning non null
+    const queryResult3 = service.queryModelToSingle(
+      '$.creation.pizzas[?(@.name==="Entity2")]'
+    );
+    expect(queryResult3).toBeFalsy();
+
     const entity1 = service.findAtPosition('creation/entities/aaaa');
     expect(entity1).toHaveProperty('from', 'Source1');
     const sources = service.findAllPossibleTargetsOfProperty(
