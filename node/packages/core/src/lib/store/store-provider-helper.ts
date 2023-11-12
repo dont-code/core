@@ -203,6 +203,14 @@ export class StoreProviderHelper {
     return toSort;
   }
 
+  /**
+   * Calculates sum, avg, min or max values per group
+   * @param values
+   * @param groupBy
+   * @param modelMgr
+   * @param position
+   * @param item
+   */
   static calculateGroupedByValues<T>(values: T[], groupBy: DontCodeStoreGroupby, modelMgr?: DontCodeModelManager, position?: DontCodeModelPointer, item?:DontCodeSchemaItem):DontCodeStoreGroupedByEntities|undefined {
       // We are counting per different value of the groupedBy Item
     if ((groupBy!=null) && (groupBy.display!=null)) {
