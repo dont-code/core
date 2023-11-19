@@ -1708,4 +1708,73 @@ describe('Model Manager', () => {
 
   });
 
+  it('should manage price correctly', () => {
+    const service = dtcde.getModelManager();
+
+    let dataInfo= new DataTransformationInfo();
+    /** Equivalent of PriceModel from commerce-plugin
+     * export interface PriceModel {
+     *   cost?:MoneyAmount;
+     *   shop?:string;
+     *   priceDate?:Date;
+     *   lastCheckDate?:Date;
+     *
+     *   idInShop?:string;
+     *   nameInShop?:string;
+     *   urlInShop?:string;
+     *
+     *   outOfStock?:boolean;
+     *   inError?:boolean;
+     * }
+     */
+    const price = {
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }
+    }
+    let result = service.extractValue(
+      price
+      , dataInfo);
+
+    expect (dataInfo.parsed).toBeTruthy();
+    expect (dataInfo.direct).toBeFalsy();
+    expect (dataInfo.subValue).toBeNull();
+    expect (dataInfo.subValues).toEqual(['cost', 'amount']);
+
+    expect (result).toEqual(price.cost.amount);
+
+    price.cost.amount=567.23;
+    price.cost.currencyCode="USD";
+
+    result = service.extractValue(
+      price
+      , dataInfo);
+
+    expect(result).toEqual(price.cost.amount);
+
+    const newPrice={
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }
+    };
+
+    dataInfo = new DataTransformationInfo();
+    result = service.applyValue(newPrice, 34.23, dataInfo);
+
+    expect(result===newPrice).toBeTruthy();
+    expect(newPrice.cost.amount).toEqual(34.23);
+
+    result = service.applyValue(newPrice, undefined, dataInfo);
+    expect(result===newPrice).toBeTruthy();
+    expect(newPrice.cost.amount).toBeUndefined();
+
+    result = service.applyValue(newPrice, 12, dataInfo);
+
+    expect(result===newPrice).toBeTruthy();
+    expect(newPrice.cost.amount).toEqual(12);
+
+  });
+
 });
