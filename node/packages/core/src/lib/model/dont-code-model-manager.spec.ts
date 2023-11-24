@@ -1621,7 +1621,7 @@ describe('Model Manager', () => {
   it('should extract simple values correctly', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     let result = service.extractValue(234
     , dataInfo);
 
@@ -1634,12 +1634,27 @@ describe('Model Manager', () => {
 
     expect(result).toEqual(343);
 
+    dataInfo = new DataTransformationInfo();
+    result = 123;
+    result = service.applyValue(result, 34.23, dataInfo);
+
+    expect(result===34.23).toBeTruthy();
+
+    result = service.applyValue(undefined, 23, dataInfo);
+    expect(result===23).toBeTruthy();
+
+    result = service.applyValue(null, 12, dataInfo);
+    expect(result===12).toBeTruthy();
+
+    result = service.applyValue(result, undefined, dataInfo);
+
+    expect(result).toBeUndefined();
   });
 
   it('should extract date values correctly', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     const date= new Date();
 
     let result = service.extractValue(
@@ -1655,12 +1670,25 @@ describe('Model Manager', () => {
 
     expect(result).toEqual(date);
 
+    dataInfo = new DataTransformationInfo();
+
+    date.setFullYear(date.getFullYear()+3);
+    result = service.applyValue(result, date, dataInfo);
+
+    expect(result===date).toBeTruthy();
+
+    result = service.applyValue(date, undefined, dataInfo);
+    expect(result).toBeUndefined();
+
+    result = service.applyValue(result, date, dataInfo);
+
+    expect(result===date).toBeTruthy();
   });
 
   it('should extract values with null', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     let result = service.extractValue({
         value: null,
         label: 'Label'
@@ -1679,12 +1707,26 @@ describe('Model Manager', () => {
     expect (dataInfo.subValue).toEqual("value");
     expect(result).toEqual(343);
 
+
+    dataInfo = new DataTransformationInfo();
+    result = service.applyValue({value:232, label:'label3'}, undefined, dataInfo);
+    expect(result.value).toBeUndefined();
+
+    result = service.applyValue(result, 22, dataInfo);
+    expect(result.value).toEqual(22);
+
+    result = service.applyValue({value:232, label:'label3'}, null, dataInfo);
+    expect(result.value).toBeNull();
+
+    result = service.applyValue(result, 22, dataInfo);
+    expect(result.value).toEqual(22);
+
   });
 
   it('should extract amount ', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     const cost = new MoneyAmount();
     cost.amount=234.56;
     cost.currencyCode="EUR";
@@ -1705,6 +1747,19 @@ describe('Model Manager', () => {
     , dataInfo);
 
     expect(result).toEqual(cost.amount);
+    dataInfo = new DataTransformationInfo();
+    result = service.applyValue(cost, 34.23, dataInfo);
+
+    expect(result===cost).toBeTruthy();
+    expect(result.amount).toEqual(34.23);
+
+    result = service.applyValue(cost, undefined, dataInfo);
+    expect(result===cost).toBeTruthy();
+    expect(cost.amount).toBeUndefined();
+
+    result = service.applyValue(cost, 12, dataInfo);
+    expect(result===cost).toBeTruthy();
+    expect(cost.amount).toEqual(12);
 
   });
 

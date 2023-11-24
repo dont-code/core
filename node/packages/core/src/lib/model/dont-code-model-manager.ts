@@ -994,8 +994,8 @@ export class DontCodeModelManager {
    * @return The object with the primitive set or the value if the obj is indeed a primitive already
    */
   public applyValue <T>(obj: T, value:any, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): T {
-    if ((obj == null) && (value!=null))
-      throw new Error ('Cannot apply a value to a null or undefined object');
+    if (obj == null)
+      return value;
 
     if (!metaData.parsed) {
       this.extractMetaData(obj, metaData, position, schemaItem);
@@ -1016,21 +1016,22 @@ export class DontCodeModelManager {
         }
       }
       if (metaData.subValue != null) {
-        if( value==undefined) {
+        if( value===undefined) {
           delete (obj as any)[metaData.subValue];
         } else {
           (obj as any)[metaData.subValue]=value;
         }
       } else if (metaData.subValues != null) {
         let curObj = obj as any;
-        if (value == undefined) {
+        if (value === undefined) {
           for (let i=0;i<metaData.subValues.length-1; i++) {
             curObj=curObj[metaData.subValues[i]];
             if (curObj==null) break;
           }
             // Delete the element only it there was one
           if( (curObj!=null) && (curObj[metaData.subValues[metaData.subValues.length-1]]!=undefined)) {
-            delete curObj[metaData.subValues[metaData.subValues.length-1]];
+              delete curObj[metaData.subValues[metaData.subValues.length-1]];
+
           }
         } else {
           for (let i=0;i<metaData.subValues.length-1; i++) {
