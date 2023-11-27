@@ -11,6 +11,7 @@ import {
   StoreProviderHelper
 } from "./store-provider-helper";
 import {DontCodeDataTransformer} from "./dont-code-data-transformer";
+import { DontCodeModelManager } from '../model/dont-code-model-manager';
 
 /**
  * The standard interface for any store provider
@@ -61,6 +62,12 @@ export abstract class AbstractDontCodeStoreProvider<T=never> implements DontCode
 
   abstract loadEntity(position: string, key: any): Promise<T|undefined>;
 
+  protected modelMgr?:DontCodeModelManager;
+  
+  constructor (modelMgr?:DontCodeModelManager) {
+    this.modelMgr=modelMgr;
+  }
+
   safeLoadEntity(position: string, key: any): Promise<T> {
     return this.loadEntity(position, key).then(value => {
       if (value==null)
@@ -102,8 +109,9 @@ export abstract class AbstractDontCodeStoreProvider<T=never> implements DontCode
         let groupedByValues:DontCodeStoreGroupedByEntities|undefined;
         if((sort!=null) || (groupBy?.atLeastOneGroupIsRequested()===true)) {
           value = StoreProviderHelper.multiSortArray(value, this.calculateSortHierarchy(sort, groupBy)) as T[];
-          if (groupBy!=null)
-            groupedByValues = StoreProviderHelper.calculateGroupedByValues(value, groupBy);
+          if (groupBy!=null) {
+            groupedByValues = StoreProviderHelper.calculateGroupedByValues(value, groupBy, this.modelMgr);
+          }
         }
         return new DontCodeStorePreparedEntities<T> (value, sort, groupedByValues);
       })

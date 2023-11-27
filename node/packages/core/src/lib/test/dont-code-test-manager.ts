@@ -7,6 +7,7 @@ import {filter, firstValueFrom, from, map, Observable, take, throwError, timer} 
 import {CommandProviderInterface} from "../plugin/command-provider-interface";
 import {DontCodeSchemaManager} from "../model/dont-code-schema-manager";
 import {Action} from "../action/action";
+import { DontCodeModelManager } from '../model/dont-code-model-manager';
 
 /**
  * Ease the unit tests by providing helper functions
@@ -91,8 +92,8 @@ export class DontCodeTestManager {
    * @param position
    * @param toFetchAsset
    */
-  public static addDummyProviderFromContent (position:string, toReturn: any): void {
-    dtcde.getStoreManager().setProvider(new DummyStoreProvider<never> (toReturn), position);
+  public static addDummyProviderFromContent (position:string, toReturn: any, modelMgr?:DontCodeModelManager): void {
+    dtcde.getStoreManager().setProvider(new DummyStoreProvider<never> (toReturn, modelMgr), position);
   }
 
   /**
@@ -189,8 +190,8 @@ class DummyStoreProvider<T> extends AbstractDontCodeStoreProvider<T> {
 
   content:any;
 
-  constructor(content: any) {
-    super();
+  constructor(content: any, modelMgr?:DontCodeModelManager) {
+    super(modelMgr);
     this.content = content;
   }
 

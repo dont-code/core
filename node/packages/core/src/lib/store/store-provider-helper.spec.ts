@@ -1,6 +1,6 @@
 import 'core-js/stable/structured-clone'; // Some bugs in Jest disable the native call
-import { dtcde } from '../dontcode';
-import { DontCodeGroupOperationType } from '../globals';
+import {dtcde} from '../dontcode';
+import {DontCodeGroupOperationType} from '../globals';
 import {DontCodeStoreAggregate, DontCodeStoreGroupby} from './dont-code-store-manager';
 import {StoreProviderHelper} from './store-provider-helper';
 
