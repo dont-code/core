@@ -979,7 +979,8 @@ export class DontCodeModelManager {
         return obj;
 
       } else {
-        return obj;
+        // If we couldn't determine the object's value, maybe it's because the value is not present
+        return undefined;
       }
     }
   }
@@ -1097,8 +1098,17 @@ export class DontCodeModelManager {
             }
           }
           if ((metaData.subValue == null)&& (metaData.subValues==null)) {
-            metaData.subValue = firstKey;
-            console.warn("Guessed value key of " + metaData.subValue + ' for object:', obj);
+            if ((typeof obj!=='object') || (obj instanceof Date)) {
+              metaData.subValue = firstKey;
+              console.warn("Guessed value key of " + metaData.subValue + ' for object:', obj);
+            } else {
+              console.warn("Cannot guess value for object: ", obj);
+              metaData.parsed=false;
+              metaData.subValue=null;
+              metaData.subValues=null;
+              metaData.direct=false;
+              metaData.array=false;
+            }
           }
 
         }
