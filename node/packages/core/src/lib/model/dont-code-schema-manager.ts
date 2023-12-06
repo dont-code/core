@@ -33,9 +33,9 @@ export class DontCodeSchemaManager {
     const pluginFullName = config.plugin.id + '-v' + config.plugin.version;
     if (config['schema-updates']) {
       const updates = config['schema-updates'];
-      updates.forEach((update) => {
+      for (const update of updates) {
         const changes = update.changes;
-        changes.forEach((change) => {
+        for (const change of changes) {
           if (change.location.id) {
             const parent = this.locateItem(change.location.parent);
             if (parent) {
@@ -44,8 +44,8 @@ export class DontCodeSchemaManager {
               throw 'Cannot find parent element: ' + change.location.parent;
             }
           }
-        });
-      });
+        }
+      }
     }
   }
 
@@ -60,7 +60,7 @@ export class DontCodeSchemaManager {
   ): DontCodeSchemaItem {
     const split = schemaPosition.split('/');
     let cur: DontCodeSchemaItem | undefined = this.currentSchema;
-    split.forEach((value) => {
+    for (const value of split) {
       if (!cur) {
         console.error(
           'Could not find subItem ' + value + ' of ' + schemaPosition
@@ -88,12 +88,18 @@ export class DontCodeSchemaManager {
         }
         cur = cur.getChild(value);
       }
-    });
+    }
 
-    if (resolveReference && cur.isReference()) {
+    if (resolveReference && cur?.isReference()) {
       cur = this.resolveReference(cur as DontCodeSchemaRef);
     }
-    return cur;
+    if (cur!=null)
+      return cur;
+    else {
+      throw new Error(
+        'Could not find item at schema position ' + schemaPosition);
+
+    }
   }
 
   resolveReference(ref: DontCodeSchemaRef): DontCodeSchemaItem {
@@ -128,7 +134,7 @@ export class DontCodeSchemaManager {
 
     let parentItem = this.currentSchema as DontCodeSchemaItem;
     let ignoreNext = false;
-    posElems.forEach((element) => {
+    for (const element of posElems) {
       if (!ignoreNext) {
         let nextItem =
           parentItem.getChild(element) ??
@@ -175,7 +181,7 @@ export class DontCodeSchemaManager {
         ret.isProperty = false;
         ignoreNext = false;
       }
-    });
+    }
 
     ret.containerPositionInSchema = ret.positionInSchema.substring(
       0,
