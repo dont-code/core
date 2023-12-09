@@ -177,7 +177,7 @@ describe('Store Provider Helper', () => {
         text:'text1',
         value:100,
         money: {
-          amount:100,
+          amount:null,
           currencyCode:'EUR'
         },
         date:new Date(2023,1,1)
@@ -197,7 +197,7 @@ describe('Store Provider Helper', () => {
           text:null,
           value:null,
           money: {
-            amount:null,
+            amount:100,
             currencyCode:'EUR'
           },
           date:null
