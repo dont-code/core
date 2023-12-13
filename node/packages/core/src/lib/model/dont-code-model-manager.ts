@@ -1086,7 +1086,7 @@ export class DontCodeModelManager {
         } else if ((obj as any).amount !== undefined) {
           // It's an MoneyAmount
           metaData.subValue = 'amount';
-        } else if ((obj as any).cost?.amount !== undefined) {
+        } else if ((obj as any).cost !== undefined) {
             // It's a PriceModel
           metaData.subValues = ['cost','amount'];
         } else {

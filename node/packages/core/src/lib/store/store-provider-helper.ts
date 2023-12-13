@@ -264,7 +264,7 @@ export class StoreProviderHelper {
               if( counter.minimum==null)  { counter.minimum=valSrc; counter.minAsValue=value}
               else {
                 const minValue=counter.minAsValue;
-                if ((value!=null) && ((minValue==null) || (value < minValue)) ) { counter.minimum = valSrc; counter.minAsValue=value };
+                if ((value!=null) && ((minValue==null) || (value < minValue)) ) { counter.minimum = valSrc; counter.minAsValue=value }
               }
 
               if( counter.maximum==null) { counter.maximum=valSrc; counter.maxAsValue=value;}
