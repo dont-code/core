@@ -1,3 +1,4 @@
+import 'core-js/stable/structured-clone'; // Some bugs in Jest disable the native call
 import {Change, ChangeType} from '../change/change';
 import {dtcde} from '../dontcode';
 import {DontCodeTestManager} from '../test/dont-code-test-manager';
@@ -1831,5 +1832,77 @@ describe('Model Manager', () => {
     expect(newPrice.cost.amount).toEqual(12);
 
   });
+
+  it('should manage incomplete price sum correctly', () => {
+    const service = dtcde.getModelManager();
+
+    let dataInfo= new DataTransformationInfo();
+    /** Equivalent of PriceModel from commerce-plugin
+     * export interface PriceModel {
+     *   cost?:MoneyAmount;
+     *   shop?:string;
+     *   priceDate?:Date;
+     *   lastCheckDate?:Date;
+     *
+     *   idInShop?:string;
+     *   nameInShop?:string;
+     *   urlInShop?:string;
+     *
+     *   outOfStock?:boolean;
+     *   inError?:boolean;
+     * }
+     */
+    const priceSum: TestPrice = {
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }
+    };
+    const priceToAdd: TestPrice = {
+      cost: {
+        amount: 12,
+        currencyCode: "EUR"
+      }
+    };
+
+    let result = service.modifyValues(priceSum, priceToAdd
+      , dataInfo, (first, second) => {
+        return first+second;
+      });
+
+    expect (dataInfo.parsed).toBeTruthy();
+    expect (dataInfo.direct).toBeFalsy();
+    expect (dataInfo.subValue).toBeNull();
+    expect (dataInfo.subValues).toEqual(['cost', 'amount']);
+  
+    expect (result.cost?.amount).toEqual(246.56);
+
+      // Empty the sum
+    priceSum.cost= {
+    };
+
+    dataInfo=new DataTransformationInfo();
+
+    result = service.modifyValues (priceSum, priceToAdd, dataInfo, (first, second) => {
+      if ((first!=null) && (second!=null))
+        return first + second;
+      else if (first == null) {
+        return second;
+      } else if (second==null) {
+        return first;
+      }
+    });
+
+    expect (result.cost?.amount).toEqual (12);
+    expect (result.cost?.currencyCode).toEqual ("EUR");
+      
+  });
+
+  interface TestPrice {
+    cost?: {
+      amount?:number,
+      currencyCode?:string
+    }
+  }
 
 });

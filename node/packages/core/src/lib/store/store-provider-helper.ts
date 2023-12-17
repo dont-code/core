@@ -327,7 +327,7 @@ export class StoreProviderHelper {
                   else if ((typeof counter.sum === 'object') &&  (!(counter.sum instanceof Date)) && (modelMgr!=null)) {
                     value = modelMgr.applyValue(structuredClone(counter.sum),
                       modelMgr.extractValue(counter.sum, counter.metaData, position, item)/counter.count,
-                      counter.metaData, position, item);
+                      counter.metaData, undefined, position, item);
                   } else value = counter.sum / counter.count;
                 }
                   break;

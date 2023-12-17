@@ -990,11 +990,12 @@ export class DontCodeModelManager {
    * @param obj
    * @param value
    * @param metaData Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param valueObj if any, the object that contained the source. In case you want to apply other values of the source as well
    * @param position
    * @param schemaItem
    * @return The object with the primitive set or the value if the obj is indeed a primitive already
    */
-  public applyValue <T>(obj: T, value:any, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): T {
+  public applyValue <T>(obj: T, value:any, metaData: DataTransformationInfo, valueObj?: T, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): T {
     if (obj == null)
       return value;
 
@@ -1041,6 +1042,28 @@ export class DontCodeModelManager {
             }
             curObj = curObj[metaData.subValues[i]];
           }
+
+          if ((curObj[metaData.subValues[metaData.subValues.length-1]]==null) && (valueObj!=null)) {
+            let curValueObj=valueObj as any;
+            for (let i=0;i<metaData.subValues.length-1; i++) {
+              if (curValueObj[metaData.subValues[i]]==null) {
+                curValueObj=null;
+                break;
+              }
+              curValueObj = curValueObj[metaData.subValues[i]];
+            }
+  
+            if (curValueObj!=null) {
+                // The element to copy to was null, so let's copy all properties from the second element
+                for (const valueProp in curValueObj) {
+
+                  if ((curObj[valueProp]==null) && (curValueObj[valueProp]!=null)) {
+                    curObj[valueProp]= structuredClone (curValueObj[valueProp]);
+                  }
+                }
+              }
+          }
+            // apply the value
           curObj[metaData.subValues[metaData.subValues.length-1]]=value;
         }
       }
@@ -1131,10 +1154,11 @@ export class DontCodeModelManager {
     if (firstElement == null) {
       throw new Error("Cannot modify value of null object");
     }
-    const calculatedValue = operator(this.extractValue(firstElement, metaData, position, schemaItem),
-      this.extractValue(secondElement, metaData, position, schemaItem));
+    const firstValue = this.extractValue(firstElement, metaData, position, schemaItem);
+    const secondValue =this.extractValue(secondElement, metaData, position, schemaItem); 
+    const calculatedValue = operator(firstValue, secondValue);
 
-    return this.applyValue(firstElement, calculatedValue, metaData, position, schemaItem);
+      return this.applyValue(firstElement, calculatedValue, metaData, secondElement, position, schemaItem);
   }
 }
 /**
