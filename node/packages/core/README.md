@@ -1,7 +1,7 @@
 # dontcode
 
 The dontcode components needed to develop dontcode Application Builder, Previewer, and plugins.
-It contains all interfaces shared between all these modules
+It contains all interfaces shared between all these modules. The core
 
 This library was generated with [Nx](https://nx.dev).
 

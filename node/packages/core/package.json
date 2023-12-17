@@ -1,6 +1,6 @@
 {
   "name": "@dontcode/core",
-  "version": "1.3.1",
+  "version": "1.3.2-35",
   "private": false,
   "peerDependencies": {
     "jsonpath-plus": "^7.2.0",

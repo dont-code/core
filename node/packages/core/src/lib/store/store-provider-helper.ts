@@ -203,6 +203,14 @@ export class StoreProviderHelper {
     return toSort;
   }
 
+  /**
+   * Calculates sum, avg, min or max values per group
+   * @param values
+   * @param groupBy
+   * @param modelMgr
+   * @param position
+   * @param item
+   */
   static calculateGroupedByValues<T>(values: T[], groupBy: DontCodeStoreGroupby, modelMgr?: DontCodeModelManager, position?: DontCodeModelPointer, item?:DontCodeSchemaItem):DontCodeStoreGroupedByEntities|undefined {
       // We are counting per different value of the groupedBy Item
     if ((groupBy!=null) && (groupBy.display!=null)) {
@@ -242,27 +250,33 @@ export class StoreProviderHelper {
               else {
                 counter.sum=modelMgr.modifyValues(counter.sum, valSrc, counter.metaData,
                   (first, second) => {
-                    return first + second
+                    if ((first!=null) && (second!=null))
+                      return first + second;
+                    else if (first == null) {
+                      return second;
+                    } else if (second==null) {
+                      return first;
+                    }
                   },
                   position, item);
               }
               const value=modelMgr.extractValue(valSrc, counter.metaData,position, item);
-              if( counter.minimum==null)  counter.minimum=valSrc;
+              if( counter.minimum==null)  { counter.minimum=valSrc; counter.minAsValue=value}
               else {
-                const minValue=modelMgr.extractValue(counter.minimum, counter.metaData, position, item);
-                if ((value!=null) && (value < minValue) ) counter.minimum = valSrc;
+                const minValue=counter.minAsValue;
+                if ((value!=null) && ((minValue==null) || (value < minValue)) ) { counter.minimum = valSrc; counter.minAsValue=value }
               }
 
-              if( counter.maximum==null)  counter.maximum=valSrc;
+              if( counter.maximum==null) { counter.maximum=valSrc; counter.maxAsValue=value;}
               else {
-                const maxValue=modelMgr.extractValue(counter.maximum, counter.metaData, position, item);
+                const maxValue=counter.maxAsValue;
 
-                if ((value!=null) && (value > maxValue))
-                  counter.maximum = valSrc;
+                if ((value!=null) && ((maxValue==null) || (value > maxValue)))
+                  { counter.maximum = valSrc; counter.maxAsValue = value;}
+              
               }
 
-              const valueNum=modelMgr.extractValue(valSrc, counter.metaData,position,item);
-              if (valueNum!=null) {
+              if (value!=null) {
                 counter.count++;
               }
 
@@ -270,9 +284,9 @@ export class StoreProviderHelper {
               if( counter.sum==null) counter.sum=0;
               counter.sum=counter.sum+val;
               if( (counter.minimum==null) || (val < counter.minimum))
-                counter.minimum=valSrc;
+                { counter.minimum=valSrc; counter.minAsValue=valSrc as number;}
               if( (counter.maximum==null) || (val > counter.maximum))
-                counter.maximum=valSrc;
+                { counter.maximum=valSrc; counter.maxAsValue=valSrc as number;}
               counter.count++;
             } else if ((val instanceof Date) && (!isNaN(val.getTime()))) {
               counter.sum=null;
@@ -284,7 +298,7 @@ export class StoreProviderHelper {
               }
               counter.count++;
             } else {  // strings
-                counter.count++;
+              counter.count++;
             }
           }
         }
@@ -313,7 +327,7 @@ export class StoreProviderHelper {
                   else if ((typeof counter.sum === 'object') &&  (!(counter.sum instanceof Date)) && (modelMgr!=null)) {
                     value = modelMgr.applyValue(structuredClone(counter.sum),
                       modelMgr.extractValue(counter.sum, counter.metaData, position, item)/counter.count,
-                      counter.metaData, position, item);
+                      counter.metaData, undefined, position, item);
                   } else value = counter.sum / counter.count;
                 }
                   break;
@@ -346,8 +360,10 @@ class Counters {
   count=0;
 
   minimum: any;
+  minAsValue: number | null = null;
 
   maximum: any;
+  maxAsValue: number | null = null;
 
   metaData = new DataTransformationInfo();
 }

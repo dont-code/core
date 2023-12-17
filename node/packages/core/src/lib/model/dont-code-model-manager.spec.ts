@@ -1,3 +1,4 @@
+import 'core-js/stable/structured-clone'; // Some bugs in Jest disable the native call
 import {Change, ChangeType} from '../change/change';
 import {dtcde} from '../dontcode';
 import {DontCodeTestManager} from '../test/dont-code-test-manager';
@@ -122,6 +123,12 @@ describe('Model Manager', () => {
       '$.creation.entities[?(@.name==="Entity2")]'
     )?.value;
     expect(queryResult2).toHaveProperty('fields');
+
+      // Test that querying something that doesn't exist is still returning non null
+    const queryResult3 = service.queryModelToSingle(
+      '$.creation.pizzas[?(@.name==="Entity2")]'
+    );
+    expect(queryResult3).toBeFalsy();
 
     const entity1 = service.findAtPosition('creation/entities/aaaa');
     expect(entity1).toHaveProperty('from', 'Source1');
@@ -1615,7 +1622,7 @@ describe('Model Manager', () => {
   it('should extract simple values correctly', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     let result = service.extractValue(234
     , dataInfo);
 
@@ -1628,12 +1635,27 @@ describe('Model Manager', () => {
 
     expect(result).toEqual(343);
 
+    dataInfo = new DataTransformationInfo();
+    result = 123;
+    result = service.applyValue(result, 34.23, dataInfo);
+
+    expect(result===34.23).toBeTruthy();
+
+    result = service.applyValue(undefined, 23, dataInfo);
+    expect(result===23).toBeTruthy();
+
+    result = service.applyValue(null, 12, dataInfo);
+    expect(result===12).toBeTruthy();
+
+    result = service.applyValue(result, undefined, dataInfo);
+
+    expect(result).toBeUndefined();
   });
 
   it('should extract date values correctly', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     const date= new Date();
 
     let result = service.extractValue(
@@ -1649,12 +1671,25 @@ describe('Model Manager', () => {
 
     expect(result).toEqual(date);
 
+    dataInfo = new DataTransformationInfo();
+
+    date.setFullYear(date.getFullYear()+3);
+    result = service.applyValue(result, date, dataInfo);
+
+    expect(result===date).toBeTruthy();
+
+    result = service.applyValue(date, undefined, dataInfo);
+    expect(result).toBeUndefined();
+
+    result = service.applyValue(result, date, dataInfo);
+
+    expect(result===date).toBeTruthy();
   });
 
   it('should extract values with null', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     let result = service.extractValue({
         value: null,
         label: 'Label'
@@ -1673,12 +1708,26 @@ describe('Model Manager', () => {
     expect (dataInfo.subValue).toEqual("value");
     expect(result).toEqual(343);
 
+
+    dataInfo = new DataTransformationInfo();
+    result = service.applyValue({value:232, label:'label3'}, undefined, dataInfo);
+    expect(result.value).toBeUndefined();
+
+    result = service.applyValue(result, 22, dataInfo);
+    expect(result.value).toEqual(22);
+
+    result = service.applyValue({value:232, label:'label3'}, null, dataInfo);
+    expect(result.value).toBeNull();
+
+    result = service.applyValue(result, 22, dataInfo);
+    expect(result.value).toEqual(22);
+
   });
 
   it('should extract amount ', () => {
     const service = dtcde.getModelManager();
 
-    const dataInfo= new DataTransformationInfo();
+    let dataInfo= new DataTransformationInfo();
     const cost = new MoneyAmount();
     cost.amount=234.56;
     cost.currencyCode="EUR";
@@ -1699,7 +1748,161 @@ describe('Model Manager', () => {
     , dataInfo);
 
     expect(result).toEqual(cost.amount);
+    dataInfo = new DataTransformationInfo();
+    result = service.applyValue(cost, 34.23, dataInfo);
+
+    expect(result===cost).toBeTruthy();
+    expect(result.amount).toEqual(34.23);
+
+    result = service.applyValue(cost, undefined, dataInfo);
+    expect(result===cost).toBeTruthy();
+    expect(cost.amount).toBeUndefined();
+
+    result = service.applyValue(cost, 12, dataInfo);
+    expect(result===cost).toBeTruthy();
+    expect(cost.amount).toEqual(12);
 
   });
+
+  it('should manage price correctly', () => {
+    const service = dtcde.getModelManager();
+
+    let dataInfo= new DataTransformationInfo();
+    /** Equivalent of PriceModel from commerce-plugin
+     * export interface PriceModel {
+     *   cost?:MoneyAmount;
+     *   shop?:string;
+     *   priceDate?:Date;
+     *   lastCheckDate?:Date;
+     *
+     *   idInShop?:string;
+     *   nameInShop?:string;
+     *   urlInShop?:string;
+     *
+     *   outOfStock?:boolean;
+     *   inError?:boolean;
+     * }
+     */
+    const price = {
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }
+    }
+    let result = service.extractValue(
+      price
+      , dataInfo);
+
+    expect (dataInfo.parsed).toBeTruthy();
+    expect (dataInfo.direct).toBeFalsy();
+    expect (dataInfo.subValue).toBeNull();
+    expect (dataInfo.subValues).toEqual(['cost', 'amount']);
+
+    expect (result).toEqual(price.cost.amount);
+
+    price.cost.amount=567.23;
+    price.cost.currencyCode="USD";
+
+    result = service.extractValue(
+      price
+      , dataInfo);
+
+    expect(result).toEqual(price.cost.amount);
+
+    const newPrice={
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }
+    };
+
+    dataInfo = new DataTransformationInfo();
+    result = service.applyValue(newPrice, 34.23, dataInfo);
+
+    expect(result===newPrice).toBeTruthy();
+    expect(newPrice.cost.amount).toEqual(34.23);
+
+    result = service.applyValue(newPrice, undefined, dataInfo);
+    expect(result===newPrice).toBeTruthy();
+    expect(newPrice.cost.amount).toBeUndefined();
+
+    result = service.applyValue(newPrice, 12, dataInfo);
+
+    expect(result===newPrice).toBeTruthy();
+    expect(newPrice.cost.amount).toEqual(12);
+
+  });
+
+  it('should manage incomplete price sum correctly', () => {
+    const service = dtcde.getModelManager();
+
+    let dataInfo= new DataTransformationInfo();
+    /** Equivalent of PriceModel from commerce-plugin
+     * export interface PriceModel {
+     *   cost?:MoneyAmount;
+     *   shop?:string;
+     *   priceDate?:Date;
+     *   lastCheckDate?:Date;
+     *
+     *   idInShop?:string;
+     *   nameInShop?:string;
+     *   urlInShop?:string;
+     *
+     *   outOfStock?:boolean;
+     *   inError?:boolean;
+     * }
+     */
+    const priceSum: TestPrice = {
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }
+    };
+    const priceToAdd: TestPrice = {
+      cost: {
+        amount: 12,
+        currencyCode: "EUR"
+      }
+    };
+
+    let result = service.modifyValues(priceSum, priceToAdd
+      , dataInfo, (first, second) => {
+        return first+second;
+      });
+
+    expect (dataInfo.parsed).toBeTruthy();
+    expect (dataInfo.direct).toBeFalsy();
+    expect (dataInfo.subValue).toBeNull();
+    expect (dataInfo.subValues).toEqual(['cost', 'amount']);
+  
+    expect (result.cost?.amount).toEqual(246.56);
+
+      // Empty the sum
+    priceSum.cost= {
+    };
+
+    dataInfo=new DataTransformationInfo();
+
+    result = service.modifyValues (priceSum, priceToAdd, dataInfo, (first, second) => {
+      if ((first!=null) && (second!=null))
+        return first + second;
+      else if (first == null) {
+        return second;
+      } else if (second==null) {
+        return first;
+      }
+    });
+
+    expect (result.cost?.amount).toEqual (12);
+    expect (result.cost?.currencyCode).toEqual ("EUR");
+      
+  });
+
+  interface TestPrice {
+    cost?: {
+      amount?:number,
+      currencyCode?:string
+    }
+  }
 
 });

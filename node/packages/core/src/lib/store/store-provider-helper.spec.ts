@@ -1,6 +1,6 @@
 import 'core-js/stable/structured-clone'; // Some bugs in Jest disable the native call
-import { dtcde } from '../dontcode';
-import { DontCodeGroupOperationType } from '../globals';
+import {dtcde} from '../dontcode';
+import {DontCodeGroupOperationType} from '../globals';
 import {DontCodeStoreAggregate, DontCodeStoreGroupby} from './dont-code-store-manager';
 import {StoreProviderHelper} from './store-provider-helper';
 
@@ -177,7 +177,7 @@ describe('Store Provider Helper', () => {
         text:'text1',
         value:100,
         money: {
-          amount:100,
+          amount:null,
           currencyCode:'EUR'
         },
         date:new Date(2023,1,1)
@@ -197,7 +197,7 @@ describe('Store Provider Helper', () => {
           text:null,
           value:null,
           money: {
-            amount:null,
+            amount:100,
             currencyCode:'EUR'
           },
           date:null

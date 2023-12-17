@@ -663,7 +663,7 @@ export class DontCodeModelManager {
    * @param query: the query as a  jsonPath
    * @param position: in case the jsonPath is relative
    */
-  queryModelToSingle(query: string, position?: string): ModelQuerySingleResult {
+  queryModelToSingle(query: string, position?: string): ModelQuerySingleResult|null {
     let root = this.content;
     if (position) {
       root = this.findAtPosition(position, false);
@@ -947,7 +947,7 @@ export class DontCodeModelManager {
   /**
    * Extract the value of any data in parameter. It can handle complex data and flattens it into something that you can calculate or act upon (number or string)
    * @param obj
-   * @param metaData: Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param metaData Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
    * @param position
    * @param schemaItem
    * @protected
@@ -970,8 +970,17 @@ export class DontCodeModelManager {
       }
       if (metaData.subValue != null) {
         return (obj as any)[metaData.subValue];
-      } else {
+      } else if (metaData.subValues!=null) {
+
+        for (let i=0;i<metaData.subValues.length; i++) {
+          obj=(obj as any)[metaData.subValues[i]];
+          if (obj==null) break;
+        }
         return obj;
+
+      } else {
+        // If we couldn't determine the object's value, maybe it's because the value is not present
+        return undefined;
       }
     }
   }
@@ -980,14 +989,15 @@ export class DontCodeModelManager {
    * Apply the primitive value back in the object
    * @param obj
    * @param value
-   * @param metaData: Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param metaData Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param valueObj if any, the object that contained the source. In case you want to apply other values of the source as well
    * @param position
    * @param schemaItem
    * @return The object with the primitive set or the value if the obj is indeed a primitive already
    */
-  public applyValue <T>(obj: T, value:any, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): T {
-    if ((obj == null) && (value!=null))
-      throw new Error ('Cannot apply a value to a null or undefined object');
+  public applyValue <T>(obj: T, value:any, metaData: DataTransformationInfo, valueObj?: T, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): T {
+    if (obj == null)
+      return value;
 
     if (!metaData.parsed) {
       this.extractMetaData(obj, metaData, position, schemaItem);
@@ -1008,10 +1018,53 @@ export class DontCodeModelManager {
         }
       }
       if (metaData.subValue != null) {
-        if( value==undefined) {
+        if( value===undefined) {
           delete (obj as any)[metaData.subValue];
         } else {
           (obj as any)[metaData.subValue]=value;
+        }
+      } else if (metaData.subValues != null) {
+        let curObj = obj as any;
+        if (value === undefined) {
+          for (let i=0;i<metaData.subValues.length-1; i++) {
+            curObj=curObj[metaData.subValues[i]];
+            if (curObj==null) break;
+          }
+            // Delete the element only it there was one
+          if( (curObj!=null) && (curObj[metaData.subValues[metaData.subValues.length-1]]!=undefined)) {
+              delete curObj[metaData.subValues[metaData.subValues.length-1]];
+
+          }
+        } else {
+          for (let i=0;i<metaData.subValues.length-1; i++) {
+            if (curObj[metaData.subValues[i]]==undefined) {
+              curObj[metaData.subValues[i]]={};
+            }
+            curObj = curObj[metaData.subValues[i]];
+          }
+
+          if ((curObj[metaData.subValues[metaData.subValues.length-1]]==null) && (valueObj!=null)) {
+            let curValueObj=valueObj as any;
+            for (let i=0;i<metaData.subValues.length-1; i++) {
+              if (curValueObj[metaData.subValues[i]]==null) {
+                curValueObj=null;
+                break;
+              }
+              curValueObj = curValueObj[metaData.subValues[i]];
+            }
+  
+            if (curValueObj!=null) {
+                // The element to copy to was null, so let's copy all properties from the second element
+                for (const valueProp in curValueObj) {
+
+                  if ((curObj[valueProp]==null) && (curValueObj[valueProp]!=null)) {
+                    curObj[valueProp]= structuredClone (curValueObj[valueProp]);
+                  }
+                }
+              }
+          }
+            // apply the value
+          curObj[metaData.subValues[metaData.subValues.length-1]]=value;
         }
       }
       return obj;
@@ -1028,6 +1081,8 @@ export class DontCodeModelManager {
   public extractMetaData<T>(obj: T, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): void {
 
     metaData.parsed = true;
+    metaData.subValue = null;
+    metaData.subValues = null;
     if (typeof obj !== 'object') {
       if (obj != null) {
         metaData.direct = true;
@@ -1052,7 +1107,11 @@ export class DontCodeModelManager {
         if ((obj as any).value !== undefined) {
           metaData.subValue = 'value';
         } else if ((obj as any).amount !== undefined) {
+          // It's an MoneyAmount
           metaData.subValue = 'amount';
+        } else if ((obj as any).cost !== undefined) {
+            // It's a PriceModel
+          metaData.subValues = ['cost','amount'];
         } else {
           let firstKey = null;
           for (const key in obj) {
@@ -1061,10 +1120,19 @@ export class DontCodeModelManager {
               metaData.subValue = key;
             }
           }
-          if (metaData.subValue == null) {
-            metaData.subValue = firstKey;
+          if ((metaData.subValue == null)&& (metaData.subValues==null)) {
+            if ((typeof obj!=='object') || (obj instanceof Date)) {
+              metaData.subValue = firstKey;
+              console.warn("Guessed value key of " + metaData.subValue + ' for object:', obj);
+            } else {
+              console.warn("Cannot guess value for object: ", obj);
+              metaData.parsed=false;
+              metaData.subValue=null;
+              metaData.subValues=null;
+              metaData.direct=false;
+              metaData.array=false;
+            }
           }
-          console.warn("Guessed value key of " + metaData.subValue + ' for object.', obj);
 
         }
       }
@@ -1076,7 +1144,7 @@ export class DontCodeModelManager {
    * Modify the first element with the value of the second element by applying the operator given in parameter
    * @param firstElement
    * @param secondElement
-   * @param metaData: Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
+   * @param metaData Will store information about how to extract the data for this item. Will accelerate greatly extraction for other similar data.
    * @param operator
    * @param position
    * @param schemaItem
@@ -1086,20 +1154,22 @@ export class DontCodeModelManager {
     if (firstElement == null) {
       throw new Error("Cannot modify value of null object");
     }
-    const calculatedValue = operator(this.extractValue(firstElement, metaData, position, schemaItem),
-      this.extractValue(secondElement, metaData, position, schemaItem));
+    const firstValue = this.extractValue(firstElement, metaData, position, schemaItem);
+    const secondValue =this.extractValue(secondElement, metaData, position, schemaItem); 
+    const calculatedValue = operator(firstValue, secondValue);
 
-    return this.applyValue(firstElement, calculatedValue, metaData, position, schemaItem);
+      return this.applyValue(firstElement, calculatedValue, metaData, secondElement, position, schemaItem);
   }
 }
 /**
  * Keep track of information about how to extract value of data
  */
 export class DataTransformationInfo {
-  parsed = false;
-  array=false;
-  direct = false;
-  subValue:string|null=null;
+  parsed = false; // Has the element been parsed ?
+  array=false; // Is it an array ?
+  direct = false; // Is the element already a usable value (not an object)
+  subValue:string|null=null; // What field will give the usable value ?
+  subValues:string[]|null=null; // What list of fields needs to be following to extract the usable value ?
 }
 
 class AtomicChange {
