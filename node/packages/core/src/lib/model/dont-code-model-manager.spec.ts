@@ -1192,6 +1192,125 @@ describe('Model Manager', () => {
     });
     checkChanges(atomicChanges, []);
 
+      // Let's see if we can add another item in the array without touching the existing ones
+    atomicChanges = service.applyChange(
+      DontCodeTestManager.createAnyChange(
+        ChangeType.ADD,
+        'creation',
+        null,
+        'entities',
+        null,
+         {
+          c: {
+            name:'TestEntityC'
+         }}
+      )
+    );
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName',
+        entities: {
+          b: {
+            name: 'TestEntity',
+            from: 'source2'
+          },
+          c: {
+            name: 'TestEntityC'
+          }
+        }
+      }
+    });
+    checkChanges(atomicChanges, [
+      { type: ChangeType.UPDATE, position: 'creation/entities' },
+      { type: ChangeType.ADD, position: 'creation/entities/c' },
+      { type: ChangeType.ADD, position: 'creation/entities/c/name' },
+
+    ]);
+      // We now modify one element and add another one
+      // This is not a known behavior, so let's not test it
+    /*  
+    atomicChanges = service.applyChange(
+      DontCodeTestManager.createAnyChange(
+        ChangeType.ADD,
+        'creation',
+        null,
+        'entities',
+        null,
+         {
+          b: {
+            name:'TestEntityB'
+          },
+          d: {
+            name:'TestEntityD'
+         }}
+      )
+    );
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName',
+        entities: {
+          b: {
+            name: 'TestEntityB',
+            from: 'source2'
+          },
+          c: {
+            name: 'TestEntityC'
+          },
+          d: {
+            name:'TestEntityD'
+         }
+        }
+      }
+    });
+    checkChanges(atomicChanges, [
+      { type: ChangeType.UPDATE, position: 'creation/entities' },
+      { type: ChangeType.UPDATE, position: 'creation/entities/b/name' },
+      { type: ChangeType.ADD, position: 'creation/entities/d' },
+      { type: ChangeType.ADD, position: 'creation/entities/d/name' },
+
+    ]);*/
+
+    // We want to ADD multiple elements already there. That should translate to UPDATES
+    atomicChanges = service.applyChange(
+      DontCodeTestManager.createAnyChange(
+        ChangeType.ADD,
+        'creation',
+        null,
+        'entities',
+        null,
+          {
+          b: {
+            name:'TestEntityB2',
+            from: 'source2'
+          },
+          c: {
+            name:'TestEntityC2'
+          }}
+      )
+    );
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName',
+        entities: {
+          b: {
+            name: 'TestEntityB2',
+            from: 'source2'
+          },
+          c: {
+            name: 'TestEntityC2'
+          }
+        }
+      }
+    });
+    checkChanges(atomicChanges, [
+      { type: ChangeType.UPDATE, position: 'creation/entities/b/name' },
+      { type: ChangeType.UPDATE, position: 'creation/entities/c/name' },
+
+    ]);
+      
     service.resetContent({
       creation: {
         name: 'TestName',

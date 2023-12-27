@@ -97,7 +97,7 @@ export class DontCodeModelManager {
       lastChange.type=ChangeType.ACTION;
     }
 
-    this.applyChangeRecursive(
+    const isAnUpdate = this.applyChangeRecursive(
       toApply,
       content,
       toApply.value,
@@ -107,6 +107,7 @@ export class DontCodeModelManager {
     return this.generateChanges(
       toApply,
       atomicChanges,
+      isAnUpdate,
       this.schemaMgr.generateSchemaPointer(atomicChanges.name)
     );
   }
@@ -118,13 +119,14 @@ export class DontCodeModelManager {
     pointer: DontCodeModelPointer,
     atomicChanges: AtomicChange,
     oldPosition?: string
-  ): void {
+  ): boolean {
     if (srcChange.pointer == null)
       throw new Error(
         'Cannot apply a change without a pointer at position ' +
         srcChange.position
       );
 
+    let isAnUpdate=true;
     if (oldPosition == null) oldPosition = srcChange.oldPosition;
 
     const subElem = pointer.lastElement;
@@ -187,8 +189,20 @@ export class DontCodeModelManager {
             typeof newContent === 'object' ||
             oldSubContent !== newContent
           ) {
+            if ((typeof oldSubContent === 'object') && (srcChange.type==ChangeType.ADD)) {
+              // Verify that when asked to add a subitem, it's really an add, that means, at least one subproperty doesn't exist.
+              // Otherwise it's a UPDATE change
+              isAnUpdate=false;
+              for (const subProperty of Object.getOwnPropertyNames(newContent)) {
+                if (oldSubContent[subProperty]!=undefined) {  // At least one element is already present
+                  isAnUpdate=true;
+                  break;
+                }
+              }
+            }
+
             curAtomicChange = atomicChanges.createSubChange(
-              ChangeType.UPDATE,
+              ChangeType.UPDATE,  // Even if it's an ADD of a subElement, we consider it's an UPDATE for the parent
               subElem,
               newContent
             );
@@ -202,7 +216,7 @@ export class DontCodeModelManager {
               pointer,
               curAtomicChange
             );
-          if (subElem.length > 0)
+          if ((subElem.length > 0) && (isAnUpdate))
             // Special case when changing the root element (subElem = '')
             this.insertProperty(
               oldContent,
@@ -321,6 +335,7 @@ export class DontCodeModelManager {
         oldPosition
       );
     }
+    return isAnUpdate;
   }
 
   /**
@@ -390,8 +405,8 @@ export class DontCodeModelManager {
           const srcAction = src as Action;
           this.applyChangeRecursive(new Action(subPosition, srcAction.value, srcAction.context, srcAction.actionType, subPointer, srcAction.running),
             oldContent, null, subPointer, atomicChanges);
-        } else {
-          // It doesn't exist in the new element, so it's deleted
+        } else if (src.type!=ChangeType.ADD){
+          // It doesn't exist in the new element, so if not explicitely added, then it's deleted
           this.applyChangeRecursive(
             new Change(ChangeType.DELETE, subPosition, null, subPointer),
             oldContent,
@@ -446,6 +461,7 @@ export class DontCodeModelManager {
   protected generateChanges(
     src: Change,
     atomicChanges: AtomicChange,
+    isAnUpdate: boolean,
     pointer?: DontCodeModelPointer,
     result?: Array<Change>
   ): Array<Change> {
@@ -521,14 +537,16 @@ export class DontCodeModelManager {
           cur.type !== ChangeType.UPDATE &&
           cur.name.length > 0
         ) {
-          result.push(
-            new Change(
-              ChangeType.UPDATE,
-              pointer.position,
-              this.findAtPosition(pointer.position),
-              pointer
-            )
-          );
+          if( isAnUpdate==true) {  // Sometimes we receive ADD but they are UPDATE in fact
+            result.push(
+              new Change(
+                ChangeType.UPDATE,
+                pointer.position,
+                this.findAtPosition(pointer.position),
+                pointer
+              )
+            );
+          }
           break;
         }
         /*if( (cur.type === ChangeType.MOVE) && (cur.oldPosition != null)) {
@@ -543,6 +561,7 @@ export class DontCodeModelManager {
       this.generateChanges(
         src,
         cur,
+        true, // It's never an incorrect update for subelements
         this.schemaMgr.generateSubSchemaPointer(pointer, cur.name),
         result
       );
