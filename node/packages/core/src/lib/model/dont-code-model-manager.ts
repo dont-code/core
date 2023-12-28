@@ -1091,6 +1091,48 @@ export class DontCodeModelManager {
   }
 
   /**
+   * Sorts the values in place. If the value is a complex type, extract a comparable item before
+   * @param values 
+   * @param field if any field must be used for the sort
+   * @param sortOrder Optionally provides a sort order (positive or negative) to support multiple sorts
+   * @param metaData 
+   */
+  public sortValues<T> (values:T[], sortOrder = 1, field?: string, metaData?: DataTransformationInfo,position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): void {
+    const metaInfo = metaData?? new DataTransformationInfo();
+
+    if (!metaInfo.parsed) {
+      for (const val of values) {
+        this.extractMetaData(this.extractField (val, field), metaInfo, position, schemaItem);
+        if (metaInfo.parsed) break;
+      }
+    }
+
+    if (metaInfo.parsed) {
+      values.sort ((first, second) => {
+        const firstValue = this.extractValue (this.extractField(first, field), metaInfo, position, schemaItem );
+        const secondValue = this.extractValue (this.extractField(second, field), metaInfo, position, schemaItem );
+
+        if (firstValue==null) {
+          if (secondValue==null) return 0;
+          else return -sortOrder;
+        } else if (secondValue==null) return sortOrder;
+
+        // firstValue and secondValue are now either string, number or Date
+
+        if ((typeof firstValue === 'string') && (typeof secondValue === 'string')) {
+            return sortOrder*(firstValue as string).localeCompare (secondValue);
+        }
+
+        return firstValue < secondValue ? -sortOrder : firstValue > secondValue ? sortOrder : 0;
+      });
+    } else {
+      console.warn ('Cannot sort array of unknown values');
+      return;
+    }
+
+  } 
+
+  /**
    * Guess how values can be set or extracted from an unknown object
    * @param obj
    * @param metaData
@@ -1099,6 +1141,7 @@ export class DontCodeModelManager {
    */
   public extractMetaData<T>(obj: T, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): void {
 
+    if( obj == null) return;
     metaData.parsed = true;
     metaData.subValue = null;
     metaData.subValues = null;
@@ -1179,6 +1222,12 @@ export class DontCodeModelManager {
 
       return this.applyValue(firstElement, calculatedValue, metaData, secondElement, position, schemaItem);
   }
+
+  protected extractField(val: any, field?: string): any {
+    if( (field!=null) && (val!=null)) return val[field];
+    else return val;
+  }
+  
 }
 /**
  * Keep track of information about how to extract value of data
@@ -1227,3 +1276,4 @@ export class ModelQuerySingleResult {
   value?:any;
   pointer!:string;
 }
+

@@ -2017,6 +2017,73 @@ describe('Model Manager', () => {
       
   });
 
+  it('should sort complex values properly', () => {
+    const service = dtcde.getModelManager();
+
+    const valueTest=[23,43,16,13];
+    service.sortValues (valueTest);
+    expect (valueTest).toStrictEqual ([13,16,23,43]);
+    service.sortValues (valueTest, -1);
+    expect (valueTest).toStrictEqual ([43,23,16,13]);
+    service.sortValues (valueTest, 1);
+    expect (valueTest).toStrictEqual ([13,16,23,43]);
+
+    const valueAmount: ({ amount?: number | undefined; currencyCode: string; } | null)[] = [ {
+      amount:154,
+      currencyCode: "EUR"
+    },{
+      amount:14,
+      currencyCode: "EUR"
+    },{
+      amount:54,
+      currencyCode: "EUR"
+    },{
+      amount:34,
+      currencyCode: "EUR"
+    } ];
+
+    service.sortValues (valueAmount, 1, 'amount');
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([14, 34, 54, 154]);
+
+    service.sortValues (valueAmount, -1);
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([154, 54, 34, 14]);
+
+    valueAmount[1] = null;
+    delete valueAmount[3]!.amount;
+
+    service.sortValues (valueAmount, 1, 'amount');
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([null, undefined, 34, 154]);
+
+    valueAmount[1]!.amount = 84;
+    delete valueAmount[2]!.amount;
+
+    service.sortValues (valueAmount, -1);
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([154, 84, null, undefined]);
+
+    const valuePrice: Array<TestPrice> = [ {
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }}, {
+      cost: {
+        amount: 12,
+        currencyCode: "EUR"
+      }}, {
+      cost: {
+        amount: 17,
+        currencyCode: "EUR"
+      }}, {
+        cost: {
+          amount: 17,
+          currencyCode: "EUR"
+        }
+      }];
+
+      service.sortValues (valuePrice, -1);
+      expect (valuePrice.map (val => val?.cost?val.cost.amount:null)).toStrictEqual ([234.56, 17, 17, 12]);
+  });
+
+
   interface TestPrice {
     cost?: {
       amount?:number,
