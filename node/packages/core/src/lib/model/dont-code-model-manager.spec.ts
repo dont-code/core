@@ -1192,6 +1192,125 @@ describe('Model Manager', () => {
     });
     checkChanges(atomicChanges, []);
 
+      // Let's see if we can add another item in the array without touching the existing ones
+    atomicChanges = service.applyChange(
+      DontCodeTestManager.createAnyChange(
+        ChangeType.ADD,
+        'creation',
+        null,
+        'entities',
+        null,
+         {
+          c: {
+            name:'TestEntityC'
+         }}
+      )
+    );
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName',
+        entities: {
+          b: {
+            name: 'TestEntity',
+            from: 'source2'
+          },
+          c: {
+            name: 'TestEntityC'
+          }
+        }
+      }
+    });
+    checkChanges(atomicChanges, [
+      { type: ChangeType.UPDATE, position: 'creation/entities' },
+      { type: ChangeType.ADD, position: 'creation/entities/c' },
+      { type: ChangeType.ADD, position: 'creation/entities/c/name' },
+
+    ]);
+      // We now modify one element and add another one
+      // This is not a known behavior, so let's not test it
+    /*  
+    atomicChanges = service.applyChange(
+      DontCodeTestManager.createAnyChange(
+        ChangeType.ADD,
+        'creation',
+        null,
+        'entities',
+        null,
+         {
+          b: {
+            name:'TestEntityB'
+          },
+          d: {
+            name:'TestEntityD'
+         }}
+      )
+    );
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName',
+        entities: {
+          b: {
+            name: 'TestEntityB',
+            from: 'source2'
+          },
+          c: {
+            name: 'TestEntityC'
+          },
+          d: {
+            name:'TestEntityD'
+         }
+        }
+      }
+    });
+    checkChanges(atomicChanges, [
+      { type: ChangeType.UPDATE, position: 'creation/entities' },
+      { type: ChangeType.UPDATE, position: 'creation/entities/b/name' },
+      { type: ChangeType.ADD, position: 'creation/entities/d' },
+      { type: ChangeType.ADD, position: 'creation/entities/d/name' },
+
+    ]);*/
+
+    // We want to ADD multiple elements already there. That should translate to UPDATES
+    atomicChanges = service.applyChange(
+      DontCodeTestManager.createAnyChange(
+        ChangeType.ADD,
+        'creation',
+        null,
+        'entities',
+        null,
+          {
+          b: {
+            name:'TestEntityB2',
+            from: 'source2'
+          },
+          c: {
+            name:'TestEntityC2'
+          }}
+      )
+    );
+
+    expect(service.getContent()).toEqual({
+      creation: {
+        name: 'TestName',
+        entities: {
+          b: {
+            name: 'TestEntityB2',
+            from: 'source2'
+          },
+          c: {
+            name: 'TestEntityC2'
+          }
+        }
+      }
+    });
+    checkChanges(atomicChanges, [
+      { type: ChangeType.UPDATE, position: 'creation/entities/b/name' },
+      { type: ChangeType.UPDATE, position: 'creation/entities/c/name' },
+
+    ]);
+      
     service.resetContent({
       creation: {
         name: 'TestName',
@@ -1897,6 +2016,73 @@ describe('Model Manager', () => {
     expect (result.cost?.currencyCode).toEqual ("EUR");
       
   });
+
+  it('should sort complex values properly', () => {
+    const service = dtcde.getModelManager();
+
+    const valueTest=[23,43,16,13];
+    service.sortValues (valueTest);
+    expect (valueTest).toStrictEqual ([13,16,23,43]);
+    service.sortValues (valueTest, -1);
+    expect (valueTest).toStrictEqual ([43,23,16,13]);
+    service.sortValues (valueTest, 1);
+    expect (valueTest).toStrictEqual ([13,16,23,43]);
+
+    const valueAmount: ({ amount?: number | undefined; currencyCode: string; } | null)[] = [ {
+      amount:154,
+      currencyCode: "EUR"
+    },{
+      amount:14,
+      currencyCode: "EUR"
+    },{
+      amount:54,
+      currencyCode: "EUR"
+    },{
+      amount:34,
+      currencyCode: "EUR"
+    } ];
+
+    service.sortValues (valueAmount, 1, 'amount');
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([14, 34, 54, 154]);
+
+    service.sortValues (valueAmount, -1);
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([154, 54, 34, 14]);
+
+    valueAmount[1] = null;
+    delete valueAmount[3]!.amount;
+
+    service.sortValues (valueAmount, 1, 'amount');
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([null, undefined, 34, 154]);
+
+    valueAmount[1]!.amount = 84;
+    delete valueAmount[2]!.amount;
+
+    service.sortValues (valueAmount, -1);
+    expect (valueAmount.map (val => val?val.amount:null)).toStrictEqual ([154, 84, null, undefined]);
+
+    const valuePrice: Array<TestPrice> = [ {
+      cost: {
+        amount:234.56,
+        currencyCode: "EUR"
+      }}, {
+      cost: {
+        amount: 12,
+        currencyCode: "EUR"
+      }}, {
+      cost: {
+        amount: 17,
+        currencyCode: "EUR"
+      }}, {
+        cost: {
+          amount: 17,
+          currencyCode: "EUR"
+        }
+      }];
+
+      service.sortValues (valuePrice, -1);
+      expect (valuePrice.map (val => val?.cost?val.cost.amount:null)).toStrictEqual ([234.56, 17, 17, 12]);
+  });
+
 
   interface TestPrice {
     cost?: {

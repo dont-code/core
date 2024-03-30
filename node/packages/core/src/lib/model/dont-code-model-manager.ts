@@ -97,7 +97,7 @@ export class DontCodeModelManager {
       lastChange.type=ChangeType.ACTION;
     }
 
-    this.applyChangeRecursive(
+    const isAnUpdate = this.applyChangeRecursive(
       toApply,
       content,
       toApply.value,
@@ -107,6 +107,7 @@ export class DontCodeModelManager {
     return this.generateChanges(
       toApply,
       atomicChanges,
+      isAnUpdate,
       this.schemaMgr.generateSchemaPointer(atomicChanges.name)
     );
   }
@@ -118,13 +119,14 @@ export class DontCodeModelManager {
     pointer: DontCodeModelPointer,
     atomicChanges: AtomicChange,
     oldPosition?: string
-  ): void {
+  ): boolean {
     if (srcChange.pointer == null)
       throw new Error(
         'Cannot apply a change without a pointer at position ' +
         srcChange.position
       );
 
+    let isAnUpdate=true;
     if (oldPosition == null) oldPosition = srcChange.oldPosition;
 
     const subElem = pointer.lastElement;
@@ -187,8 +189,20 @@ export class DontCodeModelManager {
             typeof newContent === 'object' ||
             oldSubContent !== newContent
           ) {
+            if ((typeof oldSubContent === 'object') && (srcChange.type==ChangeType.ADD)) {
+              // Verify that when asked to add a subitem, it's really an add, that means, at least one subproperty doesn't exist.
+              // Otherwise it's a UPDATE change
+              isAnUpdate=false;
+              for (const subProperty of Object.getOwnPropertyNames(newContent)) {
+                if (oldSubContent[subProperty]!=undefined) {  // At least one element is already present
+                  isAnUpdate=true;
+                  break;
+                }
+              }
+            }
+
             curAtomicChange = atomicChanges.createSubChange(
-              ChangeType.UPDATE,
+              ChangeType.UPDATE,  // Even if it's an ADD of a subElement, we consider it's an UPDATE for the parent
               subElem,
               newContent
             );
@@ -202,7 +216,7 @@ export class DontCodeModelManager {
               pointer,
               curAtomicChange
             );
-          if (subElem.length > 0)
+          if ((subElem.length > 0) && (isAnUpdate))
             // Special case when changing the root element (subElem = '')
             this.insertProperty(
               oldContent,
@@ -321,6 +335,7 @@ export class DontCodeModelManager {
         oldPosition
       );
     }
+    return isAnUpdate;
   }
 
   /**
@@ -390,8 +405,8 @@ export class DontCodeModelManager {
           const srcAction = src as Action;
           this.applyChangeRecursive(new Action(subPosition, srcAction.value, srcAction.context, srcAction.actionType, subPointer, srcAction.running),
             oldContent, null, subPointer, atomicChanges);
-        } else {
-          // It doesn't exist in the new element, so it's deleted
+        } else if (src.type!=ChangeType.ADD){
+          // It doesn't exist in the new element, so if not explicitely added, then it's deleted
           this.applyChangeRecursive(
             new Change(ChangeType.DELETE, subPosition, null, subPointer),
             oldContent,
@@ -446,6 +461,7 @@ export class DontCodeModelManager {
   protected generateChanges(
     src: Change,
     atomicChanges: AtomicChange,
+    isAnUpdate: boolean,
     pointer?: DontCodeModelPointer,
     result?: Array<Change>
   ): Array<Change> {
@@ -521,14 +537,16 @@ export class DontCodeModelManager {
           cur.type !== ChangeType.UPDATE &&
           cur.name.length > 0
         ) {
-          result.push(
-            new Change(
-              ChangeType.UPDATE,
-              pointer.position,
-              this.findAtPosition(pointer.position),
-              pointer
-            )
-          );
+          if( isAnUpdate==true) {  // Sometimes we receive ADD but they are UPDATE in fact
+            result.push(
+              new Change(
+                ChangeType.UPDATE,
+                pointer.position,
+                this.findAtPosition(pointer.position),
+                pointer
+              )
+            );
+          }
           break;
         }
         /*if( (cur.type === ChangeType.MOVE) && (cur.oldPosition != null)) {
@@ -543,6 +561,7 @@ export class DontCodeModelManager {
       this.generateChanges(
         src,
         cur,
+        true, // It's never an incorrect update for subelements
         this.schemaMgr.generateSubSchemaPointer(pointer, cur.name),
         result
       );
@@ -1072,6 +1091,48 @@ export class DontCodeModelManager {
   }
 
   /**
+   * Sorts the values in place. If the value is a complex type, extract a comparable item before
+   * @param values 
+   * @param field if any field must be used for the sort
+   * @param sortOrder Optionally provides a sort order (positive or negative) to support multiple sorts
+   * @param metaData 
+   */
+  public sortValues<T> (values:T[], sortOrder = 1, field?: string, metaData?: DataTransformationInfo,position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): void {
+    const metaInfo = metaData?? new DataTransformationInfo();
+
+    if (!metaInfo.parsed) {
+      for (const val of values) {
+        this.extractMetaData(this.extractField (val, field), metaInfo, position, schemaItem);
+        if (metaInfo.parsed) break;
+      }
+    }
+
+    if (metaInfo.parsed) {
+      values.sort ((first, second) => {
+        const firstValue = this.extractValue (this.extractField(first, field), metaInfo, position, schemaItem );
+        const secondValue = this.extractValue (this.extractField(second, field), metaInfo, position, schemaItem );
+
+        if (firstValue==null) {
+          if (secondValue==null) return 0;
+          else return -sortOrder;
+        } else if (secondValue==null) return sortOrder;
+
+        // firstValue and secondValue are now either string, number or Date
+
+        if ((typeof firstValue === 'string') && (typeof secondValue === 'string')) {
+            return sortOrder*(firstValue as string).localeCompare (secondValue);
+        }
+
+        return firstValue < secondValue ? -sortOrder : firstValue > secondValue ? sortOrder : 0;
+      });
+    } else {
+      console.warn ('Cannot sort array of unknown values');
+      return;
+    }
+
+  } 
+
+  /**
    * Guess how values can be set or extracted from an unknown object
    * @param obj
    * @param metaData
@@ -1080,6 +1141,7 @@ export class DontCodeModelManager {
    */
   public extractMetaData<T>(obj: T, metaData: DataTransformationInfo, position?: DontCodeModelPointer, schemaItem?: DontCodeSchemaItem): void {
 
+    if( obj == null) return;
     metaData.parsed = true;
     metaData.subValue = null;
     metaData.subValues = null;
@@ -1160,6 +1222,12 @@ export class DontCodeModelManager {
 
       return this.applyValue(firstElement, calculatedValue, metaData, secondElement, position, schemaItem);
   }
+
+  protected extractField(val: any, field?: string): any {
+    if( (field!=null) && (val!=null)) return val[field];
+    else return val;
+  }
+  
 }
 /**
  * Keep track of information about how to extract value of data
@@ -1208,3 +1276,4 @@ export class ModelQuerySingleResult {
   value?:any;
   pointer!:string;
 }
+

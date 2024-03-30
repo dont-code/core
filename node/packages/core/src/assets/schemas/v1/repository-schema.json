@@ -11,6 +11,19 @@
     "description": {
       "type": "string"
     },
+    "webSocketUrl": {
+      "type": "string"
+    },
+    "storeApiUrl": {
+      "type": "string"
+    },
+    "projectApiUrl": {
+      "type": "string"
+    },
+    "documentApiUrl": {
+      "type": "string"
+    },
+  
     "plugins": {
       "type": "array",
       "items": {
