@@ -1,25 +1,32 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Build Development
+name: Core Build
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch name to re-build ?
+        required: true
+        type: string
 
   push:
-    branches: [ Development ]
     paths:
       - 'node/**'
       - '.github/workflows/**'
 
 jobs:
   build:
+    env:
+      branch: ${{ inputs.branch || github.ref_name }}
+      stage: ${{ inputs.branch == 'main' && 'latest' || github.ref_name == 'main' && 'latest' || 'next' }}
 
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        browser: [chromium, chrome, firefox]
+        browser: [chromium, chrome]
 
     steps:
       - name: Checkout
@@ -28,10 +35,10 @@ jobs:
           repository: dont-code/core
           path: core
           fetch-depth: 0
-          ref: 'Development'
+          ref: ${{ env.branch }}
           token: ${{secrets.DONTCODE_ACTIONS_TOKEN}}
       - name: Setup
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
@@ -40,7 +47,7 @@ jobs:
       - name: Install
         run: |
           npm install -g nx
-          npm install --force
+          npm ci
         working-directory: 'core/node'
       - name: Build
         run: |
