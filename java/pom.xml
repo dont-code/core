@@ -15,7 +15,7 @@
         <compiler-plugin.version>3.14.1</compiler-plugin.version>
         <source-plugin.version>3.3.0</source-plugin.version>
         <javadoc-plugin.version>3.6.3</javadoc-plugin.version>
-        <gpg-plugin.version>3.2.1</gpg-plugin.version>
+        <gpg-plugin.version>3.2.8</gpg-plugin.version>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -110,15 +110,6 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
-                        <configuration>
-                            <keyname>Dontcode Maven Central Key</keyname>
-                            <passphraseServerId>gpg.passphrase</passphraseServerId>
-                            <!-- Prevent gpg from using pinentry programs -->
-                            <gpgArguments>
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
