@@ -2,7 +2,7 @@ package net.dontcode.core.project;
 
 public record DontCodeProjectModel (
     String name,
-    String comment,
+    String description,
     DontCodeProjectContent content
 ) {
 
