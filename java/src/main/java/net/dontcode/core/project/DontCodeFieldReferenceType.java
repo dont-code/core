@@ -3,8 +3,7 @@ package net.dontcode.core.project;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DontCodeFieldReferenceType {
-    ManyToOne ("ManyToOne"),
-    OneToMany ("OneToMany");
+    ManyToOne ("ManyToOne");
 
     private String value;
 
