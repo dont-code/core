@@ -1,0 +1,23 @@
+{
+  "content": {
+    "creation": {
+      "name": "Test",
+      "type": "application",
+      "entities": [
+        {
+          "name": "Test1",
+          "fields": [
+            {
+              "name": "field1",
+              "type": "string"
+            },
+            {
+              "name": "field2",
+              "type": "date"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -17,6 +17,12 @@ public class Utils {
         return map;
     }
 
+    public static <T> T fromJsonToObject (String json, Class<T> clazz) throws JsonProcessingException {
+        // convert JSON string to Java Map
+        T ret = new ObjectMapper().readValue(json, clazz);
+        return ret;
+    }
+
     public static Change createJsonTestChange (Change.ChangeType type, String containerSchema, String containerItemId, String schema, String itemId, String value, String property) throws JsonProcessingException {
         return createTestChange(type,containerSchema, containerItemId,schema,itemId, Utils.fromJsonToMap(value), property);
     }
